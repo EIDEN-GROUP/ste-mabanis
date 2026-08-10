@@ -15,6 +15,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { BrandLoader } from "@/components/brand-loader";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -140,6 +141,7 @@ function RootComponent() {
       </main>
       <SiteFooter />
       <WhatsAppButton />
+      <Toaster position="bottom-center" />
     </QueryClientProvider>
   );
 }
