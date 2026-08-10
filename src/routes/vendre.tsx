@@ -103,7 +103,7 @@ function SellPage() {
             </ul>
           </Reveal>
 
-          <Reveal delay={120} id="estimation">
+          <Reveal delay={120}>
             <LeadForm
               tone="navy"
               intent="valuation"

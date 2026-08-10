@@ -11,7 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgenceRouteImport } from './routes/agence'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as TemoignagesRouteImport } from './routes/temoignages'
+import { Route as VendreRouteImport } from './routes/vendre'
+import { Route as ActualitesIndexRouteImport } from './routes/actualites/index'
+import { Route as ActualitesSlugRouteImport } from './routes/actualites/$slug'
 import { Route as EquipeIndexRouteImport } from './routes/equipe/index'
 import { Route as EquipeSlugRouteImport } from './routes/equipe/$slug'
 import { Route as ProprietesIndexRouteImport } from './routes/proprietes/index'
@@ -29,9 +34,34 @@ const AgenceRoute = AgenceRouteImport.update({
   path: '/agence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemoignagesRoute = TemoignagesRouteImport.update({
+  id: '/temoignages',
+  path: '/temoignages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendreRoute = VendreRouteImport.update({
+  id: '/vendre',
+  path: '/vendre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
+  id: '/actualites/',
+  path: '/actualites/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
+  id: '/actualites/$slug',
+  path: '/actualites/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EquipeIndexRoute = EquipeIndexRouteImport.update({
@@ -68,10 +98,15 @@ const QuartiersSlugRoute = QuartiersSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agence': typeof AgenceRoute
+  '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
+  '/temoignages': typeof TemoignagesRoute
+  '/vendre': typeof VendreRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/equipe/': typeof EquipeIndexRoute
   '/proprietes/': typeof ProprietesIndexRoute
   '/quartiers/': typeof QuartiersIndexRoute
@@ -79,10 +114,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agence': typeof AgenceRoute
+  '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
+  '/temoignages': typeof TemoignagesRoute
+  '/vendre': typeof VendreRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
+  '/actualites': typeof ActualitesIndexRoute
   '/equipe': typeof EquipeIndexRoute
   '/proprietes': typeof ProprietesIndexRoute
   '/quartiers': typeof QuartiersIndexRoute
@@ -91,10 +131,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agence': typeof AgenceRoute
+  '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
+  '/temoignages': typeof TemoignagesRoute
+  '/vendre': typeof VendreRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/equipe/': typeof EquipeIndexRoute
   '/proprietes/': typeof ProprietesIndexRoute
   '/quartiers/': typeof QuartiersIndexRoute
@@ -104,10 +149,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agence'
+    | '/contact'
     | '/services'
+    | '/temoignages'
+    | '/vendre'
+    | '/actualites/$slug'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
+    | '/actualites/'
     | '/equipe/'
     | '/proprietes/'
     | '/quartiers/'
@@ -115,10 +165,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agence'
+    | '/contact'
     | '/services'
+    | '/temoignages'
+    | '/vendre'
+    | '/actualites/$slug'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
+    | '/actualites'
     | '/equipe'
     | '/proprietes'
     | '/quartiers'
@@ -126,10 +181,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/agence'
+    | '/contact'
     | '/services'
+    | '/temoignages'
+    | '/vendre'
+    | '/actualites/$slug'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
+    | '/actualites/'
     | '/equipe/'
     | '/proprietes/'
     | '/quartiers/'
@@ -138,10 +198,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgenceRoute: typeof AgenceRoute
+  ContactRoute: typeof ContactRoute
   ServicesRoute: typeof ServicesRoute
+  TemoignagesRoute: typeof TemoignagesRoute
+  VendreRoute: typeof VendreRoute
+  ActualitesSlugRoute: typeof ActualitesSlugRoute
   EquipeSlugRoute: typeof EquipeSlugRoute
   ProprietesSlugRoute: typeof ProprietesSlugRoute
   QuartiersSlugRoute: typeof QuartiersSlugRoute
+  ActualitesIndexRoute: typeof ActualitesIndexRoute
   EquipeIndexRoute: typeof EquipeIndexRoute
   ProprietesIndexRoute: typeof ProprietesIndexRoute
   QuartiersIndexRoute: typeof QuartiersIndexRoute
@@ -163,11 +228,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services': {
       id: '/services'
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/temoignages': {
+      id: '/temoignages'
+      path: '/temoignages'
+      fullPath: '/temoignages'
+      preLoaderRoute: typeof TemoignagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendre': {
+      id: '/vendre'
+      path: '/vendre'
+      fullPath: '/vendre'
+      preLoaderRoute: typeof VendreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites/': {
+      id: '/actualites/'
+      path: '/actualites'
+      fullPath: '/actualites/'
+      preLoaderRoute: typeof ActualitesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites/$slug': {
+      id: '/actualites/$slug'
+      path: '/actualites/$slug'
+      fullPath: '/actualites/$slug'
+      preLoaderRoute: typeof ActualitesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/equipe/': {
@@ -218,10 +318,15 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgenceRoute: AgenceRoute,
+  ContactRoute: ContactRoute,
   ServicesRoute: ServicesRoute,
+  TemoignagesRoute: TemoignagesRoute,
+  VendreRoute: VendreRoute,
+  ActualitesSlugRoute: ActualitesSlugRoute,
   EquipeSlugRoute: EquipeSlugRoute,
   ProprietesSlugRoute: ProprietesSlugRoute,
   QuartiersSlugRoute: QuartiersSlugRoute,
+  ActualitesIndexRoute: ActualitesIndexRoute,
   EquipeIndexRoute: EquipeIndexRoute,
   ProprietesIndexRoute: ProprietesIndexRoute,
   QuartiersIndexRoute: QuartiersIndexRoute,
