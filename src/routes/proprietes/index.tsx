@@ -20,13 +20,13 @@ type PropertySearch = {
 
 export const Route = createFileRoute("/proprietes/")({
   validateSearch: (search: Record<string, unknown>): PropertySearch => ({
-    transaction: search.transaction === "location" ? "location" : "vente",
-    lieu: typeof search.lieu === "string" ? search.lieu : "",
-    type: typeof search.type === "string" ? search.type : "",
-    prixMax: Number(search.prixMax) || 0,
-    surfaceMin: Number(search.surfaceMin) || 0,
-    chambres: Number(search.chambres) || 0,
-    tri: typeof search.tri === "string" ? search.tri : "recent",
+    transaction: search["transaction"] === "location" ? "location" : "vente",
+    lieu: typeof search["lieu"] === "string" ? (search["lieu"] as string) : "",
+    type: typeof search["type"] === "string" ? (search["type"] as string) : "",
+    prixMax: Number(search["prixMax"]) || 0,
+    surfaceMin: Number(search["surfaceMin"]) || 0,
+    chambres: Number(search["chambres"]) || 0,
+    tri: typeof search["tri"] === "string" ? (search["tri"] as string) : "recent",
   }),
   head: () => ({
     meta: [
@@ -54,7 +54,7 @@ function PropertiesPage() {
   const { favorites } = useFavorites();
 
   const update = (patch: Partial<PropertySearch>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: PropertySearch) => ({ ...prev, ...patch }) });
 
   const results = useMemo(() => {
     let list = properties.filter((p) => p.transaction === search.transaction);

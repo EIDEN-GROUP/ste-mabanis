@@ -70,7 +70,7 @@ function PropertyDetail() {
       {/* Gallery */}
       <section className="bg-navy pt-24 sm:pt-28">
         <div className="relative aspect-4/3 w-full overflow-hidden sm:aspect-21/9">
-          {property.images.map((src, i) => (
+          {property.images.map((src: string, i: number) => (
             <img
               key={src + i}
               src={src}
@@ -103,7 +103,7 @@ function PropertyDetail() {
           </button>
 
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-            {property.images.map((src, i) => (
+            {property.images.map((src: string, i: number) => (
               <button
                 key={`dot-${i}`}
                 type="button"
@@ -119,7 +119,7 @@ function PropertyDetail() {
         </div>
 
         <div className="mx-auto grid max-w-[100rem] grid-cols-4 gap-2 px-5 py-4 sm:px-8 lg:px-12">
-          {property.images.map((src, i) => (
+          {property.images.map((src: string, i: number) => (
             <button
               key={`thumb-${i}`}
               type="button"
@@ -189,7 +189,7 @@ function PropertyDetail() {
             <Reveal className="mt-12">
               <h2 className="display rule-gold text-3xl">Le bien</h2>
               <div className="mt-5 space-y-4 text-[0.98rem] leading-relaxed text-foreground/85">
-                {property.description.map((p, i) => (
+                {property.description.map((p: string, i: number) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
@@ -198,7 +198,7 @@ function PropertyDetail() {
             <Reveal className="mt-12">
               <h2 className="display rule-gold text-3xl">Prestations</h2>
               <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-                {property.features.map((f) => (
+                {property.features.map((f: string) => (
                   <li key={f} className="flex items-start gap-3 text-sm">
                     <Check className="mt-0.5 size-4 shrink-0 text-gold" />
                     {f}
