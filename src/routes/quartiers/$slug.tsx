@@ -79,7 +79,7 @@ function LocationPage() {
         <Section tone="sand">
           <SectionHeading eyebrow="Disponibilités" title={`Nos biens à ${location.name}`} />
           <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {listings.map((p, i) => (
+            {listings.map((p: import("@/lib/site-data").Property, i: number) => (
               <Reveal key={p.slug} delay={i * 70}>
                 <PropertyCard property={p} />
               </Reveal>

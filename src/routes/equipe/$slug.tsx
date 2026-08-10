@@ -58,7 +58,7 @@ function AgentPage() {
               title={`Les biens suivis par ${agent.name.split(" ")[0]}`}
             />
             <div className="mt-10 grid gap-8 sm:grid-cols-2">
-              {listings.map((p, i) => (
+              {listings.map((p: import("@/lib/site-data").Property, i: number) => (
                 <Reveal key={p.slug} delay={i * 70}>
                   <PropertyCard property={p} />
                 </Reveal>
