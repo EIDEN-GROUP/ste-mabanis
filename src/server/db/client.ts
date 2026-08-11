@@ -9,13 +9,14 @@
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { env } from "../env";
+import type { Database } from "./types";
 
-let client: SupabaseClient | undefined;
+let client: SupabaseClient<Database> | undefined;
 
-export function getSupabase(): SupabaseClient {
+export function getSupabase(): SupabaseClient<Database> {
   if (!client) {
     const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = env();
-    client = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    client = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: {
         // Server-side service client: no browser storage, no token refresh.
         persistSession: false,

@@ -5,18 +5,19 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
-import {
-  repository,
-  type AppointmentInput,
-  type CampaignInput,
-  type ClientInput,
-  type ClientQuery,
-  type LeadInput,
-  type Patch,
-  type PropertyInput,
-  type PropertyQuery,
-  type ReportQuery,
-  type TaskInput,
+import { supabaseRepository } from "../../server/repository/supabase-repository";
+import type {
+  AdminRepository,
+  AppointmentInput,
+  CampaignInput,
+  ClientInput,
+  ClientQuery,
+  LeadInput,
+  Patch,
+  PropertyInput,
+  PropertyQuery,
+  ReportQuery,
+  TaskInput,
 } from "./repository";
 import {
   LEAD_SOURCES,
@@ -38,6 +39,9 @@ import {
   type TaskStatus,
   type TransactionStage,
 } from "./types";
+
+/** Data access goes through the Supabase repository. */
+const repository: AdminRepository = supabaseRepository;
 
 /* ------------------------------------------------------------- validators */
 
@@ -692,6 +696,22 @@ export const sendCampaign = createServerFn({ method: "POST" })
 export const deleteCampaign = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => parseObject(raw)["id"])
   .handler(({ data }) => repository.deleteCampaign(requireId(data)));
+
+export const deleteProperty = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown) => parseObject(raw)["id"])
+  .handler(({ data }) => repository.deleteProperty(requireId(data)));
+
+export const deleteClient = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown) => parseObject(raw)["id"])
+  .handler(({ data }) => repository.deleteClient(requireId(data)));
+
+export const deleteLead = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown) => parseObject(raw)["id"])
+  .handler(({ data }) => repository.deleteLead(requireId(data)));
+
+export const deleteTransaction = createServerFn({ method: "POST" })
+  .inputValidator((raw: unknown) => parseObject(raw)["id"])
+  .handler(({ data }) => repository.deleteTransaction(requireId(data)));
 
 export const setFeatured = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => {

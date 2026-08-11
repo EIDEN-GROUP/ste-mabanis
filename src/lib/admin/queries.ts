@@ -38,7 +38,11 @@ import {
   createTask,
   createTransaction,
   deleteCampaign,
+  deleteClient,
   deleteDocument,
+  deleteLead,
+  deleteProperty,
+  deleteTransaction,
   fetchActivities,
   fetchAgents,
   fetchAppointments,
@@ -395,6 +399,30 @@ export function useDeleteDocument() {
   });
 }
 
+export function useDeleteProperty() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteProperty({ data: { id } }),
+    onSuccess: () => invalidateAfterWrite(qc),
+  });
+}
+
+export function useDeleteClient() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteClient({ data: { id } }),
+    onSuccess: () => invalidateAfterWrite(qc),
+  });
+}
+
+export function useDeleteLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteLead({ data: { id } }),
+    onSuccess: () => invalidateAfterWrite(qc),
+  });
+}
+
 export function useCreateTask() {
   const qc = useQueryClient();
   return useMutation({
@@ -433,6 +461,14 @@ export function useAddPayment() {
   return useMutation({
     mutationFn: (vars: { transactionId: string; label: string; amount: number; dueAt: string }) =>
       addPayment({ data: vars }),
+    onSuccess: () => invalidateAfterWrite(qc),
+  });
+}
+
+export function useDeleteTransaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteTransaction({ data: { id } }),
     onSuccess: () => invalidateAfterWrite(qc),
   });
 }

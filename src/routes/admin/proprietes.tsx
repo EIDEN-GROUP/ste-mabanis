@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -30,6 +30,7 @@ import {
   useUpdatePropertyMedia,
   useMovePropertyMedia,
   useRemovePropertyMedia,
+  useDeleteProperty,
 } from "@/lib/admin/queries";
 import type { PropertyQuery } from "@/lib/admin/repository";
 import {
@@ -269,7 +270,14 @@ function PropertyDetailDrawer({
   onClose: () => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const setStatus = useSetPropertyStatus();
+  const deleteProperty = useDeleteProperty();
+  const canDelete = useCan("property.delete");
+
+  useEffect(() => {
+    setDeleting(false);
+  }, [property?.id]);
 
   if (!property) return null;
 
@@ -282,6 +290,38 @@ function PropertyDetailDrawer({
       title={property.title}
       footer={
         <>
+          {canDelete ? (
+            deleting ? (
+              <AdminButton
+                variant="danger"
+                onClick={() =>
+                  deleteProperty.mutate(property.id, {
+                    onSuccess: () => {
+                      setDeleting(false);
+                      onClose();
+                      toast.success("Bien supprimé");
+                    },
+                    onError: (error) => {
+                      setDeleting(false);
+                      toast.error(
+                        error instanceof Error
+                          ? error.message.replace(/^\[supabase:[^\]]+\]\s*/, "")
+                          : "Suppression impossible",
+                      );
+                    },
+                  })
+                }
+              >
+                <Trash2 className="size-3.5" />
+                Confirmer la suppression
+              </AdminButton>
+            ) : (
+              <AdminButton variant="danger" onClick={() => setDeleting(true)}>
+                <Trash2 className="size-3.5" />
+                Supprimer
+              </AdminButton>
+            )
+          ) : null}
           {canEdit ? (
             <AdminButton variant="outline" onClick={() => setEditing((v) => !v)}>
               <Pencil className="size-3.5" />

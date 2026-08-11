@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, ChevronLeft, ChevronRight, CheckCircle2, Circle } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, CheckCircle2, Circle, Trash2 } from "lucide-react";
 import {
   transactionsQuery,
   clientsQuery,
@@ -11,10 +11,18 @@ import {
   useMoveTransactionStage,
   useAddPayment,
   useMarkPaymentPaid,
+  useDeleteTransaction,
 } from "@/lib/admin/queries";
 import { TRANSACTION_STAGES, type Transaction, type TransactionStage } from "@/lib/admin/types";
 import { formatDate, formatMoney, label, TRANSACTION_STAGE_LABELS } from "@/lib/admin/format";
-import { StatCard, Drawer, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
+import {
+  StatCard,
+  Drawer,
+  Modal,
+  AdminButton,
+  EmptyState,
+  toast,
+} from "@/components/admin/primitives";
 import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
@@ -199,6 +207,13 @@ function TransactionDrawer({
   const moveStage = useMoveTransactionStage();
   const addPayment = useAddPayment();
   const markPaid = useMarkPaymentPaid();
+  const deleteTransaction = useDeleteTransaction();
+  const canDelete = useCan("transaction.delete");
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    setDeleting(false);
+  }, [transaction?.id]);
 
   if (!transaction) return null;
 
@@ -217,6 +232,39 @@ function TransactionDrawer({
       onClose={onClose}
       title={transaction.reference}
       footer={[
+        ...(canDelete
+          ? [
+              deleting ? (
+                <AdminButton
+                  key="del-confirm"
+                  variant="danger"
+                  onClick={() =>
+                    deleteTransaction.mutate(transaction.id, {
+                      onSuccess: () => {
+                        setDeleting(false);
+                        onClose();
+                        toast.success("Transaction supprimée");
+                      },
+                      onError: (error) => {
+                        setDeleting(false);
+                        toast.error(
+                          error instanceof Error
+                            ? error.message.replace(/^\[supabase:[^\]]+\]\s*/, "")
+                            : "Suppression impossible",
+                        );
+                      },
+                    })
+                  }
+                >
+                  <Trash2 className="size-3.5" /> Confirmer
+                </AdminButton>
+              ) : (
+                <AdminButton key="del" variant="danger" onClick={() => setDeleting(true)}>
+                  <Trash2 className="size-3.5" /> Supprimer
+                </AdminButton>
+              ),
+            ]
+          : []),
         <AdminButton
           key="back"
           variant="outline"

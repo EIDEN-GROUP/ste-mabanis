@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -21,6 +21,7 @@ import {
   FilePlus2,
   StickyNote,
   ListChecks,
+  Trash2,
 } from "lucide-react";
 import {
   clientsQuery,
@@ -31,6 +32,7 @@ import {
   activitiesQuery,
   useCreateClient,
   useUpdateClient,
+  useDeleteClient,
 } from "@/lib/admin/queries";
 import type { ClientQuery } from "@/lib/admin/repository";
 import type { Client, ClientRole, LeadTemperature } from "@/lib/admin/types";
@@ -46,7 +48,7 @@ import {
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { RoleBadge, TemperatureBadge } from "@/components/admin/status-badge";
 import { Drawer, Modal, AdminButton, EmptyState, toast } from "@/components/admin/primitives";
-import { useAgentScope } from "@/lib/admin/session";
+import { useAgentScope, useCan } from "@/lib/admin/session";
 import type { Activity, Appointment, Lead } from "@/lib/admin/types";
 import { cn } from "@/lib/utils";
 
@@ -319,6 +321,13 @@ function ClientDrawer({
 }) {
   const [tab, setTab] = useState<"activity" | "leads" | "appointments" | "edit">("activity");
   const updateClient = useUpdateClient();
+  const deleteClient = useDeleteClient();
+  const canDelete = useCan("client.delete");
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    setDeleting(false);
+  }, [client?.id]);
 
   if (!client) return null;
 
@@ -332,6 +341,38 @@ function ClientDrawer({
       title={`${client.firstName} ${client.lastName}`}
       footer={
         <>
+          {canDelete ? (
+            deleting ? (
+              <AdminButton
+                variant="danger"
+                onClick={() =>
+                  deleteClient.mutate(client.id, {
+                    onSuccess: () => {
+                      setDeleting(false);
+                      onClose();
+                      toast.success("Client supprimé");
+                    },
+                    onError: (error) => {
+                      setDeleting(false);
+                      toast.error(
+                        error instanceof Error
+                          ? error.message.replace(/^\[supabase:[^\]]+\]\s*/, "")
+                          : "Suppression impossible",
+                      );
+                    },
+                  })
+                }
+              >
+                <Trash2 className="size-3.5" />
+                Confirmer la suppression
+              </AdminButton>
+            ) : (
+              <AdminButton variant="danger" onClick={() => setDeleting(true)}>
+                <Trash2 className="size-3.5" />
+                Supprimer
+              </AdminButton>
+            )
+          ) : null}
           <AdminButton variant="outline" onClick={() => setTab("edit")}>
             <Pencil className="size-3.5" />
             Modifier
