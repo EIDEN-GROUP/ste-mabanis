@@ -74,7 +74,7 @@ export function AdminHeader({
         ) : null}
       </button>
 
-      <button
+      {/* <button
         type="button"
         className={cn(
           "hidden shrink-0 items-center gap-2 bg-gold px-4 py-2.5 text-[0.68rem] tracking-[0.14em] text-navy uppercase transition-colors hover:bg-navy hover:text-white sm:inline-flex",
@@ -82,7 +82,7 @@ export function AdminHeader({
       >
         <Plus className="size-3.5" />
         Nouveau
-      </button>
+      </button> */}
     </header>
   );
 }

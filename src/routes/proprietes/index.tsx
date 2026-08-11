@@ -9,13 +9,13 @@ import { locations, properties, propertyTypes, type Transaction } from "@/lib/si
 import { cn } from "@/lib/utils";
 
 type PropertySearch = {
-  transaction: Transaction;
-  lieu: string;
-  type: string;
-  prixMax: number;
-  surfaceMin: number;
-  chambres: number;
-  tri: string;
+  transaction?: Transaction;
+  lieu?: string;
+  type?: string;
+  prixMax?: number;
+  surfaceMin?: number;
+  chambres?: number;
+  tri?: string;
 };
 
 export const Route = createFileRoute("/proprietes/")({
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/proprietes/")({
 
 function PropertiesPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/proprietes" });
+  const navigate = useNavigate({ from: "/proprietes/" });
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const { favorites } = useFavorites();
@@ -60,9 +60,10 @@ function PropertiesPage() {
     let list = properties.filter((p) => p.transaction === search.transaction);
     if (search.lieu) list = list.filter((p) => p.locationSlug === search.lieu);
     if (search.type) list = list.filter((p) => p.type === search.type);
-    if (search.prixMax) list = list.filter((p) => p.price <= search.prixMax);
-    if (search.surfaceMin) list = list.filter((p) => p.surface >= search.surfaceMin);
-    if (search.chambres) list = list.filter((p) => p.bedrooms >= search.chambres);
+    const { prixMax, surfaceMin, chambres } = search;
+    if (prixMax) list = list.filter((p) => p.price <= prixMax);
+    if (surfaceMin) list = list.filter((p) => p.surface >= surfaceMin);
+    if (chambres) list = list.filter((p) => p.bedrooms >= chambres);
     if (onlyFavorites) list = list.filter((p) => favorites.includes(p.slug));
 
     const sorted = [...list];
@@ -165,9 +166,7 @@ function PropertiesPage() {
 
       <button
         type="button"
-        onClick={() =>
-          update({ lieu: "", type: "", prixMax: 0, surfaceMin: 0, chambres: 0 })
-        }
+        onClick={() => update({ lieu: "", type: "", prixMax: 0, surfaceMin: 0, chambres: 0 })}
         className="text-xs tracking-[0.16em] text-muted-foreground uppercase underline underline-offset-4 hover:text-navy"
       >
         Réinitialiser les filtres

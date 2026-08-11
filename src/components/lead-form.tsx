@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { useCreatePublicLead } from "@/lib/admin/queries";
+import { properties as siteProperties } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
 type Field = {
@@ -11,6 +13,39 @@ type Field = {
   placeholder?: string;
   full?: boolean;
 };
+
+/**
+ * Splits a "Nom et prénom" value into first and last name. Kept forgiving:
+ * a single token becomes a first name, "Madame"/"Monsieur" prefixes are
+ * dropped, and a trailing family name can be multi-word ("El Amrani").
+ */
+function splitName(raw: string) {
+  let parts = raw
+    .trim()
+    .replace(/^(madame|monsieur|mme|m\.)\s+/i, "")
+    .split(/\s+/);
+  parts = parts.filter(Boolean);
+  if (parts.length === 1) return { firstName: parts[0]!, lastName: "" };
+  const lastName = parts.slice(-2).join(" ");
+  return {
+    firstName: parts.slice(0, -2).join(" ") || parts[0]!,
+    lastName,
+  };
+}
+
+function contextFromIntent(intent: string): { propertyId?: string; agentId?: string } {
+  if (intent.startsWith("property:")) {
+    const reference = intent.slice("property:".length);
+    const property = siteProperties.find((p) => p.reference === reference);
+    // The admin repository keys properties by their public slug.
+    return property ? { propertyId: property.slug } : {};
+  }
+  if (intent.startsWith("agent:")) {
+    const slug = intent.slice("agent:".length);
+    return slug ? { agentId: slug } : {};
+  }
+  return {};
+}
 
 export function LeadForm({
   fields,
@@ -28,6 +63,8 @@ export function LeadForm({
   children?: ReactNode;
 }) {
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const createLead = useCreatePublicLead();
 
   const dark = tone === "navy";
 
@@ -53,8 +90,40 @@ export function LeadForm({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        setSent(true);
-        toast.success("Votre demande a bien été transmise à nos conseillers.");
+        const data = new FormData(e.currentTarget);
+        const rawName = String(data.get("nom") ?? data.get("nom_complet") ?? "");
+        const { firstName, lastName } = splitName(rawName);
+        const email = String(data.get("email") ?? "");
+        const phone = String(data.get("telephone") ?? "");
+        const message = String(data.get("message") ?? "");
+        const ctx = contextFromIntent(intent);
+
+        setSending(true);
+        createLead.mutate(
+          {
+            firstName: firstName || (email.split("@")[0] ?? "Visiteur"),
+            lastName,
+            email,
+            phone,
+            message,
+            intent,
+            ...ctx,
+          },
+          {
+            onSuccess: () => {
+              setSending(false);
+              setSent(true);
+              toast.success("Votre demande a bien été transmise à nos conseillers.");
+            },
+            onError: (err) => {
+              setSending(false);
+              toast.error("Envoi impossible", {
+                description: "Réessayez dans un instant ou contactez-nous par téléphone.",
+              });
+              console.error("LeadForm submission failed", err);
+            },
+          },
+        );
       }}
       className={cn(
         "border p-6 sm:p-8",
@@ -66,7 +135,10 @@ export function LeadForm({
         {fields.map((f) => (
           <label
             key={f.name}
-            className={cn("flex flex-col gap-1.5", (f.full || f.type === "textarea") && "sm:col-span-2")}
+            className={cn(
+              "flex flex-col gap-1.5",
+              (f.full || f.type === "textarea") && "sm:col-span-2",
+            )}
           >
             <span
               className={cn(
@@ -131,9 +203,10 @@ export function LeadForm({
 
       <button
         type="submit"
-        className="mt-6 w-full bg-gold px-6 py-3.5 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition-colors hover:bg-navy hover:text-white sm:w-auto"
+        disabled={sending}
+        className="mt-6 w-full bg-gold px-6 py-3.5 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition-colors hover:bg-navy hover:text-white disabled:opacity-60 sm:w-auto"
       >
-        {submitLabel}
+        {sending ? "Envoi en cours…" : submitLabel}
       </button>
 
       {note ? (
