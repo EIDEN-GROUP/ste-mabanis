@@ -5,27 +5,19 @@ import { Reveal, Counter, Parallax } from "@/components/motion";
 import { Section, SectionHeading } from "@/components/layout-bits";
 import { SearchPanel } from "@/components/search-panel";
 import { PropertyCard } from "@/components/property-card";
-import {
-  articles,
-  images,
-  locations,
-  properties,
-  services,
-  stats,
-  testimonials,
-  values,
-} from "@/lib/site-data";
+import { TrustStrip } from "@/components/trust-strip";
+import { articles, images, locations, properties, services, stats, testimonials, values, } from "@/lib/site-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "STE MABANIS — Immobilier de caractère à Agadir" },
+      { title: "STE MABANIS Immobilier de caractère à Agadir" },
       {
         name: "description",
         content:
           "Villas, appartements et investissements sélectionnés à Agadir, Founty, la Marina et Taghazout. Vente, location, estimation et gestion locative depuis 2008.",
       },
-      { property: "og:title", content: "STE MABANIS — Immobilier de caractère à Agadir" },
+      { property: "og:title", content: "STE MABANIS Immobilier de caractère à Agadir" },
       {
         property: "og:description",
         content:
@@ -43,28 +35,32 @@ function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[92svh] overflow-hidden bg-navy">
-        <img
-          src={heroImage}
-          alt="Villa contemporaine face à l'océan à Agadir au coucher du soleil"
-          width={1920}
-          height={1280}
-          className="absolute inset-0 h-full w-full scale-105 object-cover opacity-70"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/35 to-navy" />
+    <section className="relative min-h-[92svh] overflow-hidden bg-navy">
+      <img
+        src={heroImage}
+        alt="Villa contemporaine face à l'océan à Agadir au coucher du soleil"
+        width={1920}
+        height={1280}
+        className="absolute inset-0 h-full w-full object-cover opacity-70"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-navy/85 via-navy/40 to-navy/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-transparent to-navy/20" />
 
-        <div className="relative mx-auto flex min-h-[92svh] max-w-[100rem] flex-col justify-end px-5 pt-32 pb-10 sm:px-8 sm:pb-14 lg:px-12">
-          <div className="max-w-4xl">
+      <div className="relative mx-auto flex min-h-[92svh] max-w-[100rem] flex-col px-5 pt-28 pb-16 sm:px-8 sm:pt-32 sm:pb-20 lg:px-12">
+        {/* Text + search */}
+        <div className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,30rem)]">
+          {/* Left column */}
+          <div className="min-w-0 max-w-3xl">
             <p className="eyebrow animate-rise">Agadir · Souss-Massa · Littoral atlantique</p>
             <h1
-              className="display animate-rise mt-6 text-[clamp(3rem,9vw,8rem)] text-white"
+              className="display animate-rise mt-6 text-[clamp(3rem,6vw,6.5rem)] leading-[0.92] text-white"
               style={{ animationDelay: "120ms" }}
             >
               L'adresse compte
               <span className="block italic text-gold-soft">autant que la maison.</span>
             </h1>
             <p
-              className="animate-rise mt-7 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg"
+              className="animate-rise mt-6 max-w-xl text-base leading-relaxed text-white/75 sm:mt-7 sm:text-lg"
               style={{ animationDelay: "240ms" }}
             >
               Depuis 2008, STE MABANIS accompagne acheteurs, vendeurs et investisseurs sur le
@@ -72,32 +68,50 @@ function Home() {
               répond.
             </p>
             <div
-              className="animate-rise mt-9 flex flex-wrap gap-3"
+              className="animate-rise mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap"
               style={{ animationDelay: "340ms" }}
             >
               <Link
                 to="/proprietes"
-                className="inline-flex items-center gap-2 bg-gold px-7 py-4 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition-colors hover:bg-white"
+                className="inline-flex items-center justify-center gap-2 bg-gold px-7 py-4 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition-colors hover:bg-white"
               >
-                Découvrir les biens <ArrowRight className="size-4" />
+                Découvrir les biens <ArrowRight className="size-4 shrink-0" />
               </Link>
               <Link
                 to="/vendre"
-                className="inline-flex items-center gap-2 border border-white/30 px-7 py-4 text-[0.7rem] tracking-[0.18em] text-white uppercase transition-colors hover:border-gold hover:text-gold"
+                className="inline-flex items-center justify-center gap-2 border border-white/30 px-7 py-4 text-[0.7rem] tracking-[0.18em] text-white uppercase transition-colors hover:border-gold hover:text-gold"
               >
                 Estimer mon bien
               </Link>
             </div>
           </div>
 
-          <div className="mt-12 sm:mt-16">
-            <SearchPanel />
+          {/* Right column — search panel floating over the image */}
+          <div
+            className="animate-rise min-w-0 lg:justify-self-end lg:w-full"
+            style={{ animationDelay: "420ms" }}
+          >
+            <div className="border border-white/15 bg-white/95 p-5 shadow-2xl backdrop-blur-sm sm:p-7">
+              <p className="mb-5 text-[0.7rem] tracking-[0.18em] text-navy uppercase">
+                Trouvez votre bien idéal
+              </p>
+              <SearchPanel compact />
+            </div>
           </div>
         </div>
-      </section>
+
+      </div>
+    </section>
+
+      {/* Trust strip — straddles the hero and the section below */}
+      <div className="relative z-30 mx-auto h-0 max-w-[100rem] px-5 sm:px-8 lg:px-12">
+        <div className="-translate-y-1/2">
+          <TrustStrip />
+        </div>
+      </div>
 
       {/* Stats */}
-      <Section tone="sand" className="!py-14 sm:!py-20">
+      <Section tone="sand" className="!pt-20 !pb-14 sm:!pt-24 sm:!pb-20">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 90} className="border-t border-gold/40 pt-6">
