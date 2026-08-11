@@ -32,6 +32,7 @@ import { formatDate, label, PRIORITY_LABELS, relativeTime } from "@/lib/admin/fo
 import { SEED_NOW } from "@/lib/admin/seed";
 import { StatCard, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
 import { PriorityBadge } from "@/components/admin/status-badge";
+import { useAgentScope } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/taches")({
@@ -60,18 +61,23 @@ const ENTITY_LABELS: Record<NonNullable<AdminTask["entity"]>["kind"], string> = 
 function TasksPage() {
   const [creating, setCreating] = useState(false);
 
+  // A commercial workspace only sees the tasks assigned to its agent.
+  const scope = useAgentScope();
+
   const { data: tasks = [] } = useQuery(tasksQuery());
   const { data: agents = [] } = useQuery(agentsQuery());
   const { data: leads = [] } = useQuery(leadsQuery());
   const { data: clients = [] } = useQuery(clientsQuery({}));
   const { data: properties = [] } = useQuery(propertiesQuery({}));
 
+  const visibleTasks = scope ? tasks.filter((t) => t.assigneeId === scope) : tasks;
+
   const agentsById = useMemo(() => new Map(agents.map((a) => [a.id, a])), [agents]);
   const leadsById = useMemo(() => new Map(leads.map((l) => [l.id, l])), [leads]);
   const clientsById = useMemo(() => new Map(clients.map((c) => [c.id, c])), [clients]);
   const propertiesById = useMemo(() => new Map(properties.map((p) => [p.id, p])), [properties]);
 
-  const open = tasks.filter((t) => t.status !== "done");
+  const open = visibleTasks.filter((t) => t.status !== "done");
   const overdue = open.filter((t) => t.dueAt && new Date(t.dueAt) < SEED_NOW);
   const today = open.filter((t) => {
     if (!t.dueAt) return false;
@@ -82,17 +88,17 @@ function TasksPage() {
       d.getDate() === SEED_NOW.getDate()
     );
   });
-  const done = tasks.filter((t) => t.status === "done");
+  const done = visibleTasks.filter((t) => t.status === "done");
 
   const byStatus = useMemo(
     () => ({
-      todo: tasks
+      todo: visibleTasks
         .filter((t) => t.status === "todo")
         .sort((a, b) => (a.dueAt ?? "9999").localeCompare(b.dueAt ?? "9999")),
-      doing: tasks.filter((t) => t.status === "doing"),
-      done: tasks.filter((t) => t.status === "done"),
+      doing: visibleTasks.filter((t) => t.status === "doing"),
+      done: visibleTasks.filter((t) => t.status === "done"),
     }),
-    [tasks],
+    [visibleTasks],
   );
 
   return (
@@ -140,10 +146,14 @@ function TasksPage() {
         </AdminButton>
       </div>
 
-      {tasks.length === 0 ? (
+      {tasks.length === 0 || visibleTasks.length === 0 ? (
         <EmptyState
-          title="Aucune tâche"
-          description="Créez la première tâche de l'agence ou laissez les automatismes la créer pour vous."
+          title={tasks.length === 0 ? "Aucune tâche" : "Aucune tâche dans cet espace"}
+          description={
+            tasks.length === 0
+              ? "Créez la première tâche de l'agence ou laissez les automatismes la créer pour vous."
+              : "Les tâches attribuées aux autres agents ne sont pas visibles ici."
+          }
           action={
             <AdminButton onClick={() => setCreating(true)}>
               <Plus className="size-3.5" /> Créer une tâche
@@ -190,6 +200,7 @@ function TasksPage() {
           leads={leads}
           clients={clients}
           properties={properties}
+          defaultAssigneeId={scope ?? undefined}
           onClose={() => setCreating(false)}
         />
       ) : null}
@@ -348,18 +359,20 @@ function TaskFormModal({
   leads,
   clients,
   properties,
+  defaultAssigneeId,
   onClose,
 }: {
   agents: { name: string; id: string }[];
   leads: { id: string; clientId: string }[];
   clients: { firstName: string; lastName: string; id: string }[];
   properties: { title: string; id: string }[];
+  defaultAssigneeId?: string | undefined;
   onClose: () => void;
 }) {
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("normal");
   const [dueAt, setDueAt] = useState("");
-  const [assigneeId, setAssigneeId] = useState("");
+  const [assigneeId, setAssigneeId] = useState(defaultAssigneeId ?? "");
   const [entityKind, setEntityKind] = useState<"lead" | "client" | "property" | "none">("none");
   const [entityId, setEntityId] = useState("");
 

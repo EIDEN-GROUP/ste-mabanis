@@ -15,6 +15,7 @@ import {
 import { TRANSACTION_STAGES, type Transaction, type TransactionStage } from "@/lib/admin/types";
 import { formatDate, formatMoney, label, TRANSACTION_STAGE_LABELS } from "@/lib/admin/format";
 import { StatCard, Drawer, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
+import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/transactions")({
@@ -40,6 +41,8 @@ function TransactionsPage() {
   const { data: clients = [] } = useQuery(clientsQuery({}));
   const { data: properties = [] } = useQuery(propertiesQuery({}));
   const { data: agents = [] } = useQuery(agentsQuery());
+
+  const canManage = useCan("transaction.manage");
 
   const clientsById = useMemo(() => new Map(clients.map((c) => [c.id, c])), [clients]);
   const propertiesById = useMemo(() => new Map(properties.map((p) => [p.id, p])), [properties]);
@@ -92,9 +95,11 @@ function TransactionsPage() {
             De l'intérêt à la clôture — cliquez sur un dossier pour le détailler.
           </p>
         </div>
-        <AdminButton onClick={() => setCreating(true)}>
-          <Plus className="size-3.5" /> Nouvelle transaction
-        </AdminButton>
+        {canManage ? (
+          <AdminButton onClick={() => setCreating(true)}>
+            <Plus className="size-3.5" /> Nouvelle transaction
+          </AdminButton>
+        ) : null}
       </div>
 
       <div className="overflow-x-auto pb-2">

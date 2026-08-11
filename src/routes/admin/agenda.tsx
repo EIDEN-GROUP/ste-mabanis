@@ -17,6 +17,7 @@ import { APPOINTMENT_LABELS, formatDate, formatTime, label } from "@/lib/admin/f
 import { SEED_NOW } from "@/lib/admin/seed";
 import { Calendar } from "@/components/admin/calendar";
 import { StatCard, Drawer, Modal, AdminButton } from "@/components/admin/primitives";
+import { useAgentScope } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/agenda")({
@@ -84,17 +85,25 @@ function AgendaPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
+  // A commercial workspace only sees the appointments its agent runs.
+  const scope = useAgentScope();
+
   const { data: appointments = [] } = useQuery(appointmentsQuery());
   const { data: clients = [] } = useQuery(clientsQuery({}));
   const { data: properties = [] } = useQuery(propertiesQuery({}));
   const { data: agents = [] } = useQuery(agentsQuery());
 
+  const visibleAppointments = scope
+    ? appointments.filter((a) => a.agentId === scope)
+    : appointments;
+  const scopedClients = scope ? clients.filter((c) => c.agentId === scope) : clients;
+
   const clientsById = useMemo(() => new Map(clients.map((c) => [c.id, c])), [clients]);
   const propertiesById = useMemo(() => new Map(properties.map((p) => [p.id, p])), [properties]);
   const agentsById = useMemo(() => new Map(agents.map((a) => [a.id, a])), [agents]);
 
-  const today = appointments.filter((a) => sameDay(new Date(a.startsAt), SEED_NOW));
-  const week = appointments.filter((a) => {
+  const today = visibleAppointments.filter((a) => sameDay(new Date(a.startsAt), SEED_NOW));
+  const week = visibleAppointments.filter((a) => {
     const d = new Date(a.startsAt);
     return (
       sameDay(d, SEED_NOW) || (d > SEED_NOW && d < new Date(SEED_NOW.getTime() + 7 * 86_400_000))
@@ -102,7 +111,7 @@ function AgendaPage() {
   });
   const doneWeek = week.filter((a) => a.status === "done");
 
-  const selected = appointments.find((a) => a.id === selectedId) ?? null;
+  const selected = visibleAppointments.find((a) => a.id === selectedId) ?? null;
 
   return (
     <div className="space-y-6">
@@ -131,7 +140,7 @@ function AgendaPage() {
         <StatCard
           label="Visites à venir"
           value={String(
-            appointments.filter((a) => a.kind === "viewing" && a.status !== "done").length,
+            visibleAppointments.filter((a) => a.kind === "viewing" && a.status !== "done").length,
           )}
           hint="Toutes périodes"
           icon={Eye}
@@ -161,9 +170,9 @@ function AgendaPage() {
       </div>
 
       {view === "mois" ? (
-        <Calendar appointments={appointments} />
+        <Calendar appointments={visibleAppointments} />
       ) : (
-        <Timeline view={view} appointments={appointments} onSelect={setSelectedId} />
+        <Timeline view={view} appointments={visibleAppointments} onSelect={setSelectedId} />
       )}
 
       <AppointmentDrawer
@@ -176,9 +185,10 @@ function AgendaPage() {
 
       {creating ? (
         <AppointmentFormModal
-          clients={clients}
+          clients={scopedClients}
           properties={properties}
           agents={agents}
+          defaultAgentId={scope ?? undefined}
           onClose={() => setCreating(false)}
         />
       ) : null}
@@ -543,12 +553,14 @@ function AppointmentFormModal({
   clients,
   properties,
   agents,
+  defaultAgentId,
   onClose,
 }: {
   appointment?: Appointment | undefined;
   clients: { firstName: string; lastName: string; id: string }[];
   properties: { title: string; id: string }[];
   agents: { name: string; id: string }[];
+  defaultAgentId?: string | undefined;
   onClose: () => void;
 }) {
   const isEdit = Boolean(appointment);
@@ -562,7 +574,7 @@ function AppointmentFormModal({
   const [to, setTo] = useState(toLocalTime(new Date(start.getTime() + 60 * 60 * 1000)));
   const [clientId, setClientId] = useState(appointment?.clientId ?? "");
   const [propertyId, setPropertyId] = useState(appointment?.propertyId ?? "");
-  const [agentId, setAgentId] = useState(appointment?.agentId ?? "");
+  const [agentId, setAgentId] = useState(appointment?.agentId ?? defaultAgentId ?? "");
   const [location, setLocation] = useState(appointment?.location ?? "");
 
   const create = useCreateAppointment();

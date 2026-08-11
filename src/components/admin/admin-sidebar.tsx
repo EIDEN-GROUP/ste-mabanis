@@ -1,7 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { PanelLeftClose, PanelLeftOpen, ArrowUpRight } from "lucide-react";
 import logo from "@/assets/mabanis-logo.png";
-import { navGroups, type NavItem } from "@/lib/admin/nav";
+import { navGroupsFor, type NavItem } from "@/lib/admin/nav";
+import { useSession } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 /** Rail widths. Kept here so the shell can offset content by the same values. */
@@ -100,6 +101,8 @@ export function AdminSidebar({
   className?: string;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { role } = useSession();
+  const groups = navGroupsFor(role);
 
   return (
     <aside
@@ -130,7 +133,7 @@ export function AdminSidebar({
       </div>
 
       <nav className="flex-1 overflow-x-hidden overflow-y-auto py-4">
-        {navGroups.map((group, gi) => (
+        {groups.map((group, gi) => (
           <div key={group.title} className={gi === 0 ? "" : "mt-5"}>
             <p
               className={cn(

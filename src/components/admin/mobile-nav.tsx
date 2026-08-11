@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { X, ArrowUpRight } from "lucide-react";
 import logo from "@/assets/mabanis-logo.png";
-import { bottomNavItems, navGroups } from "@/lib/admin/nav";
+import { bottomNavItemsFor, navGroupsFor } from "@/lib/admin/nav";
+import { useSession } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 function isActive(pathname: string, to: string) {
@@ -12,6 +13,8 @@ function isActive(pathname: string, to: string) {
 /** Full-height drawer for the complete site map on phones and tablets. */
 export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { role } = useSession();
+  const groups = navGroupsFor(role);
 
   useEffect(() => {
     if (!open) return;
@@ -66,7 +69,7 @@ export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () =
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4">
-          {navGroups.map((group) => (
+          {groups.map((group) => (
             <div key={group.title} className="mb-5">
               <p className="px-5 pb-2 text-[0.58rem] tracking-[0.22em] text-admin-sidebar-muted/70 uppercase">
                 {group.title}
@@ -124,6 +127,8 @@ export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () =
 /** Bottom bar — the four most-used destinations, thumb height. */
 export function AdminBottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { role } = useSession();
+  const items = bottomNavItemsFor(role);
 
   return (
     <nav
@@ -132,7 +137,7 @@ export function AdminBottomNav() {
       // persistent nav instead of relying on the burger alone.
       className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-admin-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
     >
-      {bottomNavItems.map((item) => {
+      {items.map((item) => {
         const Icon = item.icon;
         const active = isActive(pathname, item.to);
         const inner = (

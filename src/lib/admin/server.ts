@@ -654,9 +654,11 @@ export const fetchDashboard = createServerFn({ method: "GET" }).handler(() =>
   repository.getDashboard(),
 );
 
-export const fetchPriorities = createServerFn({ method: "GET" }).handler(() =>
-  repository.getPriorities(),
-);
+export const fetchPriorities = createServerFn({ method: "GET" })
+  .inputValidator((raw: unknown) => ({
+    agentId: asString((raw as Record<string, unknown>)["agentId"]),
+  }))
+  .handler(({ data }) => repository.getPriorities(data.agentId));
 
 /* ---------------------------------------------------------------- marketing */
 

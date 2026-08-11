@@ -44,6 +44,7 @@ import { PropertyFilters } from "@/components/admin/property-filters";
 import { PropertyStatusBadge } from "@/components/admin/status-badge";
 import { PropertyGallery } from "@/components/admin/property-gallery";
 import { Drawer, Modal, AdminButton, toast, LoadingState } from "@/components/admin/primitives";
+import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/proprietes")({
@@ -120,6 +121,9 @@ function PropertiesPage() {
 
   const { data = [], isPending } = useQuery(propertiesQuery(query));
   const { data: agents = [] } = useQuery(agentsQuery());
+
+  const canCreate = useCan("property.create");
+  const canEdit = useCan("property.edit");
 
   const agentName = useCallback(
     (id: string) => agents.find((a) => a.id === id)?.name ?? "—",
@@ -211,10 +215,12 @@ function PropertiesPage() {
             {isPending ? "…" : `${formatNumber(data.length)} bien${data.length > 1 ? "s" : ""}`}
           </h2>
         </div>
-        <AdminButton onClick={() => setCreating(true)}>
-          <Plus className="size-3.5" />
-          Nouveau bien
-        </AdminButton>
+        {canCreate ? (
+          <AdminButton onClick={() => setCreating(true)}>
+            <Plus className="size-3.5" />
+            Nouveau bien
+          </AdminButton>
+        ) : null}
       </div>
 
       <PropertyFilters value={query} onChange={setQuery} />
@@ -228,18 +234,19 @@ function PropertiesPage() {
         empty={{
           title: "Aucun bien trouvé",
           description: "Modifiez vos filtres ou créez une nouvelle fiche.",
-          action: (
+          action: canCreate ? (
             <AdminButton onClick={() => setCreating(true)}>
               <Plus className="size-3.5" />
               Nouveau bien
             </AdminButton>
-          ),
+          ) : undefined,
         }}
       />
 
       <PropertyDetailDrawer
         property={selected}
         agents={agents.map((a) => ({ id: a.id, name: a.name }))}
+        canEdit={canEdit}
         onClose={() => setSelected(null)}
       />
 
@@ -253,10 +260,12 @@ function PropertiesPage() {
 function PropertyDetailDrawer({
   property,
   agents,
+  canEdit,
   onClose,
 }: {
   property: AdminProperty | null;
   agents: { id: string; name: string }[];
+  canEdit: boolean;
   onClose: () => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -273,10 +282,12 @@ function PropertyDetailDrawer({
       title={property.title}
       footer={
         <>
-          <AdminButton variant="outline" onClick={() => setEditing((v) => !v)}>
-            <Pencil className="size-3.5" />
-            {editing ? "Voir la fiche" : "Modifier"}
-          </AdminButton>
+          {canEdit ? (
+            <AdminButton variant="outline" onClick={() => setEditing((v) => !v)}>
+              <Pencil className="size-3.5" />
+              {editing ? "Voir la fiche" : "Modifier"}
+            </AdminButton>
+          ) : null}
           <AdminButton variant="outline" className="flex-1" onClick={onClose}>
             Fermer
           </AdminButton>

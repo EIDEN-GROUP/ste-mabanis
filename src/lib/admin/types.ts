@@ -107,6 +107,57 @@ export type Agent = {
   avatarUrl?: string | undefined;
 };
 
+/* -------------------------------------------------------------- staff roles */
+
+export type StaffRole = "directrice" | "commercial" | "assistant";
+
+export type RoleInfo = {
+  label: string;
+  tagline: string;
+  capabilities: string[];
+};
+
+export const STAFF_ROLES: Record<StaffRole, RoleInfo> = {
+  directrice: {
+    label: "Directrice",
+    tagline: "Direction & administration",
+    capabilities: [
+      "Accès complet à tous les espaces",
+      "Gestion du portefeuille, des ventes et du budget",
+      "Rapports, automatisations et marketing",
+      "Seule autorisée à supprimer des données",
+    ],
+  },
+  commercial: {
+    label: "Commercial",
+    tagline: "Ventes & relation client",
+    capabilities: [
+      "Voir et éditer les biens",
+      "Gérer ses propres clients, leads et visites",
+      "Matching et envoi de sélections",
+      "Lecture de ses transactions et documents",
+    ],
+  },
+  assistant: {
+    label: "Assistant direction",
+    tagline: "Support opérationnel",
+    capabilities: [
+      "Agenda et visites de l'agence",
+      "Documents et tâches",
+      "Clients : création et mise à jour",
+      "Lecture seule des biens et transactions",
+    ],
+  },
+};
+
+/** Which seeded agent plays which staff role in the demo workspace. */
+export const AGENT_STAFF_ROLE: Record<string, StaffRole> = {
+  "yassine-el-amrani": "directrice",
+  "salma-bouhaddou": "commercial",
+  "nadia-lahlou": "commercial",
+  "karim-ouhssaine": "assistant",
+};
+
 /* ------------------------------------------------------------------- leads */
 
 export const PIPELINE_STAGES = [

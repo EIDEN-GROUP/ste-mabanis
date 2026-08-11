@@ -46,6 +46,7 @@ import {
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { RoleBadge, TemperatureBadge } from "@/components/admin/status-badge";
 import { Drawer, Modal, AdminButton, EmptyState, toast } from "@/components/admin/primitives";
+import { useAgentScope } from "@/lib/admin/session";
 import type { Activity, Appointment, Lead } from "@/lib/admin/types";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +79,9 @@ function ClientsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
+  // A commercial workspace is scoped to one agent's book of business.
+  const scope = useAgentScope();
+
   const { data: clients = [], isPending } = useQuery(clientsQuery(query));
   const { data: agents = [] } = useQuery(agentsQuery());
   const { data: selected } = useQuery(clientQuery(selectedId ?? ""));
@@ -88,6 +92,8 @@ function ClientsPage() {
   const { data: appointments = [] } = useQuery(appointmentsQuery());
 
   const agentName = (id: string) => agents.find((a) => a.id === id)?.name ?? "—";
+
+  const visibleClients = scope ? clients.filter((c) => c.agentId === scope) : clients;
 
   const toggle = (key: keyof ClientQuery, value: string) => {
     const current = (query[key] as string[] | undefined) ?? [];
@@ -177,7 +183,7 @@ function ClientsPage() {
           <h2 className="display mt-1 text-2xl">
             {isPending
               ? "…"
-              : `${formatNumber(clients.length)} client${clients.length > 1 ? "s" : ""}`}
+              : `${formatNumber(visibleClients.length)} client${visibleClients.length > 1 ? "s" : ""}`}
           </h2>
         </div>
         <AdminButton onClick={() => setCreating(true)}>
@@ -254,7 +260,7 @@ function ClientsPage() {
       </div>
 
       <DataTable
-        rows={clients}
+        rows={visibleClients}
         columns={columns}
         getRowId={(c) => c.id}
         onRowClick={(c) => setSelectedId(c.id)}
@@ -284,6 +290,7 @@ function ClientsPage() {
       {creating ? (
         <ClientFormModal
           agents={agents.map((a) => ({ id: a.id, name: a.name }))}
+          defaultAgentId={scope ?? undefined}
           onClose={() => setCreating(false)}
         />
       ) : null}
@@ -545,10 +552,12 @@ type ClientFormState = {
 function ClientFormModal({
   client,
   agents,
+  defaultAgentId,
   onClose,
 }: {
   client?: Client | undefined;
   agents: { id: string; name: string }[];
+  defaultAgentId?: string | undefined;
   onClose: () => void;
 }) {
   const [form, setForm] = useState<ClientFormState>(() => ({
@@ -564,7 +573,7 @@ function ClientFormModal({
     budgetMin: client?.budgetMin ? String(client.budgetMin) : "",
     budgetMax: client?.budgetMax ? String(client.budgetMax) : "",
     notes: client?.notes ?? "",
-    agentId: client?.agentId ?? agents[0]?.id ?? "",
+    agentId: client?.agentId ?? defaultAgentId ?? agents[0]?.id ?? "",
   }));
   const [saving, setSaving] = useState(false);
 

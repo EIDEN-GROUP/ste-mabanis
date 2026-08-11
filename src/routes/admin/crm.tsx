@@ -39,6 +39,7 @@ import {
 import { Pipeline } from "@/components/admin/pipeline";
 import { TemperatureBadge, RoleBadge } from "@/components/admin/status-badge";
 import { Drawer, Modal, AdminButton, EmptyState, toast } from "@/components/admin/primitives";
+import { useAgentScope } from "@/lib/admin/session";
 import { ActivityTimeline } from "./clients";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +58,9 @@ function CrmPage() {
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
 
+  // A commercial workspace only sees the leads it owns.
+  const scope = useAgentScope();
+
   const { data: leads = [] } = useQuery(leadsQuery());
   const { data: clients = [] } = useQuery(clientsQuery({}));
   const { data: properties = [] } = useQuery(propertiesQuery({}));
@@ -65,14 +69,17 @@ function CrmPage() {
     activitiesQuery(selectedId ? { leadId: selectedId } : {}),
   );
 
+  const visibleLeads = scope ? leads.filter((l) => l.agentId === scope) : leads;
+  const scopedClients = scope ? clients.filter((c) => c.agentId === scope) : clients;
+
   const clientsById = useMemo(() => new Map(clients.map((c) => [c.id, c])), [clients]);
   const propertiesById = useMemo(() => new Map(properties.map((p) => [p.id, p])), [properties]);
   const moveLead = useMoveLead();
 
   const filteredLeads = useMemo(() => {
-    if (!search.trim()) return leads;
+    if (!search.trim()) return visibleLeads;
     const term = search.trim().toLowerCase();
-    return leads.filter((l) => {
+    return visibleLeads.filter((l) => {
       const client = clientsById.get(l.clientId);
       const property = l.propertyId ? propertiesById.get(l.propertyId) : undefined;
       return [
@@ -85,16 +92,16 @@ function CrmPage() {
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(term));
     });
-  }, [leads, search, clientsById, propertiesById]);
+  }, [visibleLeads, search, clientsById, propertiesById]);
 
-  const hotCount = leads.filter(
+  const hotCount = visibleLeads.filter(
     (l) => l.temperature === "hot" && l.stage !== "won" && l.stage !== "lost",
   ).length;
-  const openValue = leads
+  const openValue = visibleLeads
     .filter((l) => l.stage !== "won" && l.stage !== "lost")
     .reduce((s, l) => s + l.value, 0);
 
-  const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
+  const selectedLead = visibleLeads.find((l) => l.id === selectedId) ?? null;
 
   return (
     <div className="space-y-5">
@@ -111,7 +118,7 @@ function CrmPage() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: Layers, label: "Leads ouverts", value: formatNumber(leads.length) },
+          { icon: Layers, label: "Leads ouverts", value: formatNumber(visibleLeads.length) },
           { icon: Flame, label: "Chauds", value: formatNumber(hotCount) },
           { icon: Wallet, label: "Valeur pipeline", value: formatMoney(openValue, true) },
         ].map(({ icon: Icon, label: l, value }) => (
@@ -165,9 +172,10 @@ function CrmPage() {
 
       {creating ? (
         <LeadFormModal
-          clients={clients}
+          clients={scopedClients}
           properties={properties}
           agents={agents}
+          defaultAgentId={scope ?? undefined}
           onClose={() => setCreating(false)}
         />
       ) : null}
@@ -508,11 +516,13 @@ function LeadFormModal({
   clients,
   properties,
   agents,
+  defaultAgentId,
   onClose,
 }: {
   clients: import("@/lib/admin/types").Client[];
   properties: import("@/lib/admin/types").AdminProperty[];
   agents: { id: string; name: string }[];
+  defaultAgentId?: string | undefined;
   onClose: () => void;
 }) {
   const [newClient, setNewClient] = useState(false);
@@ -543,7 +553,7 @@ function LeadFormModal({
         email: quick.email.trim(),
         phone: quick.phone.trim(),
         source: "site_web",
-        agentId: agents[0]?.id,
+        agentId: defaultAgentId ?? agents[0]?.id,
       });
       targetClientId = created.id;
     }
@@ -558,7 +568,7 @@ function LeadFormModal({
       temperature,
       score: Number(score) || 0,
       value: selectedProperty?.price ?? 0,
-      agentId: agents[0]?.id,
+      agentId: defaultAgentId ?? agents[0]?.id,
       nextAction: nextAction.trim() || undefined,
       stage: "new",
     };

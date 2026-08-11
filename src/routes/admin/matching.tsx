@@ -12,6 +12,7 @@ import {
 import type { Client, AdminProperty, PropertyMatch, ClientMatch } from "@/lib/admin/types";
 import { formatMoney, label, ROLE_LABELS } from "@/lib/admin/format";
 import { Panel, AdminButton, EmptyState, toast } from "@/components/admin/primitives";
+import { useAgentScope, useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/matching")({
@@ -33,6 +34,10 @@ function MatchingPage() {
   const [propertyId, setPropertyId] = useState("");
   const [picked, setPicked] = useState<Set<string>>(new Set());
 
+  // A commercial workspace only matches its own clients.
+  const scope = useAgentScope();
+  const canSend = useCan("match.send");
+
   const { data: clients = [] } = useQuery(clientsQuery({}));
   const { data: properties = [] } = useQuery(propertiesQuery({}));
   const { data: clientMatches = [] } = useQuery(matchesForClientQuery(clientId));
@@ -41,18 +46,22 @@ function MatchingPage() {
   const sendMatches = useSendMatches();
 
   const propertiesById = useMemo(() => new Map(properties.map((p) => [p.id, p])), [properties]);
-  const clientsById = useMemo(() => new Map(clients.map((c) => [c.id, c])), [clients]);
+  const scopedClients = useMemo(
+    () => (scope ? clients.filter((c) => c.agentId === scope) : clients),
+    [clients, scope],
+  );
+  const clientsById = useMemo(() => new Map(scopedClients.map((c) => [c.id, c])), [scopedClients]);
 
   const filteredClients = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return clients
+    return scopedClients
       .filter((c) => c.roles.some((r) => r === "buyer" || r === "tenant" || r === "investor"))
       .filter((c) =>
         term
           ? `${c.firstName} ${c.lastName} ${c.email} ${c.city ?? ""}`.toLowerCase().includes(term)
           : true,
       );
-  }, [clients, search]);
+  }, [scopedClients, search]);
 
   const activeProperties = useMemo(
     () => properties.filter((p) => ["available", "reserved", "under_offer"].includes(p.status)),
@@ -115,6 +124,7 @@ function MatchingPage() {
           matches={clientMatches}
           propertiesById={propertiesById}
           picked={picked}
+          canSend={canSend}
           onTogglePick={togglePick}
           onSendAll={() => {
             if (!selectedClient) return;
@@ -170,6 +180,7 @@ function ClientTab({
   matches,
   propertiesById,
   picked,
+  canSend,
   onTogglePick,
   onSendAll,
   onSendPicked,
@@ -182,6 +193,7 @@ function ClientTab({
   matches: PropertyMatch[];
   propertiesById: Map<string, AdminProperty>;
   picked: Set<string>;
+  canSend: boolean;
   onTogglePick: (pid: string) => void;
   onSendAll: () => void;
   onSendPicked: () => void;
@@ -259,10 +271,14 @@ function ClientTab({
                 pour ce client
               </p>
               <div className="flex gap-2">
-                <AdminButton variant="outline" disabled={picked.size === 0} onClick={onSendPicked}>
+                <AdminButton
+                  variant="outline"
+                  disabled={picked.size === 0 || !canSend}
+                  onClick={onSendPicked}
+                >
                   <Send className="size-3.5" /> Envoyer la sélection ({picked.size})
                 </AdminButton>
-                <AdminButton onClick={onSendAll}>
+                <AdminButton onClick={onSendAll} disabled={!canSend}>
                   <Send className="size-3.5" /> Tout envoyer
                 </AdminButton>
               </div>

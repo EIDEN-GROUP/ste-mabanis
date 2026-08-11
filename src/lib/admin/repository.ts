@@ -309,7 +309,7 @@ export interface AdminRepository {
   markAllNotificationsRead(): Promise<void>;
 
   getDashboard(): Promise<DashboardSummary>;
-  getPriorities(): Promise<Priority[]>;
+  getPriorities(agentId?: string): Promise<Priority[]>;
 
   /* ------------------------------------------------------------- marketing */
 
@@ -1498,12 +1498,13 @@ export const inMemoryRepository: AdminRepository = {
     };
   },
 
-  async getPriorities(): Promise<Priority[]> {
+  async getPriorities(agentId?: string): Promise<Priority[]> {
     const now = new Date().toISOString();
     const todayEnd = new Date(Date.now() + 86_400_000).toISOString();
 
     const overdueTasks = tasks
       .filter((t) => t.status !== "done" && t.dueAt && t.dueAt < now)
+      .filter((t) => !agentId || t.assigneeId === agentId)
       .slice(0, 3)
       .map<Priority>((t) => ({
         id: t.id,
@@ -1516,6 +1517,7 @@ export const inMemoryRepository: AdminRepository = {
 
     const todayAppointments = appointments
       .filter((a) => a.startsAt >= now && a.startsAt <= todayEnd)
+      .filter((a) => !agentId || a.agentId === agentId)
       .slice(0, 3)
       .map<Priority>((a) => ({
         id: a.id,
@@ -1531,6 +1533,7 @@ export const inMemoryRepository: AdminRepository = {
 
     const staleLeads = leads
       .filter((l) => l.stage === "new" || l.stage === "contacted")
+      .filter((l) => !agentId || l.agentId === agentId)
       .slice(0, 2)
       .map<Priority>((l) => ({
         id: l.id,

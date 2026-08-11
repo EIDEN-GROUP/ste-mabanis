@@ -23,6 +23,7 @@ import {
 import type { DocumentCategory, StoredDocument } from "@/lib/admin/types";
 import { DOCUMENT_LABELS, formatBytes, formatDate, label } from "@/lib/admin/format";
 import { StatCard, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
+import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/documents")({
@@ -47,6 +48,8 @@ function DocumentsPage() {
   const { data: clients = [] } = useQuery(clientsQuery({}));
   const { data: properties = [] } = useQuery(propertiesQuery({}));
   const { data: agents = [] } = useQuery(agentsQuery());
+
+  const canManage = useCan("document.manage");
 
   const agentsById = useMemo(() => new Map(agents.map((a) => [a.id, a])), [agents]);
 
@@ -123,9 +126,11 @@ function DocumentsPage() {
               className="h-10 w-44 border border-line bg-admin-surface pl-9 pr-3 text-sm outline-none focus:border-gold sm:w-56"
             />
           </label>
-          <AdminButton onClick={() => setUploading(true)}>
-            <Plus className="size-3.5" /> Importer
-          </AdminButton>
+          {canManage ? (
+            <AdminButton onClick={() => setUploading(true)}>
+              <Plus className="size-3.5" /> Importer
+            </AdminButton>
+          ) : null}
         </div>
       </div>
 
@@ -134,9 +139,11 @@ function DocumentsPage() {
           title="Aucun document"
           description="Importez des mandats, titres fonciers, compromis ou factures pour les retrouver ici."
           action={
-            <AdminButton onClick={() => setUploading(true)}>
-              <Upload className="size-3.5" /> Importer un fichier
-            </AdminButton>
+            canManage ? (
+              <AdminButton onClick={() => setUploading(true)}>
+                <Upload className="size-3.5" /> Importer un fichier
+              </AdminButton>
+            ) : undefined
           }
         />
       ) : (
@@ -191,7 +198,7 @@ function DocumentsPage() {
                 >
                   <Download className="size-4" />
                 </a>
-                <DeleteDocumentButton doc={doc} />
+                {canManage ? <DeleteDocumentButton doc={doc} /> : null}
               </li>
             );
           })}

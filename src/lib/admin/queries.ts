@@ -107,7 +107,7 @@ export const adminKeys = {
   transactions: () => ["admin", "transactions"] as const,
   notifications: () => ["admin", "notifications"] as const,
   dashboard: () => ["admin", "dashboard"] as const,
-  priorities: () => ["admin", "priorities"] as const,
+  priorities: (agentId?: string) => ["admin", "priorities", agentId] as const,
   campaigns: () => ["admin", "campaigns"] as const,
   marketingStats: () => ["admin", "marketingStats"] as const,
   featured: () => ["admin", "featured"] as const,
@@ -177,8 +177,11 @@ export const notificationsQuery = () =>
 export const dashboardQuery = () =>
   queryOptions({ queryKey: adminKeys.dashboard(), queryFn: () => fetchDashboard() });
 
-export const prioritiesQuery = () =>
-  queryOptions({ queryKey: adminKeys.priorities(), queryFn: () => fetchPriorities() });
+export const prioritiesQuery = (agentId?: string) =>
+  queryOptions({
+    queryKey: adminKeys.priorities(agentId),
+    queryFn: () => fetchPriorities({ data: { agentId } }),
+  });
 
 export const campaignsQuery = () =>
   queryOptions({ queryKey: adminKeys.campaigns(), queryFn: () => fetchCampaigns() });
