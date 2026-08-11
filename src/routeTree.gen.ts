@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AgenceRouteImport } from './routes/agence'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -17,6 +18,8 @@ import { Route as TemoignagesRouteImport } from './routes/temoignages'
 import { Route as VendreRouteImport } from './routes/vendre'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites/index'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites/$slug'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminDesignRouteImport } from './routes/admin/design'
 import { Route as EquipeIndexRouteImport } from './routes/equipe/index'
 import { Route as EquipeSlugRouteImport } from './routes/equipe/$slug'
 import { Route as ProprietesIndexRouteImport } from './routes/proprietes/index'
@@ -27,6 +30,11 @@ import { Route as QuartiersSlugRouteImport } from './routes/quartiers/$slug'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgenceRoute = AgenceRouteImport.update({
@@ -64,6 +72,16 @@ const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
   path: '/actualites/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDesignRoute = AdminDesignRouteImport.update({
+  id: '/design',
+  path: '/design',
+  getParentRoute: () => AdminRoute,
+} as any)
 const EquipeIndexRoute = EquipeIndexRouteImport.update({
   id: '/equipe/',
   path: '/equipe/',
@@ -97,16 +115,19 @@ const QuartiersSlugRoute = QuartiersSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agence': typeof AgenceRoute
   '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
   '/vendre': typeof VendreRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
+  '/admin/design': typeof AdminDesignRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
   '/actualites/': typeof ActualitesIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/equipe/': typeof EquipeIndexRoute
   '/proprietes/': typeof ProprietesIndexRoute
   '/quartiers/': typeof QuartiersIndexRoute
@@ -119,10 +140,12 @@ export interface FileRoutesByTo {
   '/temoignages': typeof TemoignagesRoute
   '/vendre': typeof VendreRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
+  '/admin/design': typeof AdminDesignRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
   '/actualites': typeof ActualitesIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/equipe': typeof EquipeIndexRoute
   '/proprietes': typeof ProprietesIndexRoute
   '/quartiers': typeof QuartiersIndexRoute
@@ -130,16 +153,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/agence': typeof AgenceRoute
   '/contact': typeof ContactRoute
   '/services': typeof ServicesRoute
   '/temoignages': typeof TemoignagesRoute
   '/vendre': typeof VendreRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
+  '/admin/design': typeof AdminDesignRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
   '/actualites/': typeof ActualitesIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/equipe/': typeof EquipeIndexRoute
   '/proprietes/': typeof ProprietesIndexRoute
   '/quartiers/': typeof QuartiersIndexRoute
@@ -148,16 +174,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/agence'
     | '/contact'
     | '/services'
     | '/temoignages'
     | '/vendre'
     | '/actualites/$slug'
+    | '/admin/design'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
     | '/actualites/'
+    | '/admin/'
     | '/equipe/'
     | '/proprietes/'
     | '/quartiers/'
@@ -170,26 +199,31 @@ export interface FileRouteTypes {
     | '/temoignages'
     | '/vendre'
     | '/actualites/$slug'
+    | '/admin/design'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
     | '/actualites'
+    | '/admin'
     | '/equipe'
     | '/proprietes'
     | '/quartiers'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/agence'
     | '/contact'
     | '/services'
     | '/temoignages'
     | '/vendre'
     | '/actualites/$slug'
+    | '/admin/design'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
     | '/actualites/'
+    | '/admin/'
     | '/equipe/'
     | '/proprietes/'
     | '/quartiers/'
@@ -197,6 +231,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AgenceRoute: typeof AgenceRoute
   ContactRoute: typeof ContactRoute
   ServicesRoute: typeof ServicesRoute
@@ -219,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agence': {
@@ -270,6 +312,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActualitesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/design': {
+      id: '/admin/design'
+      path: '/design'
+      fullPath: '/admin/design'
+      preLoaderRoute: typeof AdminDesignRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/equipe/': {
       id: '/equipe/'
       path: '/equipe'
@@ -315,8 +371,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminDesignRoute: typeof AdminDesignRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminDesignRoute: AdminDesignRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AgenceRoute: AgenceRoute,
   ContactRoute: ContactRoute,
   ServicesRoute: ServicesRoute,
@@ -334,3 +403,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

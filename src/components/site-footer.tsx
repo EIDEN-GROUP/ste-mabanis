@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
-import logo from "@/assets/mabanis-logo.png.asset.json";
+import logo from "@/assets/mabanis-logo.png";
 import { agency } from "@/lib/site-data";
 
 export function SiteFooter() {
@@ -9,7 +9,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-[100rem] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-12 lg:py-24">
         <div>
           <img
-            src={logo.url}
+            src={logo}
             alt="STE MABANIS"
             width={240}
             height={240}

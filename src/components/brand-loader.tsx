@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/mabanis-logo.png.asset.json";
+import logo from "@/assets/mabanis-favicon.png";
 
 export function BrandLoader() {
   const [phase, setPhase] = useState<"in" | "out" | "done">("in");
@@ -34,11 +34,11 @@ export function BrandLoader() {
     >
       <div className="flex flex-col items-center gap-7 px-8">
         <img
-          src={logo.url}
+          src={logo}
           alt=""
           width={220}
           height={220}
-          className="w-40 animate-rise brightness-0 invert sm:w-52"
+          className="w-40 animate-rise sm:w-52"
         />
         <div className="relative h-px w-40 overflow-hidden bg-white/15 sm:w-56">
           <span className="loader-sweep absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-gold to-transparent" />
