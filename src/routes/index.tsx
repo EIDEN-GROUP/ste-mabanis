@@ -30,7 +30,12 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const featured = properties.filter((p) => p.featured);
-  const latest = properties.slice(-3);
+  // "Nouveautés" must show the listings actually flagged as new (newest first),
+  // then fall back to the most recent ones to fill the three slots.
+  const latest = [
+    ...properties.filter((p) => p.isNew),
+    ...properties.filter((p) => !p.isNew),
+  ].slice(0, 3);
 
   return (
     <>

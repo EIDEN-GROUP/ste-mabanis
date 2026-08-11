@@ -88,7 +88,7 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-[100rem] flex-col gap-2 px-5 py-6 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
           <p>© {new Date().getFullYear()} STE MABANIS — Ste Gestion et Services. Agadir, Maroc.</p>
-          <p className="tracking-[0.2em] text-white/40 uppercase">mabanis.au</p>
+          <p className="tracking-[0.2em] text-white/40 uppercase">stemabanis.com</p>
         </div>
       </div>
     </footer>
