@@ -273,9 +273,10 @@ function printReport(report?: Report) {
 <head>
 <meta charset="utf-8">
 <title>${escapeHtml(report.title)}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 <style>
   * { box-sizing: border-box; }
-  body { font-family: "Segoe UI", Arial, sans-serif; margin: 32px; color: #141419; }
+  body { font-family: Roboto, "Segoe UI", Arial, sans-serif; margin: 32px; color: #141419; }
   h1 { font-size: 22px; margin: 0 0 4px; }
   .period { margin: 0 0 24px; color: #6b6b76; font-size: 13px; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }

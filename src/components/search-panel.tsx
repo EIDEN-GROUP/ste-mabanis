@@ -26,7 +26,7 @@ export function SearchPanel({ compact = false }: { compact?: boolean }) {
   };
 
   return (
-    <div className={compact ? "bg-card p-5 shadow-card" : "bg-card/95 p-5 shadow-elegant backdrop-blur sm:p-7"}>
+    <div className={compact ? "bg-transparent" : "bg-card/95 p-5 shadow-elegant backdrop-blur sm:p-7"}>
       <div className="flex gap-1 border-b border-line">
         {(["vente", "location"] as const).map((t) => (
           <button
@@ -44,7 +44,7 @@ export function SearchPanel({ compact = false }: { compact?: boolean }) {
         ))}
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className={`mt-5 grid gap-3 ${compact ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-4"}`}>
         <label className="flex flex-col gap-1.5">
           <span className="text-[0.6rem] tracking-[0.18em] text-muted-foreground uppercase">
             Quartier

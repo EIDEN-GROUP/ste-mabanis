@@ -6,7 +6,7 @@ import { Section, SectionHeading } from "@/components/layout-bits";
 import { SearchPanel } from "@/components/search-panel";
 import { PropertyCard } from "@/components/property-card";
 import { TrustStrip } from "@/components/trust-strip";
-import { articles, images, locations, properties, services, stats, testimonials, values, } from "@/lib/site-data";
+import { articles, images, locations, properties, services, testimonials, values, } from "@/lib/site-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,7 +35,7 @@ function Home() {
   return (
     <>
       {/* Hero */}
-    <section className="relative min-h-[92svh] overflow-hidden bg-navy">
+    <section className="relative min-h-[92svh] overflow-hidden bg-black">
       <img
         src={heroImage}
         alt="Villa contemporaine face à l'océan à Agadir au coucher du soleil"
@@ -43,28 +43,27 @@ function Home() {
         height={1280}
         className="absolute inset-0 h-full w-full object-cover opacity-70"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-navy/85 via-navy/40 to-navy/10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-transparent to-navy/20" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
 
-      <div className="relative mx-auto flex min-h-[92svh] max-w-[100rem] flex-col px-5 pt-28 pb-16 sm:px-8 sm:pt-32 sm:pb-20 lg:px-12">
+      <div className="relative mx-auto flex min-h-[92svh] max-w-[100rem] flex-col px-5 pt-28 pb-20 sm:px-8 sm:pt-32 sm:pb-24 lg:px-12">
         {/* Text + search */}
         <div className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,30rem)]">
           {/* Left column */}
           <div className="min-w-0 max-w-3xl">
-            <p className="eyebrow animate-rise">Agadir · Souss-Massa · Littoral atlantique</p>
+            <p className="eyebrow animate-rise">AGADIR · SOUSS-MASSA · IMMOBILIER D’EXCEPTION</p>
             <h1
               className="display animate-rise mt-6 text-[clamp(3rem,6vw,6.5rem)] leading-[0.92] text-white"
               style={{ animationDelay: "120ms" }}
             >
-              L'adresse compte
-              <span className="block italic text-gold-soft">autant que la maison.</span>
+              L’élégance immobilière 
+              <span className="block italic text-gold-soft">à Agadir.</span>
             </h1>
             <p
               className="animate-rise mt-6 max-w-xl text-base leading-relaxed text-white/75 sm:mt-7 sm:text-lg"
               style={{ animationDelay: "240ms" }}
             >
-              Depuis 2008, STE MABANIS accompagne acheteurs, vendeurs et investisseurs sur le Grand
-              Agadir. Une sélection resserrée, des estimations honnêtes, un conseiller qui répond.
+              Des propriétés d’exception au cœur d’Agadir et du Souss-Massa. Depuis 2008, STE MABANIS sélectionne et accompagne des projets immobiliers où emplacement, architecture et qualité de vie se rencontrent.
             </p>
             <div
               className="animate-rise mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap"
@@ -98,30 +97,13 @@ function Home() {
             </div>
           </div>
         </div>
-
       </div>
     </section>
 
-      {/* Trust strip — straddles the hero and the section below */}
-      <div className="relative z-30 mx-auto h-0 max-w-[100rem] px-5 sm:px-8 lg:px-12">
-        <div className="-translate-y-1/2">
-          <TrustStrip />
-        </div>
+      {/* Trust strip — straddles the hero and the section below it */}
+      <div className="relative z-20 mx-auto max-w-[100rem] px-5 [--trust-strip-h:4.5rem] sm:px-8 sm:[--trust-strip-h:5.5rem] lg:px-12">
+        <TrustStrip className="mt-[calc(var(--trust-strip-h)*-0.5)]" />
       </div>
-
-      {/* Stats */}
-      <Section tone="sand" className="!pt-20 !pb-14 sm:!pt-24 sm:!pb-20">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((s, i) => (
-            <Reveal key={s.label} delay={i * 90} className="border-t border-gold/40 pt-6">
-              <p className="display text-5xl text-blue sm:text-6xl">
-                <Counter value={s.value} suffix={s.suffix} />
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.label}</p>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
 
       {/* Featured */}
       <Section>
@@ -182,8 +164,7 @@ function Home() {
                   <h3 className="display mt-3 text-4xl text-white sm:text-5xl">{c.title}</h3>
                   <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">{c.text}</p>
                   <span className="mt-6 inline-flex items-center gap-2 text-[0.7rem] tracking-[0.18em] text-gold uppercase">
-                    Explorer{" "}
-                    <ArrowRight className="size-4 transition-transform duration-500 group-hover:translate-x-1" />
+                    Explorer <ArrowRight className="size-4 transition-transform duration-500 group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>
@@ -370,11 +351,7 @@ function Home() {
         <div className="mt-12 grid gap-8 lg:grid-cols-3">
           {articles.slice(0, 3).map((a, i) => (
             <Reveal key={a.slug} delay={i * 90}>
-              <Link
-                to="/actualites/$slug"
-                params={{ slug: a.slug }}
-                className="zoom-frame group block"
-              >
+              <Link to="/actualites/$slug" params={{ slug: a.slug }} className="zoom-frame group block">
                 <div className="overflow-hidden">
                   <img
                     src={a.image}

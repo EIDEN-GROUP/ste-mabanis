@@ -8,9 +8,13 @@ Use the attached STE MABANIS logo exactly as provided.
 
 TYPOGRAPHY:
 
-Inter for navigation, UI, search, buttons and body text
+Sarabun Light for navigation, UI, search, buttons and body text
 
-Cormorant Garamond for hero titles, editorial headings and property titles
+Playfair Display for hero titles, editorial headings and property titles
+(stands in for Safira March, which has no web-font CDN — self-host it and swap
+the --font-display stack in src/styles.css to use the real face)
+
+Roboto only inside the back office, scoped by the `font-admin` utility
 
 VISUAL IDENTITY:
 Luxury + modern + architectural + editorial.
