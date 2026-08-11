@@ -393,7 +393,7 @@ function Home() {
         <Reveal className="relative mx-auto max-w-3xl text-center">
           <p className="eyebrow">Parlons de votre projet</p>
           <h2 className="display mt-5 text-[clamp(2.25rem,6vw,4.5rem)]">
-            Un café, un plan, une estimation.
+            Une conversation, un plan, une estimation.
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-white/70">
             Que vous achetiez, vendiez ou louiez, la première conversation est gratuite et sans
