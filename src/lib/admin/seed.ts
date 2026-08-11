@@ -21,9 +21,11 @@ import type {
   AppNotification,
   Client,
   ClientRole,
+  FeaturedProperty,
   Lead,
   LeadSource,
   LeadTemperature,
+  MarketingCampaign,
   PipelineStage,
   PropertyMedia,
   PropertyStatus,
@@ -446,6 +448,57 @@ export const seedTransactions: Transaction[] = Array.from({ length: 8 }, (_, i) 
     closedAt: i % 8 === 7 ? iso(-2) : undefined,
   };
 });
+
+/* --------------------------------------------------------------- marketing */
+
+export const seedCampaigns: MarketingCampaign[] = [
+  {
+    id: "camp-1",
+    name: "Coup de cœur Marina — Août",
+    subject: "3 biens d'exception face à la Marina d'Agadir",
+    channel: "email",
+    status: "sent",
+    audience: "Acheteurs Marina — budget ≥ 2 M MAD",
+    audienceCount: 240,
+    sentAt: iso(-8, 9),
+    opens: 142,
+    clicks: 51,
+    conversions: 6,
+    createdAt: iso(-14),
+  },
+  {
+    id: "camp-2",
+    name: "Relance WhatsApp — visiteurs du salon",
+    subject: "Suite à votre visite sur le salon immobilier…",
+    channel: "whatsapp",
+    status: "sent",
+    audience: "Leads salons (Juin) sans suite",
+    audienceCount: 86,
+    sentAt: iso(-3, 14),
+    opens: 80,
+    clicks: 33,
+    conversions: 4,
+    createdAt: iso(-5),
+  },
+  {
+    id: "camp-3",
+    name: "Investisseurs — Taghazout Bay",
+    subject: "Rentabilité locative : le dossier complet",
+    channel: "portail",
+    status: "draft",
+    audience: "Investisseurs — budget 1,5–4 M MAD",
+    audienceCount: 132,
+    opens: 0,
+    clicks: 0,
+    conversions: 0,
+    createdAt: iso(-1),
+  },
+];
+
+export const seedFeatured: FeaturedProperty[] = [
+  { propertyId: seedProperties[0]!.id, since: iso(-6), until: iso(9) },
+  { propertyId: seedProperties[3]!.id, since: iso(-3), until: iso(12) },
+];
 
 /* ------------------------------------------------------------ notifications */
 

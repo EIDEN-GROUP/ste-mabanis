@@ -19,7 +19,19 @@ import { Route as VendreRouteImport } from './routes/vendre'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites/index'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites/$slug'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAgendaRouteImport } from './routes/admin/agenda'
+import { Route as AdminAutomatisationsRouteImport } from './routes/admin/automatisations'
+import { Route as AdminClientsRouteImport } from './routes/admin/clients'
+import { Route as AdminCrmRouteImport } from './routes/admin/crm'
 import { Route as AdminDesignRouteImport } from './routes/admin/design'
+import { Route as AdminDocumentsRouteImport } from './routes/admin/documents'
+import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
+import { Route as AdminMatchingRouteImport } from './routes/admin/matching'
+import { Route as AdminPortailClientRouteImport } from './routes/admin/portail-client'
+import { Route as AdminProprietesRouteImport } from './routes/admin/proprietes'
+import { Route as AdminRapportsRouteImport } from './routes/admin/rapports'
+import { Route as AdminTachesRouteImport } from './routes/admin/taches'
+import { Route as AdminTransactionsRouteImport } from './routes/admin/transactions'
 import { Route as EquipeIndexRouteImport } from './routes/equipe/index'
 import { Route as EquipeSlugRouteImport } from './routes/equipe/$slug'
 import { Route as ProprietesIndexRouteImport } from './routes/proprietes/index'
@@ -77,9 +89,69 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAgendaRoute = AdminAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAutomatisationsRoute = AdminAutomatisationsRouteImport.update({
+  id: '/automatisations',
+  path: '/automatisations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClientsRoute = AdminClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCrmRoute = AdminCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDesignRoute = AdminDesignRouteImport.update({
   id: '/design',
   path: '/design',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDocumentsRoute = AdminDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMatchingRoute = AdminMatchingRouteImport.update({
+  id: '/matching',
+  path: '/matching',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPortailClientRoute = AdminPortailClientRouteImport.update({
+  id: '/portail-client',
+  path: '/portail-client',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProprietesRoute = AdminProprietesRouteImport.update({
+  id: '/proprietes',
+  path: '/proprietes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRapportsRoute = AdminRapportsRouteImport.update({
+  id: '/rapports',
+  path: '/rapports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTachesRoute = AdminTachesRouteImport.update({
+  id: '/taches',
+  path: '/taches',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTransactionsRoute = AdminTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
   getParentRoute: () => AdminRoute,
 } as any)
 const EquipeIndexRoute = EquipeIndexRouteImport.update({
@@ -122,7 +194,19 @@ export interface FileRoutesByFullPath {
   '/temoignages': typeof TemoignagesRoute
   '/vendre': typeof VendreRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
+  '/admin/agenda': typeof AdminAgendaRoute
+  '/admin/automatisations': typeof AdminAutomatisationsRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/crm': typeof AdminCrmRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/documents': typeof AdminDocumentsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/portail-client': typeof AdminPortailClientRoute
+  '/admin/proprietes': typeof AdminProprietesRoute
+  '/admin/rapports': typeof AdminRapportsRoute
+  '/admin/taches': typeof AdminTachesRoute
+  '/admin/transactions': typeof AdminTransactionsRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
@@ -140,7 +224,19 @@ export interface FileRoutesByTo {
   '/temoignages': typeof TemoignagesRoute
   '/vendre': typeof VendreRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
+  '/admin/agenda': typeof AdminAgendaRoute
+  '/admin/automatisations': typeof AdminAutomatisationsRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/crm': typeof AdminCrmRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/documents': typeof AdminDocumentsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/portail-client': typeof AdminPortailClientRoute
+  '/admin/proprietes': typeof AdminProprietesRoute
+  '/admin/rapports': typeof AdminRapportsRoute
+  '/admin/taches': typeof AdminTachesRoute
+  '/admin/transactions': typeof AdminTransactionsRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
@@ -160,7 +256,19 @@ export interface FileRoutesById {
   '/temoignages': typeof TemoignagesRoute
   '/vendre': typeof VendreRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
+  '/admin/agenda': typeof AdminAgendaRoute
+  '/admin/automatisations': typeof AdminAutomatisationsRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/crm': typeof AdminCrmRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/documents': typeof AdminDocumentsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/portail-client': typeof AdminPortailClientRoute
+  '/admin/proprietes': typeof AdminProprietesRoute
+  '/admin/rapports': typeof AdminRapportsRoute
+  '/admin/taches': typeof AdminTachesRoute
+  '/admin/transactions': typeof AdminTransactionsRoute
   '/equipe/$slug': typeof EquipeSlugRoute
   '/proprietes/$slug': typeof ProprietesSlugRoute
   '/quartiers/$slug': typeof QuartiersSlugRoute
@@ -181,7 +289,19 @@ export interface FileRouteTypes {
     | '/temoignages'
     | '/vendre'
     | '/actualites/$slug'
+    | '/admin/agenda'
+    | '/admin/automatisations'
+    | '/admin/clients'
+    | '/admin/crm'
     | '/admin/design'
+    | '/admin/documents'
+    | '/admin/marketing'
+    | '/admin/matching'
+    | '/admin/portail-client'
+    | '/admin/proprietes'
+    | '/admin/rapports'
+    | '/admin/taches'
+    | '/admin/transactions'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
@@ -199,7 +319,19 @@ export interface FileRouteTypes {
     | '/temoignages'
     | '/vendre'
     | '/actualites/$slug'
+    | '/admin/agenda'
+    | '/admin/automatisations'
+    | '/admin/clients'
+    | '/admin/crm'
     | '/admin/design'
+    | '/admin/documents'
+    | '/admin/marketing'
+    | '/admin/matching'
+    | '/admin/portail-client'
+    | '/admin/proprietes'
+    | '/admin/rapports'
+    | '/admin/taches'
+    | '/admin/transactions'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
@@ -218,7 +350,19 @@ export interface FileRouteTypes {
     | '/temoignages'
     | '/vendre'
     | '/actualites/$slug'
+    | '/admin/agenda'
+    | '/admin/automatisations'
+    | '/admin/clients'
+    | '/admin/crm'
     | '/admin/design'
+    | '/admin/documents'
+    | '/admin/marketing'
+    | '/admin/matching'
+    | '/admin/portail-client'
+    | '/admin/proprietes'
+    | '/admin/rapports'
+    | '/admin/taches'
+    | '/admin/transactions'
     | '/equipe/$slug'
     | '/proprietes/$slug'
     | '/quartiers/$slug'
@@ -319,11 +463,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/agenda': {
+      id: '/admin/agenda'
+      path: '/agenda'
+      fullPath: '/admin/agenda'
+      preLoaderRoute: typeof AdminAgendaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/automatisations': {
+      id: '/admin/automatisations'
+      path: '/automatisations'
+      fullPath: '/admin/automatisations'
+      preLoaderRoute: typeof AdminAutomatisationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/clients': {
+      id: '/admin/clients'
+      path: '/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminClientsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/crm': {
+      id: '/admin/crm'
+      path: '/crm'
+      fullPath: '/admin/crm'
+      preLoaderRoute: typeof AdminCrmRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/design': {
       id: '/admin/design'
       path: '/design'
       fullPath: '/admin/design'
       preLoaderRoute: typeof AdminDesignRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/documents': {
+      id: '/admin/documents'
+      path: '/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AdminDocumentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/matching': {
+      id: '/admin/matching'
+      path: '/matching'
+      fullPath: '/admin/matching'
+      preLoaderRoute: typeof AdminMatchingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/portail-client': {
+      id: '/admin/portail-client'
+      path: '/portail-client'
+      fullPath: '/admin/portail-client'
+      preLoaderRoute: typeof AdminPortailClientRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/proprietes': {
+      id: '/admin/proprietes'
+      path: '/proprietes'
+      fullPath: '/admin/proprietes'
+      preLoaderRoute: typeof AdminProprietesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rapports': {
+      id: '/admin/rapports'
+      path: '/rapports'
+      fullPath: '/admin/rapports'
+      preLoaderRoute: typeof AdminRapportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/taches': {
+      id: '/admin/taches'
+      path: '/taches'
+      fullPath: '/admin/taches'
+      preLoaderRoute: typeof AdminTachesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/transactions': {
+      id: '/admin/transactions'
+      path: '/transactions'
+      fullPath: '/admin/transactions'
+      preLoaderRoute: typeof AdminTransactionsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/equipe/': {
@@ -372,12 +600,36 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAgendaRoute: typeof AdminAgendaRoute
+  AdminAutomatisationsRoute: typeof AdminAutomatisationsRoute
+  AdminClientsRoute: typeof AdminClientsRoute
+  AdminCrmRoute: typeof AdminCrmRoute
   AdminDesignRoute: typeof AdminDesignRoute
+  AdminDocumentsRoute: typeof AdminDocumentsRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminMatchingRoute: typeof AdminMatchingRoute
+  AdminPortailClientRoute: typeof AdminPortailClientRoute
+  AdminProprietesRoute: typeof AdminProprietesRoute
+  AdminRapportsRoute: typeof AdminRapportsRoute
+  AdminTachesRoute: typeof AdminTachesRoute
+  AdminTransactionsRoute: typeof AdminTransactionsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAgendaRoute: AdminAgendaRoute,
+  AdminAutomatisationsRoute: AdminAutomatisationsRoute,
+  AdminClientsRoute: AdminClientsRoute,
+  AdminCrmRoute: AdminCrmRoute,
   AdminDesignRoute: AdminDesignRoute,
+  AdminDocumentsRoute: AdminDocumentsRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
+  AdminMatchingRoute: AdminMatchingRoute,
+  AdminPortailClientRoute: AdminPortailClientRoute,
+  AdminProprietesRoute: AdminProprietesRoute,
+  AdminRapportsRoute: AdminRapportsRoute,
+  AdminTachesRoute: AdminTachesRoute,
+  AdminTransactionsRoute: AdminTransactionsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

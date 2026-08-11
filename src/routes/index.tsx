@@ -63,9 +63,8 @@ function Home() {
               className="animate-rise mt-6 max-w-xl text-base leading-relaxed text-white/75 sm:mt-7 sm:text-lg"
               style={{ animationDelay: "240ms" }}
             >
-              Depuis 2008, STE MABANIS accompagne acheteurs, vendeurs et investisseurs sur le
-              Grand Agadir. Une sélection resserrée, des estimations honnêtes, un conseiller qui
-              répond.
+              Depuis 2008, STE MABANIS accompagne acheteurs, vendeurs et investisseurs sur le Grand
+              Agadir. Une sélection resserrée, des estimations honnêtes, un conseiller qui répond.
             </p>
             <div
               className="animate-rise mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap"
@@ -183,7 +182,8 @@ function Home() {
                   <h3 className="display mt-3 text-4xl text-white sm:text-5xl">{c.title}</h3>
                   <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">{c.text}</p>
                   <span className="mt-6 inline-flex items-center gap-2 text-[0.7rem] tracking-[0.18em] text-gold uppercase">
-                    Explorer <ArrowRight className="size-4 transition-transform duration-500 group-hover:translate-x-1" />
+                    Explorer{" "}
+                    <ArrowRight className="size-4 transition-transform duration-500 group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>
@@ -370,7 +370,11 @@ function Home() {
         <div className="mt-12 grid gap-8 lg:grid-cols-3">
           {articles.slice(0, 3).map((a, i) => (
             <Reveal key={a.slug} delay={i * 90}>
-              <Link to="/actualites/$slug" params={{ slug: a.slug }} className="zoom-frame group block">
+              <Link
+                to="/actualites/$slug"
+                params={{ slug: a.slug }}
+                className="zoom-frame group block"
+              >
                 <div className="overflow-hidden">
                   <img
                     src={a.image}

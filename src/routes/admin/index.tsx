@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Clock,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 import { dashboardQuery, prioritiesQuery } from "@/lib/admin/queries";
 import { formatMoney, formatNumber, label, SOURCE_LABELS, STAGE_LABELS } from "@/lib/admin/format";
@@ -27,6 +28,8 @@ import {
   DonutChart,
   TrendChart,
 } from "@/components/admin/charts";
+import { ACTION_ROLES, type AdminAction } from "@/lib/admin/permissions";
+import { useAgentScope, useAgentsForRole, useSession } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/")({
@@ -45,9 +48,54 @@ const URGENCY = {
   soon: { tone: "text-muted-foreground border-line", icon: Clock, word: "À suivre" },
 } as const;
 
+const ACTION_LABELS: Record<AdminAction, string> = {
+  "screen.design": "Fiche design",
+  "screen.rapports": "Rapports",
+  "screen.automatisations": "Automatisations",
+  "screen.marketing": "Campagnes",
+  "screen.portail-client": "Portail client",
+  "screen.matching": "Matching",
+  "screen.crm": "CRM / Leads",
+  "screen.agenda": "Agenda",
+  "screen.transactions": "Transactions",
+  "screen.documents": "Documents",
+  "screen.taches": "Tâches",
+  "screen.proprietes": "Propriétés",
+  "screen.clients": "Clients",
+  "property.create": "Créer un bien",
+  "property.edit": "Modifier un bien",
+  "property.delete": "Supprimer un bien",
+  "client.create": "Créer un client",
+  "client.edit": "Modifier un client",
+  "client.delete": "Supprimer un client",
+  "lead.move": "Déplacer un lead",
+  "lead.convert": "Convertir un lead",
+  "lead.delete": "Supprimer un lead",
+  "appointment.manage": "Gérer les visites",
+  "transaction.manage": "Gérer les transactions",
+  "transaction.delete": "Supprimer une transaction",
+  "document.manage": "Gérer les documents",
+  "task.manage": "Gérer les tâches",
+  "report.export": "Exporter les rapports",
+  "campaign.manage": "Gérer les campagnes",
+  "automation.toggle": "Activer les automatisations",
+  "match.send": "Envoyer des biens",
+};
+
+const ROLE_COLUMNS: { role: "directrice" | "commercial" | "assistant"; label: string }[] = [
+  { role: "directrice", label: "Directrice" },
+  { role: "commercial", label: "Commercial" },
+  { role: "assistant", label: "Assistant" },
+];
+
 function DashboardPage() {
+  const { role, roleInfo, agentId } = useSession();
+  const scope = useAgentScope();
+  const commercialAgents = useAgentsForRole("commercial");
   const { data, isPending } = useQuery(dashboardQuery());
-  const { data: priorities = [], isPending: prioritiesPending } = useQuery(prioritiesQuery());
+  const { data: priorities = [], isPending: prioritiesPending } = useQuery(
+    prioritiesQuery(scope ?? undefined),
+  );
 
   if (isPending || !data) {
     return (
@@ -59,9 +107,20 @@ function DashboardPage() {
   }
 
   const { kpis } = data;
+  const isDirectrice = role === "directrice";
+  const agentName = commercialAgents.find((a) => a.id === agentId)?.name;
 
   return (
     <div className="space-y-6">
+      {/* ---------------------------------------------------------- greeting */}
+      <section>
+        <p className="eyebrow">Tableau de bord</p>
+        <h2 className="display mt-1 text-2xl">
+          Bonjour{agentName ? `, ${agentName}` : `, ${roleInfo.label}`}
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">{roleInfo.tagline}</p>
+      </section>
+
       {/* ---------------------------------------------------------- KPIs */}
       <section>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-6">
@@ -97,14 +156,16 @@ function DashboardPage() {
             hint="en cours"
             icon={Wallet}
           />
-          <StatCard
-            index={4}
-            label="Honoraires"
-            value={formatMoney(kpis.revenueYtd, true)}
-            delta={kpis.deltas["revenueYtd"]}
-            hint="cumul"
-            icon={TrendingUp}
-          />
+          {isDirectrice ? (
+            <StatCard
+              index={4}
+              label="Honoraires"
+              value={formatMoney(kpis.revenueYtd, true)}
+              delta={kpis.deltas["revenueYtd"]}
+              hint="cumul"
+              icon={TrendingUp}
+            />
+          ) : null}
           <StatCard
             index={5}
             label="Conversion"
@@ -235,6 +296,60 @@ function DashboardPage() {
                 value: String(s.value),
               }))}
             />
+          </div>
+        </Panel>
+      </section>
+
+      {/* ------------------------------------------------ roles & permissions */}
+      <section>
+        <Panel>
+          <PanelHeader
+            eyebrow="Rôles et permissions"
+            title="Qui peut faire quoi"
+            action={
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ShieldCheck className="size-3.5 text-gold" />
+                {roleInfo.label}
+              </span>
+            }
+          />
+          <div className="overflow-x-auto p-4">
+            <table className="w-full min-w-[640px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-line text-left">
+                  <th className="py-2 pr-4 text-[0.62rem] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+                    Action
+                  </th>
+                  {ROLE_COLUMNS.map((c) => (
+                    <th
+                      key={c.role}
+                      className="py-2 px-3 text-center text-[0.62rem] font-medium tracking-[0.14em] uppercase"
+                    >
+                      <span className={cn(c.role === role && "text-gold")}>{c.label}</span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(Object.keys(ACTION_ROLES) as AdminAction[]).map((action) => (
+                  <tr
+                    key={action}
+                    className="border-b border-line/60 transition-colors last:border-0"
+                  >
+                    <td className="py-1.5 pr-4 text-navy">{ACTION_LABELS[action]}</td>
+                    {ROLE_COLUMNS.map((c) => (
+                      <td key={c.role} className="py-1.5 px-3 text-center">
+                        {ACTION_ROLES[action].includes(c.role) ? (
+                          <span className="text-gold">✓</span>
+                        ) : (
+                          <span className="text-muted-foreground/40">·</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </Panel>
       </section>

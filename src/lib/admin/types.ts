@@ -107,6 +107,57 @@ export type Agent = {
   avatarUrl?: string | undefined;
 };
 
+/* -------------------------------------------------------------- staff roles */
+
+export type StaffRole = "directrice" | "commercial" | "assistant";
+
+export type RoleInfo = {
+  label: string;
+  tagline: string;
+  capabilities: string[];
+};
+
+export const STAFF_ROLES: Record<StaffRole, RoleInfo> = {
+  directrice: {
+    label: "Directrice",
+    tagline: "Direction & administration",
+    capabilities: [
+      "Accès complet à tous les espaces",
+      "Gestion du portefeuille, des ventes et du budget",
+      "Rapports, automatisations et marketing",
+      "Seule autorisée à supprimer des données",
+    ],
+  },
+  commercial: {
+    label: "Commercial",
+    tagline: "Ventes & relation client",
+    capabilities: [
+      "Voir et éditer les biens",
+      "Gérer ses propres clients, leads et visites",
+      "Matching et envoi de sélections",
+      "Lecture de ses transactions et documents",
+    ],
+  },
+  assistant: {
+    label: "Assistant direction",
+    tagline: "Support opérationnel",
+    capabilities: [
+      "Agenda et visites de l'agence",
+      "Documents et tâches",
+      "Clients : création et mise à jour",
+      "Lecture seule des biens et transactions",
+    ],
+  },
+};
+
+/** Which seeded agent plays which staff role in the demo workspace. */
+export const AGENT_STAFF_ROLE: Record<string, StaffRole> = {
+  "yassine-el-amrani": "directrice",
+  "salma-bouhaddou": "commercial",
+  "nadia-lahlou": "commercial",
+  "karim-ouhssaine": "assistant",
+};
+
 /* ------------------------------------------------------------------- leads */
 
 export const PIPELINE_STAGES = [
@@ -298,4 +349,115 @@ export type Priority = {
   detail: string;
   urgency: "overdue" | "today" | "soon";
   href: string;
+};
+
+/* --------------------------------------------------------------- marketing */
+
+export type CampaignChannel = "email" | "whatsapp" | "portail" | "reseaux_sociaux";
+export type CampaignStatus = "draft" | "scheduled" | "sent";
+
+export type MarketingCampaign = {
+  id: ID;
+  name: string;
+  subject: string;
+  channel: CampaignChannel;
+  status: CampaignStatus;
+  /** Segment description, e.g. "Acheteurs Marina — budget > 2 M MAD". */
+  audience: string;
+  audienceCount: number;
+  sentAt?: string | undefined;
+  opens: number;
+  clicks: number;
+  conversions: number;
+  createdAt: string;
+};
+
+/** A property pushed on the public homepage ("À la une"). */
+export type FeaturedProperty = {
+  propertyId: ID;
+  since: string;
+  until: string;
+};
+
+export type SourceStat = {
+  source: LeadSource;
+  leads: number;
+  conversions: number;
+  rate: number;
+};
+
+export type MarketingStats = {
+  campaigns: MarketingCampaign[];
+  featured: FeaturedProperty[];
+  sources: SourceStat[];
+  totals: {
+    sent: number;
+    opens: number;
+    clicks: number;
+    conversions: number;
+    featuredCount: number;
+  };
+};
+
+/* ---------------------------------------------------------------- matching */
+
+export type PropertyMatch = {
+  propertyId: ID;
+  /** 0-100 compatibility score. */
+  score: number;
+  reasons: string[];
+};
+
+export type ClientMatch = {
+  clientId: ID;
+  score: number;
+  reasons: string[];
+};
+
+/* -------------------------------------------------------------- automations */
+
+export type AutomationRuleKey =
+  "leadFirstContact" | "visitConfirmTask" | "soldClosesTransaction" | "inactiveLeadRelance";
+
+export type AutomationRule = {
+  key: AutomationRuleKey;
+  title: string;
+  description: string;
+  enabled: boolean;
+  runs: number;
+  lastRun?: string | undefined;
+};
+
+export type AutomationRun = {
+  id: ID;
+  rule: AutomationRuleKey;
+  title: string;
+  detail: string;
+  at: string;
+};
+
+export type AutomationOverview = {
+  rules: AutomationRule[];
+  runs: AutomationRun[];
+};
+
+/** A lead with no recorded activity for several days, needing a callback. */
+export type InactiveLead = {
+  lead: Lead;
+  client: Client;
+  daysInactive: number;
+};
+
+/* ----------------------------------------------------------------- reports */
+
+export type ReportKey = "properties" | "crm" | "agents" | "activity";
+
+export type Report = {
+  key: ReportKey;
+  title: string;
+  from: string;
+  to: string;
+  kpis: KpiPoint[];
+  series: { label: string; points: KpiPoint[] }[];
+  table: { columns: string[]; rows: string[][] };
 };
