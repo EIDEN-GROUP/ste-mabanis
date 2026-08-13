@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "DEPLOY_TARGET=vercel npm run build",
   "outputDirectory": ".output/public",
   "framework": "tanstack-start",
   "installCommand": "npm install",
