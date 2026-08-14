@@ -1,31 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import heroImage from "@/assets/hero-agadir.jpg";
-import { Reveal, Counter, Parallax } from "@/components/motion";
+import { Reveal, TextReveal, MaskReveal, Magnetic } from "@/components/motion";
 import { Section, SectionHeading } from "@/components/layout-bits";
-import { SearchPanel } from "@/components/search-panel";
 import { PropertyCard } from "@/components/property-card";
-import {
-  articles,
-  images,
-  locations,
-  properties,
-  services,
-  stats,
-  testimonials,
-  values,
-} from "@/lib/site-data";
+import { HomeHero } from "@/components/home/hero";
+import { HeroSearch } from "@/components/home/hero-search";
+import { QuartiersShowcase } from "@/components/home/quartiers";
+import { TestimonialsSection } from "@/components/home/testimonials";
+import { CinematicServices } from "@/components/home/services-cinematic";
+import { BlogSection } from "@/components/home/blog-section";
+import { images, properties } from "@/lib/site-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "STE MABANIS — Immobilier de caractère à Agadir" },
+      { title: "STE MABANIS | Immobilier de caractère à Agadir & Souss-Massa" },
       {
         name: "description",
         content:
-          "Villas, appartements et investissements sélectionnés à Agadir, Founty, la Marina et Taghazout. Vente, location, estimation et gestion locative depuis 2008.",
+          "Villas, appartements et investissements sélectionnés à Agadir, Founty, la Marina et Taghazout. Vente, location, estimation et gestion locative depuis 2024.",
       },
-      { property: "og:title", content: "STE MABANIS — Immobilier de caractère à Agadir" },
+      {
+        property: "og:title",
+        content: "STE MABANIS | Immobilier de caractère à Agadir",
+      },
       {
         property: "og:description",
         content:
@@ -37,84 +35,23 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const featured = properties.filter((p) => p.featured);
-  const latest = properties.slice(-3);
+  const featured = properties.filter((p) => p.featured).slice(0, 4);
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative min-h-[92svh] overflow-hidden bg-navy">
-        <img
-          src={heroImage}
-          alt="Villa contemporaine face à l'océan à Agadir au coucher du soleil"
-          width={1920}
-          height={1280}
-          className="absolute inset-0 h-full w-full scale-105 object-cover opacity-70"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/35 to-navy" />
+      <HomeHero />
 
-        <div className="relative mx-auto flex min-h-[92svh] max-w-[100rem] flex-col justify-end px-5 pt-32 pb-10 sm:px-8 sm:pb-14 lg:px-12">
-          <div className="max-w-4xl">
-            <p className="eyebrow animate-rise">Agadir · Souss-Massa · Littoral atlantique</p>
-            <h1
-              className="display animate-rise mt-6 text-[clamp(3rem,9vw,8rem)] text-white"
-              style={{ animationDelay: "120ms" }}
-            >
-              L'adresse compte
-              <span className="block italic text-gold-soft">autant que la maison.</span>
-            </h1>
-            <p
-              className="animate-rise mt-7 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg"
-              style={{ animationDelay: "240ms" }}
-            >
-              Depuis 2008, STE MABANIS accompagne acheteurs, vendeurs et investisseurs sur le Grand
-              Agadir. Une sélection resserrée, des estimations honnêtes, un conseiller qui répond.
-            </p>
-            <div
-              className="animate-rise mt-9 flex flex-wrap gap-3"
-              style={{ animationDelay: "340ms" }}
-            >
-              <Link
-                to="/proprietes"
-                className="inline-flex items-center gap-2 bg-gold px-7 py-4 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition-colors hover:bg-white"
-              >
-                Découvrir les biens <ArrowRight className="size-4" />
-              </Link>
-              <Link
-                to="/vendre"
-                className="inline-flex items-center gap-2 border border-white/30 px-7 py-4 text-[0.7rem] tracking-[0.18em] text-white uppercase transition-colors hover:border-gold hover:text-gold"
-              >
-                Estimer mon bien
-              </Link>
-            </div>
-          </div>
+      {/* Search bar straddles the hero edge on desktop, sits below it on mobile */}
+      <div className="relative z-30 mx-auto -mt-px max-w-[100rem] px-5 sm:px-8 lg:-mt-[5.5rem] lg:px-12">
+        <HeroSearch />
+      </div>
 
-          <div className="mt-12 sm:mt-16">
-            <SearchPanel />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <Section tone="sand" className="!py-14 sm:!py-20">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((s, i) => (
-            <Reveal key={s.label} delay={i * 90} className="border-t border-gold/40 pt-6">
-              <p className="display text-5xl text-blue sm:text-6xl">
-                <Counter value={s.value} suffix={s.suffix} />
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.label}</p>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* Featured */}
-      <Section>
+      {/* 01 Sélection */}
+      <Section className="py-16 sm:py-20 lg:py-24">
         <SectionHeading
           eyebrow="Sélection du moment"
-          title="Biens d'exception"
-          intro="Une poignée d'adresses que nous avons visitées, vérifiées et que nous défendons personnellement."
+          title="Des biens d'exception, à Agadir."
+          intro="Une poignée d'adresses que nous avons visitées, vérifiées et que nous défendons personnellement auprès de nos acquéreurs."
           action={
             <Link
               to="/proprietes"
@@ -124,301 +61,60 @@ function Home() {
             </Link>
           }
         />
-        <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+        {/* Snap carousel on phones, grid from sm up four stacked cards is too much scroll. */}
+        <div className="-mx-5 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4 xl:gap-8 [&::-webkit-scrollbar]:hidden">
           {featured.map((p, i) => (
-            <Reveal key={p.slug} delay={i * 80}>
-              <PropertyCard property={p} />
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* Buy / Rent split */}
-      <Section tone="sand">
-        <div className="grid gap-6 lg:grid-cols-2">
-          {[
-            {
-              to: "/proprietes" as const,
-              eyebrow: "Acheter",
-              title: "Trouver le bien juste",
-              text: "Villas de front de mer, appartements familiaux, riads restaurés, terrains constructibles. Nous filtrons pour vous ce qui mérite une visite.",
-              image: images.property1,
-            },
-            {
-              to: "/proprietes" as const,
-              eyebrow: "Louer",
-              title: "S'installer sereinement",
-              text: "Longue durée, meublé ou nu, résidentiel ou professionnel : baux conformes, états des lieux rigoureux et locataires sélectionnés.",
-              image: images.property5,
-            },
-          ].map((c, i) => (
-            <Reveal key={c.eyebrow} delay={i * 100}>
-              <Link to={c.to} className="zoom-frame group relative block h-[26rem] sm:h-[32rem]">
-                <img
-                  src={c.image}
-                  alt=""
-                  loading="lazy"
-                  width={1280}
-                  height={960}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/25 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-7 sm:p-10">
-                  <p className="eyebrow">{c.eyebrow}</p>
-                  <h3 className="display mt-3 text-4xl text-white sm:text-5xl">{c.title}</h3>
-                  <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">{c.text}</p>
-                  <span className="mt-6 inline-flex items-center gap-2 text-[0.7rem] tracking-[0.18em] text-gold uppercase">
-                    Explorer{" "}
-                    <ArrowRight className="size-4 transition-transform duration-500 group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* Expertise */}
-      <Section>
-        <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <Reveal className="zoom-frame relative">
-            <Parallax intensity={22}>
-              <img
-                src={images.editorial1}
-                alt="Détail architectural, ombre de palmier sur une façade blanche"
-                loading="lazy"
-                width={1280}
-                height={960}
-                className="aspect-4/5 w-full object-cover"
+            <Reveal key={p.slug} delay={i * 90} className="w-[82%] shrink-0 snap-start sm:w-auto sm:shrink">
+              <PropertyCard
+                property={p}
+                className="h-full transition-shadow duration-700 hover:shadow-elegant"
               />
-            </Parallax>
-            <div className="absolute -bottom-6 -right-4 hidden bg-navy px-8 py-6 text-white sm:block">
-              <p className="display text-4xl text-gold">2008</p>
-              <p className="mt-1 text-[0.65rem] tracking-[0.2em] uppercase">Première agence</p>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* 03 Services : Acheter / Vendre / Louer / Investir */}
+      <CinematicServices />
+
+      {/* 02 Quartiers */}
+      <Section tone="navy" className="bg-ink overflow-hidden pt-0!">
+        <div className="mx-auto grid max-w-[100rem] gap-8 lg:grid-cols-[40%_60%] lg:items-center lg:gap-12">
+          <p className="max-w-[30rem] text-[clamp(1.9rem,6vw,3.75rem)] leading-[1.05] font-bold uppercase tracking-[-0.02em]">
+            <TextReveal text="Une expertise " />{" "}
+            <span className="text-white/40">
+              <TextReveal text="de chaque quartier." delay={220} />
+            </span>
+          </p>
+          <Reveal delay={260}>
+            <div className="lg:max-w-10/12">
+              <p className="text-white">
+                <TextReveal
+                  text="Une connaissance approfondie d'Agadir et de ses quartiers pour vous guider vers les adresses qui correspondent réellement à votre projet."
+                  delay={220}
+                  className="text-[clamp(1.05rem,2.2vw,1.5rem)]"
+                />
+              </p>
+              <Link
+                to="/quartiers"
+                className="btn-sheen group mt-6 inline-flex items-center justify-center gap-3 rounded-md bg-gold px-7 py-3.5 text-[0.68rem] tracking-[0.18em] font-medium uppercase text-navy transition-colors duration-500 hover:bg-white"
+              >
+                Tous les quartiers
+                <ArrowRight className="size-4 transition-transform duration-500 group-hover:translate-x-1" />
+              </Link>
             </div>
           </Reveal>
-
-          <div>
-            <SectionHeading
-              eyebrow="Notre expertise"
-              title="Sept métiers, un seul interlocuteur"
-              intro="De la première estimation à la gestion du bien dix ans plus tard, tout se traite en interne."
-            />
-            <div className="mt-10 grid gap-px bg-line sm:grid-cols-2">
-              {services.map((s, i) => (
-                <Reveal key={s.slug} delay={i * 50} className="bg-background p-6">
-                  <p className="text-[0.6rem] tracking-[0.2em] text-gold">
-                    {String(i + 1).padStart(2, "0")}
-                  </p>
-                  <h3 className="display mt-2 text-2xl">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.summary}</p>
-                </Reveal>
-              ))}
-              <Reveal className="flex items-center bg-navy p-6">
-                <Link
-                  to="/services"
-                  className="inline-flex items-center gap-2 text-[0.7rem] tracking-[0.18em] text-gold uppercase"
-                >
-                  Détail des services <ArrowRight className="size-4" />
-                </Link>
-              </Reveal>
-            </div>
-          </div>
         </div>
-      </Section>
-
-      {/* Locations */}
-      <Section tone="navy">
-        <SectionHeading
-          tone="navy"
-          eyebrow="Quartiers"
-          title="Connaître Agadir rue par rue"
-          intro="Chaque secteur a son marché, ses acheteurs et ses pièges. Voici ce que nous en savons."
-          action={
-            <Link
-              to="/quartiers"
-              className="link-underline inline-flex items-center gap-2 text-[0.72rem] tracking-[0.18em] text-gold uppercase"
-            >
-              Tous les quartiers <ArrowUpRight className="size-4" />
-            </Link>
-          }
-        />
-        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {locations.slice(0, 3).map((l, i) => (
-            <Reveal key={l.slug} delay={i * 90}>
-              <Link
-                to="/quartiers/$slug"
-                params={{ slug: l.slug }}
-                className="zoom-frame group relative block h-96"
-              >
-                <img
-                  src={l.image}
-                  alt={l.name}
-                  loading="lazy"
-                  width={1280}
-                  height={960}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/30 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-7">
-                  <h3 className="display text-3xl text-white">{l.name}</h3>
-                  <p className="mt-2 text-xs tracking-[0.14em] text-gold uppercase">
-                    {l.priceRange}
-                  </p>
-                  <p className="mt-3 text-sm text-white/65 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                    {l.intro}
-                  </p>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* Why */}
-      <Section>
-        <div className="grid gap-14 lg:grid-cols-[0.85fr_1.15fr]">
-          <SectionHeading
-            eyebrow="Pourquoi STE MABANIS"
-            title="Une agence qui assume ses conseils"
-          />
-          <div className="grid gap-px bg-line sm:grid-cols-2">
-            {values.map((v, i) => (
-              <Reveal key={v.title} delay={i * 70} className="bg-background p-7">
-                <h3 className="display rule-gold text-2xl">{v.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{v.text}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* Testimonials */}
-      <Section tone="sand">
-        <SectionHeading
-          eyebrow="Ils nous ont fait confiance"
-          title="Paroles de clients"
-          action={
-            <Link
-              to="/temoignages"
-              className="link-underline inline-flex items-center gap-2 text-[0.72rem] tracking-[0.18em] uppercase"
-            >
-              Tous les témoignages <ArrowUpRight className="size-4 text-gold" />
-            </Link>
-          }
-        />
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          {testimonials.slice(0, 3).map((t, i) => (
-            <Reveal key={t.name} delay={i * 90} className="bg-card p-8 shadow-card">
-              <p className="display text-3xl text-gold">“</p>
-              <p className="mt-2 text-[0.98rem] leading-relaxed">{t.quote}</p>
-              <div className="mt-6 border-t border-line pt-4">
-                <p className="text-sm font-medium">{t.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t.role} · {t.location}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* Latest properties */}
-      <Section>
-        <SectionHeading
-          eyebrow="Dernières opportunités"
-          title="Nouveautés du portefeuille"
-          intro="Les biens rentrés récemment, avant leur diffusion la plus large."
-        />
-        <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {latest.map((p, i) => (
-            <Reveal key={p.slug} delay={i * 80}>
-              <PropertyCard property={p} />
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* News */}
-      <Section tone="sand">
-        <SectionHeading
-          eyebrow="Actualités & analyses"
-          title="Comprendre le marché avant d'agir"
-          action={
-            <Link
-              to="/actualites"
-              className="link-underline inline-flex items-center gap-2 text-[0.72rem] tracking-[0.18em] uppercase"
-            >
-              Toutes les publications <ArrowUpRight className="size-4 text-gold" />
-            </Link>
-          }
-        />
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
-          {articles.slice(0, 3).map((a, i) => (
-            <Reveal key={a.slug} delay={i * 90}>
-              <Link
-                to="/actualites/$slug"
-                params={{ slug: a.slug }}
-                className="zoom-frame group block"
-              >
-                <div className="overflow-hidden">
-                  <img
-                    src={a.image}
-                    alt={a.title}
-                    loading="lazy"
-                    width={1280}
-                    height={960}
-                    className="aspect-16/10 w-full object-cover"
-                  />
-                </div>
-                <p className="mt-5 text-[0.62rem] tracking-[0.2em] text-gold uppercase">
-                  {a.category} · {a.readTime}
-                </p>
-                <h3 className="display mt-2 text-2xl">{a.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{a.excerpt}</p>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* CTA */}
-      <section className="relative overflow-hidden bg-navy px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-36">
-        <img
-          src={images.locationAgadir}
-          alt=""
-          aria-hidden
-          loading="lazy"
-          width={1280}
-          height={960}
-          className="absolute inset-0 h-full w-full object-cover opacity-20"
-        />
-        <div className="absolute inset-0 bg-navy/70" />
-        <Reveal className="relative mx-auto max-w-3xl text-center">
-          <p className="eyebrow">Parlons de votre projet</p>
-          <h2 className="display mt-5 text-[clamp(2.25rem,6vw,4.5rem)]">
-            Un café, un plan, une estimation.
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl text-white/70">
-            Que vous achetiez, vendiez ou louiez, la première conversation est gratuite et sans
-            engagement. Elle dure rarement plus de vingt minutes et fait souvent gagner des mois.
-          </p>
-          <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <Link
-              to="/contact"
-              className="bg-gold px-7 py-4 text-[0.7rem] tracking-[0.18em] text-navy uppercase transition-colors hover:bg-white"
-            >
-              Prendre rendez-vous
-            </Link>
-            <Link
-              to="/vendre"
-              className="border border-white/30 px-7 py-4 text-[0.7rem] tracking-[0.18em] uppercase transition-colors hover:border-gold hover:text-gold"
-            >
-              Demander une estimation
-            </Link>
-          </div>
+        <Reveal delay={120} className="mt-12">
+          <QuartiersShowcase />
         </Reveal>
-      </section>
+      </Section>
+
+      {/* 05 Preuve sociale */}
+      <TestimonialsSection />
+
+      {/* 06 Blog & Resources */}
+      <BlogSection />
     </>
   );
 }

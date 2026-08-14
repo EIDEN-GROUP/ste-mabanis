@@ -797,6 +797,12 @@ export function propertiesByAgent(slug: string) {
   return properties.filter((p) => p.agentSlug === slug);
 }
 
+export const socials = [
+  { label: "Instagram", href: "https://instagram.com/stemabanis", icon: "Instagram" },
+  { label: "Threads", href: "https://threads.net/@stemabanis", icon: "Threads" },
+  { label: "Facebook", href: "https://facebook.com/stemabanis", icon: "Facebook" },
+];
+
 export function propertiesByLocation(slug: string) {
   return properties.filter((p) => p.locationSlug === slug);
 }

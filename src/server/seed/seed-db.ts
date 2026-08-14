@@ -239,25 +239,25 @@ function buildMediaRows(propertyId: string, imagePaths: string[]): Insert<"prope
 async function wipe() {
   log("--reset: wiping workspace…");
   const supabase = getSupabase();
-  const order: (keyof Database["public"]["Tables"])[] = [
-    "notifications",
-    "match_sends",
-    "automation_runs",
-    "automation_rules",
-    "featured_properties",
-    "payments",
-    "transactions",
-    "documents",
-    "tasks",
-    "appointments",
-    "activities",
-    "leads",
-    "property_media",
-    "properties",
-    "clients",
+  const order: { table: keyof Database["public"]["Tables"]; pk: string }[] = [
+    { table: "notifications", pk: "id" },
+    { table: "match_sends", pk: "id" },
+    { table: "automation_runs", pk: "id" },
+    { table: "automation_rules", pk: "key" },
+    { table: "featured_properties", pk: "property_id" },
+    { table: "payments", pk: "id" },
+    { table: "transactions", pk: "id" },
+    { table: "documents", pk: "id" },
+    { table: "tasks", pk: "id" },
+    { table: "appointments", pk: "id" },
+    { table: "activities", pk: "id" },
+    { table: "leads", pk: "id" },
+    { table: "property_media", pk: "id" },
+    { table: "properties", pk: "id" },
+    { table: "clients", pk: "id" },
   ];
-  for (const table of order) {
-    const { error } = await supabase.from(table).delete().gt("id", "");
+  for (const { table, pk } of order) {
+    const { error } = await supabase.from(table).delete().not(pk, "is", null);
     if (error) fail(`cannot clear ${table}: ${error.message}`);
   }
   const staffEmails = new Set(siteAgents.map((a) => `${slugEmail(a.name)}@${env().SITE_DOMAIN}`));
