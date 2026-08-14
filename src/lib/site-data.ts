@@ -10,6 +10,7 @@ import locationMarina from "@/assets/location-marina.jpg";
 import locationFounty from "@/assets/location-founty.jpg";
 import editorial1 from "@/assets/editorial-1.jpg";
 import teamOffice from "@/assets/team-office.jpg";
+import testimonialsImage from "@/assets/testimonials.png";
 
 export const images = {
   property1,
@@ -24,6 +25,7 @@ export const images = {
   locationFounty,
   editorial1,
   teamOffice,
+  testimonialsImage,
 };
 
 export const agency = {
