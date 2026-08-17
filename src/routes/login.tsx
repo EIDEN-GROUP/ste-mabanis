@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
-import logo from "@/assets/mabanis-logo.png";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { EASE } from "@/components/motion";
 import { login, verifySession } from "@/lib/admin/auth/session";
 import { images } from "@/lib/site-data";
@@ -103,10 +102,7 @@ function AdminLogin() {
       <Slides index={slide} className="hidden lg:block" />
       <div className="relative h-[24svh] shrink-0 overflow-hidden lg:hidden">
         <Slides index={slide} />
-        <BrandRow className="absolute inset-x-0 top-0 px-5 pt-5" />
       </div>
-
-      <BrandRow className="absolute inset-x-0 top-0 z-20 hidden px-8 pt-8 lg:flex xl:px-12 xl:pt-10" />
 
       {/* Le discours de la vitrine, calé sur la diapositive affichée. */}
       <div className="absolute bottom-0 left-0 z-20 hidden w-[46%] px-8 pb-10 lg:block xl:px-12 xl:pb-14">
@@ -188,7 +184,7 @@ function AdminLogin() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="username"
-                    placeholder="direction@mabanis.au"
+                    placeholder="direction@mabanis.com"
                     className="mt-1.5 h-11 w-full rounded-md border border-line bg-white px-4 text-sm text-navy transition-[border-color,box-shadow] duration-300 outline-none placeholder:text-muted-foreground/60 hover:border-navy/30 focus:border-gold focus:ring-2 focus:ring-gold/25"
                   />
                 </motion.label>
@@ -284,30 +280,6 @@ function AdminLogin() {
           </motion.div>
         </motion.div>
       </div>
-    </div>
-  );
-}
-
-/** Logo à gauche, retour au site à droite — la barre qui coiffe la vitrine. */
-function BrandRow({ className }: { className?: string }) {
-  return (
-    <div className={cn("z-20 flex items-center justify-between gap-4", className)}>
-      <Link to="/" aria-label="STE MABANIS accueil">
-        <img
-          src={logo}
-          alt="STE MABANIS"
-          width={220}
-          height={126}
-          className="w-28 brightness-0 invert sm:w-32"
-        />
-      </Link>
-      <Link
-        to="/"
-        className="group inline-flex items-center gap-2 text-[0.72rem] lg:pr-15 tracking-[0.14em] text-white/70 uppercase transition-colors hover:text-white"
-      >
-        <ArrowLeft className="size-3.5 transition-transform duration-500 group-hover:-translate-x-1" />
-        Retour au site
-      </Link>
     </div>
   );
 }

@@ -27,7 +27,7 @@ const HIDE: Record<string, string> = {
 /**
  * One dataset, two presentations: a real table from `md` up, and a stack of
  * cards below it. The spec asks for cards rather than a squeezed table on
- * phones, so the `<table>` is not merely scrolled — it is replaced.
+ * phones, so the `<table>` is not merely scrolled   it is replaced.
  */
 export function DataTable<T>({
   rows,
@@ -175,7 +175,7 @@ export function DataTable<T>({
                   : undefined
               }
               className={cn(
-                "stagger-in border border-line bg-admin-surface p-4",
+                "stagger-in rounded-md border border-line bg-admin-surface p-4",
                 onRowClick && "cursor-pointer transition-colors active:bg-sand",
               )}
             >

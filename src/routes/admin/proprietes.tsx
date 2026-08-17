@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -30,7 +30,6 @@ import {
   useUpdatePropertyMedia,
   useMovePropertyMedia,
   useRemovePropertyMedia,
-  useDeleteProperty,
 } from "@/lib/admin/queries";
 import type { PropertyQuery } from "@/lib/admin/repository";
 import {
@@ -44,14 +43,14 @@ import { DataTable, type Column } from "@/components/admin/data-table";
 import { PropertyFilters } from "@/components/admin/property-filters";
 import { PropertyStatusBadge } from "@/components/admin/status-badge";
 import { PropertyGallery } from "@/components/admin/property-gallery";
-import { Drawer, Modal, AdminButton, toast, LoadingState } from "@/components/admin/primitives";
+import { Modal, AdminButton, toast, LoadingState } from "@/components/admin/primitives";
 import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/proprietes")({
   head: () => ({
     meta: [
-      { title: "Propriétés — STE MABANIS" },
+      { title: "Propriétés   STE MABANIS" },
       { name: "description", content: "Gestion du portefeuille immobilier." },
     ],
   }),
@@ -127,7 +126,7 @@ function PropertiesPage() {
   const canEdit = useCan("property.edit");
 
   const agentName = useCallback(
-    (id: string) => agents.find((a) => a.id === id)?.name ?? "—",
+    (id: string) => agents.find((a) => a.id === id)?.name ?? " ",
     [agents],
   );
 
@@ -139,7 +138,7 @@ function PropertiesPage() {
       sortValue: (p) => p.title,
       cell: (p) => (
         <div className="flex items-center gap-3">
-          <span className="grid size-11 shrink-0 place-items-center overflow-hidden border border-line bg-sand">
+          <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-md border border-line bg-sand">
             {(() => {
               const cover = p.media.find((m) => m.isCover) ?? p.media[0];
               return cover ? (
@@ -244,7 +243,7 @@ function PropertiesPage() {
         }}
       />
 
-      <PropertyDetailDrawer
+      <PropertyDetailModal
         property={selected}
         agents={agents.map((a) => ({ id: a.id, name: a.name }))}
         canEdit={canEdit}
@@ -256,9 +255,9 @@ function PropertiesPage() {
   );
 }
 
-/* ------------------------------------------------------------ detail drawer */
+/* ------------------------------------------------------------- detail modal */
 
-function PropertyDetailDrawer({
+function PropertyDetailModal({
   property,
   agents,
   canEdit,
@@ -270,58 +269,20 @@ function PropertyDetailDrawer({
   onClose: () => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const setStatus = useSetPropertyStatus();
-  const deleteProperty = useDeleteProperty();
-  const canDelete = useCan("property.delete");
-
-  useEffect(() => {
-    setDeleting(false);
-  }, [property?.id]);
 
   if (!property) return null;
 
   const publicLive = ACTIVE_PROPERTY_STATUSES.includes(property.status);
 
   return (
-    <Drawer
+    <Modal
       open={Boolean(property)}
       onClose={onClose}
       title={property.title}
+      size="lg"
       footer={
         <>
-          {canDelete ? (
-            deleting ? (
-              <AdminButton
-                variant="danger"
-                onClick={() =>
-                  deleteProperty.mutate(property.id, {
-                    onSuccess: () => {
-                      setDeleting(false);
-                      onClose();
-                      toast.success("Bien supprimé");
-                    },
-                    onError: (error) => {
-                      setDeleting(false);
-                      toast.error(
-                        error instanceof Error
-                          ? error.message.replace(/^\[supabase:[^\]]+\]\s*/, "")
-                          : "Suppression impossible",
-                      );
-                    },
-                  })
-                }
-              >
-                <Trash2 className="size-3.5" />
-                Confirmer la suppression
-              </AdminButton>
-            ) : (
-              <AdminButton variant="danger" onClick={() => setDeleting(true)}>
-                <Trash2 className="size-3.5" />
-                Supprimer
-              </AdminButton>
-            )
-          ) : null}
           {canEdit ? (
             <AdminButton variant="outline" onClick={() => setEditing((v) => !v)}>
               <Pencil className="size-3.5" />
@@ -339,7 +300,7 @@ function PropertyDetailDrawer({
       ) : (
         <PropertyDetailView property={property} agents={agents} onSetStatus={setStatus.mutate} />
       )}
-    </Drawer>
+    </Modal>
   );
 }
 
@@ -352,7 +313,7 @@ function PropertyDetailView({
   agents: { id: string; name: string }[];
   onSetStatus: (vars: { id: string; status: PropertyStatus }) => void;
 }) {
-  const agentName = agents.find((a) => a.id === property.agentId)?.name ?? "—";
+  const agentName = agents.find((a) => a.id === property.agentId)?.name ?? " ";
   const publicLive = ACTIVE_PROPERTY_STATUSES.includes(property.status);
 
   return (
@@ -413,7 +374,7 @@ function PropertyDetailView({
           property.status === "under_offer"
             ? "Visible dans les résultats du site public."
             : property.status === "sold" || property.status === "rented"
-              ? "Retiré du site public — l'historique et les rapports sont conservés."
+              ? "Retiré du site public   l'historique et les rapports sont conservés."
               : "Caché du site public."}
         </p>
       </section>
@@ -431,7 +392,7 @@ function PropertyDetailView({
         ].map(({ icon: Icon, label: l, value }) => (
           <div
             key={l}
-            className="flex items-center gap-3 border border-line bg-admin-bg/50 px-3.5 py-3"
+            className="flex items-center gap-3 rounded-md border border-line bg-admin-bg/50 px-3.5 py-3"
           >
             <Icon className="size-4 shrink-0 text-gold" />
             <div className="min-w-0">
@@ -442,7 +403,7 @@ function PropertyDetailView({
             </div>
           </div>
         ))}
-        <div className="col-span-2 flex items-center gap-3 border border-line bg-admin-bg/50 px-3.5 py-3">
+        <div className="col-span-2 flex items-center gap-3 rounded-md border border-line bg-admin-bg/50 px-3.5 py-3">
           <Building2 className="size-4 shrink-0 text-gold" />
           <div className="min-w-0">
             <p className="text-[0.58rem] tracking-[0.14em] text-muted-foreground uppercase">
@@ -452,7 +413,7 @@ function PropertyDetailView({
           </div>
         </div>
         {property.ownerClientId ? (
-          <div className="col-span-2 flex items-center gap-3 border border-line bg-admin-bg/50 px-3.5 py-3">
+          <div className="col-span-2 flex items-center gap-3 rounded-md border border-line bg-admin-bg/50 px-3.5 py-3">
             <Users className="size-4 shrink-0 text-gold" />
             <div className="min-w-0">
               <p className="text-[0.58rem] tracking-[0.14em] text-muted-foreground uppercase">
@@ -556,15 +517,19 @@ function MediaManager({ property }: { property: AdminProperty }) {
       {grouped.length ? (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {grouped.map((m, idx) => (
-            <li key={m.id} className="group relative border border-line bg-admin-bg/50">
+            <li key={m.id} className="group relative rounded-md border border-line bg-admin-bg/50">
               {m.kind === "video" ? (
-                <video src={m.url} className="aspect-[4/3] w-full bg-sand object-cover" muted />
+                <video
+                  src={m.url}
+                  className="aspect-[4/3] w-full rounded-md bg-sand object-cover"
+                  muted
+                />
               ) : (
                 <img
                   src={m.url}
                   alt={m.label ?? ""}
                   loading="lazy"
-                  className="aspect-[4/3] w-full bg-sand object-cover"
+                  className="aspect-[4/3] w-full rounded-md bg-sand object-cover"
                 />
               )}
               {m.kind === "photo" ? (
@@ -574,7 +539,7 @@ function MediaManager({ property }: { property: AdminProperty }) {
                   aria-label={m.isCover ? "Retirer la couverture" : "Définir comme couverture"}
                   aria-pressed={m.isCover}
                   className={cn(
-                    "absolute top-2 left-2 grid size-8 place-items-center border backdrop-blur transition-colors",
+                    "absolute top-2 left-2 grid size-8 place-items-center rounded-md border backdrop-blur transition-colors",
                     m.isCover
                       ? "border-gold bg-gold text-navy"
                       : "border-white/40 bg-navy/60 text-white/80 hover:bg-navy",
@@ -583,7 +548,7 @@ function MediaManager({ property }: { property: AdminProperty }) {
                   <Star className={cn("size-3.5", m.isCover && "fill-current")} />
                 </button>
               ) : null}
-              <span className="absolute top-2 right-2 border border-line bg-admin-surface/90 px-1.5 py-0.5 text-[0.55rem] tracking-[0.12em] text-muted-foreground uppercase backdrop-blur">
+              <span className="absolute top-2 right-2 rounded-md border border-line bg-admin-surface/90 px-1.5 py-0.5 text-[0.55rem] tracking-[0.12em] text-muted-foreground uppercase backdrop-blur">
                 {KINDS[m.kind].label}
               </span>
 
@@ -644,7 +609,7 @@ function MediaManager({ property }: { property: AdminProperty }) {
                     value={editingLabel}
                     onChange={(e) => setEditingLabel(e.target.value)}
                     placeholder="Libellé"
-                    className="h-9 min-w-0 flex-1 border border-line bg-admin-surface px-2 text-sm outline-none focus:border-gold"
+                    className="h-9 min-w-0 flex-1 rounded-md border border-line bg-admin-surface px-2 text-sm outline-none focus:border-gold"
                   />
                   <AdminButton className="min-h-9 px-3" type="submit">
                     OK
@@ -655,8 +620,8 @@ function MediaManager({ property }: { property: AdminProperty }) {
           ))}
         </ul>
       ) : (
-        <p className="border border-dashed border-line px-4 py-6 text-center text-xs text-muted-foreground">
-          Aucun élément — ajoutez des {KINDS[kind].label.toLowerCase()} ci-dessous.
+        <p className="rounded-md border border-dashed border-line px-4 py-6 text-center text-xs text-muted-foreground">
+          Aucun élément   ajoutez des {KINDS[kind].label.toLowerCase()} ci-dessous.
         </p>
       )}
 
@@ -672,7 +637,7 @@ function MediaManager({ property }: { property: AdminProperty }) {
           void handleFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "flex flex-col items-center gap-2 border border-dashed px-4 py-8 text-center transition-colors",
+          "flex flex-col items-center gap-2 rounded-md border border-dashed px-4 py-8 text-center transition-colors",
           dragging ? "border-gold bg-gold/5" : "border-line",
         )}
       >
@@ -689,7 +654,7 @@ function MediaManager({ property }: { property: AdminProperty }) {
         </p>
         <p className="text-[0.65rem] text-muted-foreground/70">
           {kind === "photo"
-            ? "JPG, PNG, WebP — recadrées à 1600 px"
+            ? "JPG, PNG, WebP   recadrées à 1600 px"
             : kind === "video"
               ? "MP4, WebM"
               : "PDF, PNG, JPG"}
@@ -827,7 +792,7 @@ function PropertyFormModal({
         onChange={(e) => onChange(e.target.value)}
         required={opts.required}
         placeholder={opts.placeholder}
-        className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none transition-colors focus:border-gold"
+        className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none transition-colors focus:border-gold"
       />
     </label>
   );
@@ -839,7 +804,7 @@ function PropertyFormModal({
       title={property ? "Modifier le bien" : "Nouveau bien"}
       description={
         property
-          ? `${property.reference} — la fiche s'enregistre en direct.`
+          ? `${property.reference}   la fiche s'enregistre en direct.`
           : "La fiche reste en brouillon tant que vous ne la publiez pas."
       }
       size="lg"
@@ -908,7 +873,7 @@ function PropertyFormModal({
           <select
             value={form.status}
             onChange={(e) => set("status", e.target.value as PropertyStatus)}
-            className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
           >
             {PROPERTY_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -925,7 +890,7 @@ function PropertyFormModal({
           <select
             value={form.agentId}
             onChange={(e) => set("agentId", e.target.value)}
-            className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
           >
             {(agents ?? []).map((a) => (
               <option key={a.id} value={a.id}>
@@ -943,7 +908,7 @@ function PropertyFormModal({
             value={form.features}
             onChange={(e) => set("features", e.target.value)}
             placeholder="Piscine, Jardin, Vue mer, Garage…"
-            className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
           />
         </label>
 
@@ -956,12 +921,12 @@ function PropertyFormModal({
             onChange={(e) => set("description", e.target.value)}
             rows={5}
             placeholder="Atouts du bien, environnement, potentiel…"
-            className="border border-line bg-admin-bg/40 px-3 py-2.5 text-sm outline-none focus:border-gold"
+            className="rounded-md border border-line bg-admin-bg/40 px-3 py-2.5 text-sm outline-none focus:border-gold"
           />
         </label>
       </div>
 
-      <p className="mt-5 flex items-start gap-2 border border-line bg-admin-bg/50 px-3.5 py-3 text-xs text-muted-foreground">
+      <p className="mt-5 flex items-start gap-2 rounded-md border border-line bg-admin-bg/50 px-3.5 py-3 text-xs text-muted-foreground">
         <Building2 className="mt-0.5 size-3.5 shrink-0 text-gold" />
         {form.status === "draft" || form.status === "archived"
           ? "Ce statut masque le bien du site public."

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, ChevronLeft, ChevronRight, CheckCircle2, Circle, Trash2 } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, CheckCircle2, Circle } from "lucide-react";
 import {
   transactionsQuery,
   clientsQuery,
@@ -11,25 +11,17 @@ import {
   useMoveTransactionStage,
   useAddPayment,
   useMarkPaymentPaid,
-  useDeleteTransaction,
 } from "@/lib/admin/queries";
 import { TRANSACTION_STAGES, type Transaction, type TransactionStage } from "@/lib/admin/types";
 import { formatDate, formatMoney, label, TRANSACTION_STAGE_LABELS } from "@/lib/admin/format";
-import {
-  StatCard,
-  Drawer,
-  Modal,
-  AdminButton,
-  EmptyState,
-  toast,
-} from "@/components/admin/primitives";
+import { StatCard, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
 import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/transactions")({
   head: () => ({
     meta: [
-      { title: "Transactions — STE MABANIS" },
+      { title: "Transactions   STE MABANIS" },
       { name: "description", content: "Suivi des transactions immobilières." },
     ],
   }),
@@ -100,7 +92,7 @@ function TransactionsPage() {
         <div>
           <p className="eyebrow">Pipeline des transactions</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            De l'intérêt à la clôture — cliquez sur un dossier pour le détailler.
+            De l'intérêt à la clôture   cliquez sur un dossier pour le détailler.
           </p>
         </div>
         {canManage ? (
@@ -134,7 +126,7 @@ function TransactionsPage() {
                           key={t.id}
                           type="button"
                           onClick={() => setSelectedId(t.id)}
-                          className="group border border-line bg-admin-surface p-3.5 text-left transition-colors hover:border-gold/60"
+                          className="group rounded-md border border-line bg-admin-surface p-3.5 text-left transition-colors hover:border-gold/60"
                         >
                           <p className="text-[0.6rem] tracking-[0.14em] text-muted-foreground uppercase">
                             {t.reference}
@@ -159,7 +151,7 @@ function TransactionsPage() {
         </div>
       </div>
 
-      <TransactionDrawer
+      <TransactionModal
         transaction={selected}
         property={selected ? (propertiesById.get(selected.propertyId) ?? null) : null}
         buyer={selected ? (clientsById.get(selected.buyerClientId) ?? null) : null}
@@ -184,7 +176,7 @@ function TransactionsPage() {
 
 /* --------------------------------------------------------- transaction drawer */
 
-function TransactionDrawer({
+function TransactionModal({
   transaction,
   property,
   buyer,
@@ -207,13 +199,6 @@ function TransactionDrawer({
   const moveStage = useMoveTransactionStage();
   const addPayment = useAddPayment();
   const markPaid = useMarkPaymentPaid();
-  const deleteTransaction = useDeleteTransaction();
-  const canDelete = useCan("transaction.delete");
-  const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    setDeleting(false);
-  }, [transaction?.id]);
 
   if (!transaction) return null;
 
@@ -227,44 +212,11 @@ function TransactionDrawer({
   };
 
   return (
-    <Drawer
+    <Modal
       open
       onClose={onClose}
       title={transaction.reference}
       footer={[
-        ...(canDelete
-          ? [
-              deleting ? (
-                <AdminButton
-                  key="del-confirm"
-                  variant="danger"
-                  onClick={() =>
-                    deleteTransaction.mutate(transaction.id, {
-                      onSuccess: () => {
-                        setDeleting(false);
-                        onClose();
-                        toast.success("Transaction supprimée");
-                      },
-                      onError: (error) => {
-                        setDeleting(false);
-                        toast.error(
-                          error instanceof Error
-                            ? error.message.replace(/^\[supabase:[^\]]+\]\s*/, "")
-                            : "Suppression impossible",
-                        );
-                      },
-                    })
-                  }
-                >
-                  <Trash2 className="size-3.5" /> Confirmer
-                </AdminButton>
-              ) : (
-                <AdminButton key="del" variant="danger" onClick={() => setDeleting(true)}>
-                  <Trash2 className="size-3.5" /> Supprimer
-                </AdminButton>
-              ),
-            ]
-          : []),
         <AdminButton
           key="back"
           variant="outline"
@@ -290,9 +242,9 @@ function TransactionDrawer({
             </span>
             <span className="tabular-nums">{progress} %</span>
           </div>
-          <div className="mt-2 h-1.5 bg-line">
+          <div className="mt-2 h-1.5 rounded-sm bg-line">
             <div
-              className="h-full bg-gold transition-[width] duration-500"
+              className="h-full rounded-sm bg-gold transition-[width] duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -317,15 +269,15 @@ function TransactionDrawer({
           </div>
           <div className="flex gap-3">
             <dt className="w-24 shrink-0 text-xs text-muted-foreground uppercase">Acheteur</dt>
-            <dd className="text-navy">{buyer ? `${buyer.firstName} ${buyer.lastName}` : "—"}</dd>
+            <dd className="text-navy">{buyer ? `${buyer.firstName} ${buyer.lastName}` : " "}</dd>
           </div>
           <div className="flex gap-3">
             <dt className="w-24 shrink-0 text-xs text-muted-foreground uppercase">Vendeur</dt>
-            <dd className="text-navy">{seller ? `${seller.firstName} ${seller.lastName}` : "—"}</dd>
+            <dd className="text-navy">{seller ? `${seller.firstName} ${seller.lastName}` : " "}</dd>
           </div>
           <div className="flex gap-3">
             <dt className="w-24 shrink-0 text-xs text-muted-foreground uppercase">Agent</dt>
-            <dd className="text-navy">{agent?.name ?? "—"}</dd>
+            <dd className="text-navy">{agent?.name ?? " "}</dd>
           </div>
           <div className="flex gap-3">
             <dt className="w-24 shrink-0 text-xs text-muted-foreground uppercase">Montant</dt>
@@ -361,7 +313,7 @@ function TransactionDrawer({
                 <li
                   key={p.id}
                   className={cn(
-                    "flex items-center gap-3 border border-line px-3 py-2.5",
+                    "flex items-center gap-3 rounded-md border border-line px-3 py-2.5",
                     paid && "bg-sand/60 opacity-80",
                   )}
                 >
@@ -388,7 +340,7 @@ function TransactionDrawer({
                       onClick={() =>
                         markPaid.mutate({ transactionId: transaction.id, paymentId: p.id })
                       }
-                      className="border border-line px-2.5 py-1.5 text-[0.6rem] tracking-[0.12em] text-navy uppercase transition-colors hover:border-gold"
+                      className="rounded-md border border-line px-2.5 py-1.5 text-[0.6rem] tracking-[0.12em] text-navy uppercase transition-colors hover:border-gold"
                     >
                       Encaisser
                     </button>
@@ -401,7 +353,7 @@ function TransactionDrawer({
 
         {addingPayment ? (
           <form
-            className="space-y-3 border border-line p-4"
+            className="space-y-3 rounded-md border border-line p-4"
             onSubmit={(e) => {
               e.preventDefault();
               const amt = Number(amount);
@@ -423,7 +375,7 @@ function TransactionDrawer({
               <input
                 value={labelPay}
                 onChange={(e) => setLabelPay(e.target.value)}
-                className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+                className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
               />
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -433,7 +385,7 @@ function TransactionDrawer({
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+                  className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
                 />
               </label>
               <label className="flex flex-col gap-1.5">
@@ -442,7 +394,7 @@ function TransactionDrawer({
                   type="date"
                   value={dueAt}
                   onChange={(e) => setDueAt(e.target.value)}
-                  className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+                  className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
                 />
               </label>
             </div>
@@ -454,7 +406,7 @@ function TransactionDrawer({
           </AdminButton>
         )}
       </div>
-    </Drawer>
+    </Modal>
   );
 }
 
@@ -494,7 +446,7 @@ function TransactionFormModal({
   };
 
   const fieldCls =
-    "h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold";
+    "h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold";
 
   return (
     <Modal
@@ -554,7 +506,7 @@ function TransactionFormModal({
               onChange={(e) => setSellerClientId(e.target.value)}
               className={fieldCls}
             >
-              <option value="">—</option>
+              <option value=""> </option>
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.firstName} {c.lastName}
@@ -569,7 +521,7 @@ function TransactionFormModal({
               onChange={(e) => setAgentId(e.target.value)}
               className={fieldCls}
             >
-              <option value="">—</option>
+              <option value=""> </option>
               {agents.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name}

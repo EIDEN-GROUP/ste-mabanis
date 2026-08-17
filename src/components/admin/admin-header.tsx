@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, Check, ChevronDown, Menu, Search, UserRound } from "lucide-react";
+import { Bell, Check, ChevronDown, LogOut, Menu, Search, UserRound } from "lucide-react";
+import { logout } from "@/lib/admin/auth/session";
 import { notificationsQuery } from "@/lib/admin/queries";
 import { allNavItemsFor, pathAllowedFor } from "@/lib/admin/nav";
 import { useAgentsForRole, useSession } from "@/lib/admin/session";
-import { STAFF_ROLES, type StaffRole } from "@/lib/admin/types";
+import { STAFF_ROLES, type RoleInfo, type StaffRole } from "@/lib/admin/types";
 import { toast } from "@/components/admin/primitives";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,27 @@ function useCurrentTitle() {
   return match?.label ?? "Administration";
 }
 
+/** Une ligne d'espace de travail : point, libellé, accroche, coche si actif. */
+function RoleRow({ info, active }: { info: RoleInfo; active: boolean }) {
+  return (
+    <>
+      <span
+        className={cn(
+          "mt-1.5 size-2 shrink-0 rounded-full",
+          active ? "bg-gold" : "bg-muted-foreground/40",
+        )}
+      />
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2 text-sm font-medium text-navy">
+          {info.label}
+          {active ? <Check className="size-3.5 text-gold" /> : null}
+        </span>
+        <span className="block text-xs text-muted-foreground">{info.tagline}</span>
+      </span>
+    </>
+  );
+}
+
 export function AdminHeader({
   onOpenNotifications,
   onOpenMenu,
@@ -30,7 +52,7 @@ export function AdminHeader({
   const title = useCurrentTitle();
   const { data = [] } = useQuery(notificationsQuery());
   const unread = data.filter((n) => !n.read).length;
-  const { role, roleInfo, agentId, switchRole, switchAgent, roleLocked, name } = useSession();
+  const { role, roleInfo, agentId, switchRole, switchAgent } = useSession();
   const agents = useAgentsForRole("commercial");
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -60,7 +82,7 @@ export function AdminHeader({
       const first = allNavItemsFor(next)[0];
       if (first) void navigate({ to: first.to });
     }
-    toast.success("Espace activé", `${STAFF_ROLES[next].label} — ${STAFF_ROLES[next].tagline}.`);
+    toast.success("Espace activé", `${STAFF_ROLES[next].label}   ${STAFF_ROLES[next].tagline}.`);
   };
 
   const pickAgent = (id: string) => {
@@ -77,7 +99,7 @@ export function AdminHeader({
         type="button"
         onClick={onOpenMenu}
         aria-label="Ouvrir le menu"
-        className="grid size-10 shrink-0 place-items-center border border-line text-navy transition-colors hover:border-gold lg:hidden"
+        className="grid size-10 shrink-0 place-items-center rounded-md border border-line text-navy transition-colors hover:border-gold lg:hidden"
       >
         <Menu className="size-4.5" />
       </button>
@@ -96,13 +118,13 @@ export function AdminHeader({
           type="search"
           placeholder="Rechercher…"
           aria-label="Rechercher"
-          className="h-10 w-52 border border-line bg-background pr-3 pl-9 text-sm transition-[width,border-color] duration-300 outline-none placeholder:text-muted-foreground focus:w-72 focus:border-gold lg:w-64 lg:focus:w-80"
+          className="h-10 w-52 rounded-md border border-line bg-background pr-3 pl-9 text-sm transition-[width,border-color] duration-300 outline-none placeholder:text-muted-foreground focus:w-72 focus:border-gold lg:w-64 lg:focus:w-80"
         />
       </label>
       <button
         type="button"
         aria-label="Rechercher"
-        className="grid size-10 shrink-0 place-items-center border border-line text-navy transition-colors hover:border-gold md:hidden"
+        className="grid size-10 shrink-0 place-items-center rounded-md border border-line text-navy transition-colors hover:border-gold md:hidden"
       >
         <Search className="size-4" />
       </button>
@@ -112,41 +134,41 @@ export function AdminHeader({
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          aria-label={`Mon espace : ${name ?? roleInfo.label}`}
-          className="flex h-10 items-center gap-2 border border-line bg-admin-surface px-3 text-sm transition-colors hover:border-gold"
+          aria-label={`Mon espace : ${roleInfo.label}`}
+          className="flex h-10 items-center gap-2 rounded-md border border-line bg-admin-surface px-3 text-sm transition-colors hover:border-gold"
         >
           <span className="size-2 shrink-0 rounded-full bg-gold" />
-          <span className="hidden max-w-[10rem] truncate text-navy sm:block">
-            {roleLocked && name ? name : roleInfo.label}
-          </span>
-          <ChevronDown className={cn("size-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
+          <span className="hidden max-w-[10rem] truncate text-navy sm:block">{roleInfo.label}</span>
+          <ChevronDown
+            className={cn(
+              "size-3.5 text-muted-foreground transition-transform",
+              open && "rotate-180",
+            )}
+          />
         </button>
 
         {open ? (
-          <div className="absolute right-0 z-50 mt-2 w-[21rem] border border-line bg-admin-surface shadow-panel">
+          // overflow-hidden so the tinted rows and the footer band stop at the corner.
+          <div className="absolute right-0 z-50 mt-2 w-[21rem] overflow-hidden rounded-md border border-line bg-admin-surface shadow-panel">
             <div className="border-b border-line px-4 py-3">
               <p className="text-[0.58rem] tracking-[0.2em] text-muted-foreground uppercase">
                 Mon espace de travail
               </p>
-              {roleLocked ? (
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Connecté en tant que <span className="font-medium text-navy">{name}</span> —{" "}
-                  {roleInfo.label}
-                </p>
-              ) : (
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Choisissez un rôle pour voir ses accès et ses actions.
-                </p>
-              )}
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {role === "directrice"
+                  ? "Choisissez un rôle pour voir ses accès et ses actions."
+                  : "Vous êtes connecté(e) à cet espace."}
+              </p>
             </div>
 
-            {!roleLocked ? (
-              <ul className="max-h-72 overflow-y-auto">
-                {ROLE_ORDER.map((r) => {
-                  const info = STAFF_ROLES[r];
-                  const active = r === role;
-                  return (
-                    <li key={r}>
+            <ul className="scrollbar-gold max-h-72 overflow-y-auto [--scroll-track:var(--admin-surface)]">
+              {ROLE_ORDER.filter((r) => r === role || role === "directrice").map((r) => {
+                const info = STAFF_ROLES[r];
+                const active = r === role;
+                const switchable = role === "directrice";
+                return (
+                  <li key={r}>
+                    {switchable ? (
                       <button
                         type="button"
                         onClick={() => pickRole(r)}
@@ -155,25 +177,22 @@ export function AdminHeader({
                           active ? "bg-sand" : "hover:bg-sand/60",
                         )}
                       >
-                        <span
-                          className={cn(
-                            "mt-1.5 size-2 shrink-0 rounded-full",
-                            active ? "bg-gold" : "bg-muted-foreground/40",
-                          )}
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-2 text-sm font-medium text-navy">
-                            {info.label}
-                            {active ? <Check className="size-3.5 text-gold" /> : null}
-                          </span>
-                          <span className="block text-xs text-muted-foreground">{info.tagline}</span>
-                        </span>
+                        <RoleRow info={info} active={active} />
                       </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
+                    ) : (
+                      <div
+                        className={cn(
+                          "flex w-full items-start gap-3 px-4 py-3 text-left",
+                          active && "bg-sand",
+                        )}
+                      >
+                        <RoleRow info={info} active={active} />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
 
             {role === "commercial" ? (
               <div className="border-t border-line px-4 py-3">
@@ -187,7 +206,7 @@ export function AdminHeader({
                         type="button"
                         onClick={() => pickAgent(a.id)}
                         className={cn(
-                          "flex w-full items-center gap-2.5 px-2 py-1.5 text-sm transition-colors",
+                          "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors",
                           agentId === a.id
                             ? "bg-sand text-navy"
                             : "text-muted-foreground hover:bg-sand/60 hover:text-navy",
@@ -216,6 +235,20 @@ export function AdminHeader({
                 ))}
               </ul>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                // La déconnexion efface le cookie de session côté serveur ; on
+                // recharge franchement vers /login plutôt que de naviguer en
+                // interne pour vider le cache React Query et le contexte.
+                void logout().then(() => window.location.assign("/login"));
+              }}
+              className="flex w-full items-center gap-2.5 border-t border-line px-4 py-3 text-sm text-navy transition-colors hover:bg-sand"
+            >
+              <LogOut className="size-3.5 text-gold" />
+              Se déconnecter
+            </button>
           </div>
         ) : null}
       </div>
@@ -224,11 +257,11 @@ export function AdminHeader({
         type="button"
         onClick={onOpenNotifications}
         aria-label={`Notifications${unread ? ` (${unread} non lues)` : ""}`}
-        className="relative grid size-10 shrink-0 place-items-center border border-line text-navy transition-colors hover:border-gold"
+        className="relative grid size-10 shrink-0 place-items-center rounded-full border border-line text-navy transition-colors hover:border-gold hover:bg-gold hover:text-white"
       >
         <Bell className="size-4" />
         {unread > 0 ? (
-          <span className="absolute -top-1.5 -right-1.5 grid size-[1.15rem] place-items-center bg-gold text-[0.6rem] font-medium text-navy tabular-nums">
+          <span className="absolute -top-1.5 -right-1.5 grid size-[1.15rem] place-items-center rounded-md bg-gold text-[0.6rem] font-medium text-navy tabular-nums">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}

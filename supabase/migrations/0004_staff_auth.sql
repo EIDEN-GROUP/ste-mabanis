@@ -18,3 +18,12 @@ alter table profiles
   add column if not exists bio text,
   add column if not exists languages text[],
   add column if not exists years integer;
+
+-- The workspace roles used by the back office (see src/lib/admin/types.ts).
+-- 0001 created the enum with only agent/manager/admin; the login gate maps
+-- every staff account to one of these three workspaces. Idempotent, and kept
+-- in this migration (not 0005) because a freshly added enum value cannot be
+-- used in the same transaction that adds it.
+alter type staff_role add value if not exists 'directrice';
+alter type staff_role add value if not exists 'commercial';
+alter type staff_role add value if not exists 'assistant';

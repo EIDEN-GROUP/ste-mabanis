@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/admin/rapports")({
   head: () => ({
     meta: [
-      { title: "Rapports — STE MABANIS" },
+      { title: "Rapports   STE MABANIS" },
       { name: "description", content: "Rapports immobiliers exportables en CSV et PDF." },
     ],
   }),
@@ -81,7 +81,7 @@ function ReportsPage() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value || defaultFrom)}
-              className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+              className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
             />
           </label>
           <label className="flex flex-col gap-1.5">
@@ -90,7 +90,7 @@ function ReportsPage() {
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value || defaultTo)}
-              className="h-11 border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
+              className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
             />
           </label>
           <button
@@ -99,7 +99,7 @@ function ReportsPage() {
               setFrom(defaultFrom);
               setTo(defaultTo);
             }}
-            className="grid h-11 place-items-center border border-line px-3 text-muted-foreground transition-colors hover:border-gold hover:text-gold"
+            className="grid h-11 place-items-center rounded-md border border-line px-3 text-muted-foreground transition-colors hover:border-gold hover:text-gold"
             aria-label="Réinitialiser les dates"
           >
             <RotateCcw className="size-4" />
@@ -152,7 +152,7 @@ function ReportsPage() {
                 <div>
                   <h2 className="display text-xl">{TAB_TITLES[tab]}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {formatDate(report.from)} — {formatDate(report.to)}
+                    {formatDate(report.from)}   {formatDate(report.to)}
                   </p>
                 </div>
               </div>
@@ -173,7 +173,7 @@ function ReportsPage() {
             )}
           </Panel>
 
-          <Panel>
+          <Panel className="overflow-hidden">
             <header className="border-b border-line px-5 py-4">
               <h2 className="display text-xl">Détail</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -213,7 +213,7 @@ function ReportsPage() {
           </Panel>
         </>
       ) : (
-        <div className="border border-line bg-admin-surface px-6 py-16 text-center text-sm text-muted-foreground">
+        <div className="rounded-md border border-line bg-admin-surface px-6 py-16 text-center text-sm text-muted-foreground">
           Chargement du rapport…
         </div>
       )}
@@ -264,7 +264,7 @@ function printReport(report?: Report) {
   const headers = report.table.columns.map((c) => `<th>${escapeHtml(c)}</th>`).join("");
   const body = [
     `<h1>${escapeHtml(report.title)}</h1>`,
-    `<p class="period">STE MABANIS · ${escapeHtml(formatDate(report.from))} — ${escapeHtml(formatDate(report.to))}</p>`,
+    `<p class="period">STE MABANIS · ${escapeHtml(formatDate(report.from))}   ${escapeHtml(formatDate(report.to))}</p>`,
     `<table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`,
     `<p class="foot">Généré le ${escapeHtml(formatDate(new Date().toISOString()))}</p>`,
   ].join("");

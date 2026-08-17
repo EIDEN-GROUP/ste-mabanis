@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { X, ArrowUpRight } from "lucide-react";
 import logo from "@/assets/mabanis-logo.png";
+import { setScrollLocked } from "@/lib/scroll-lock";
 import { bottomNavItemsFor, navGroupsFor } from "@/lib/admin/nav";
 import { useSession } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
@@ -18,14 +19,15 @@ export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () =
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Même gel que le menu du site : `overflow: hidden` seul laisse Safari
+    // faire glisser la page sous le tiroir.
+    setScrollLocked(true);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      setScrollLocked(false);
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
@@ -46,7 +48,7 @@ export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () =
         aria-label="Menu administration"
         aria-hidden={!open}
         className={cn(
-          "fixed inset-y-0 left-0 z-[90] flex w-[min(20rem,85vw)] flex-col bg-admin-sidebar text-admin-sidebar-fg transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] motion-reduce:transition-none lg:hidden",
+          "fixed top-0 left-0 z-[90] flex h-[100dvh] w-[min(20rem,85vw)] flex-col rounded-r-md bg-admin-sidebar text-admin-sidebar-fg transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] motion-reduce:transition-none lg:hidden",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -62,13 +64,13 @@ export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () =
             type="button"
             onClick={onClose}
             aria-label="Fermer le menu"
-            className="grid size-9 place-items-center border border-white/20 transition-colors hover:border-gold"
+            className="grid size-9 place-items-center rounded-md border border-white/20 transition-colors hover:border-gold"
           >
             <X className="size-4" />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4">
+        <nav className="scrollbar-gold flex-1 overflow-y-auto py-4">
           {groups.map((group) => (
             <div key={group.title} className="mb-5">
               <p className="px-5 pb-2 text-[0.58rem] tracking-[0.22em] text-admin-sidebar-muted/70 uppercase">
@@ -84,7 +86,7 @@ export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () =
                     />
                     <span className="flex-1 truncate">{item.label}</span>
                     {!item.ready ? (
-                      <span className="border border-admin-sidebar-muted/40 px-1.5 py-0.5 text-[0.55rem] tracking-[0.14em] uppercase">
+                      <span className="rounded-md border border-admin-sidebar-muted/40 px-1.5 py-0.5 text-[0.55rem] tracking-[0.14em] uppercase">
                         P{item.phase}
                       </span>
                     ) : null}
@@ -111,20 +113,20 @@ export function AdminNavDrawer({ open, onClose }: { open: boolean; onClose: () =
           ))}
         </nav>
 
-        <Link
-          to="/"
+        <a
+          href="/"
           onClick={onClose}
           className="flex min-h-12 shrink-0 items-center gap-3 border-t border-white/10 px-5 py-3 text-sm text-admin-sidebar-muted transition-colors hover:text-gold"
         >
           <ArrowUpRight className="size-4" />
           Voir le site public
-        </Link>
+        </a>
       </div>
     </>
   );
 }
 
-/** Bottom bar — the four most-used destinations, thumb height. */
+/** Bottom bar   the four most-used destinations, thumb height. */
 export function AdminBottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { role } = useSession();
