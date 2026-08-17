@@ -16,6 +16,10 @@ dist-ssr
 .nitro
 *.local
 
+# Vercel (nitro vercel preset build artifact)
+.vercel/
+.vercel/output/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

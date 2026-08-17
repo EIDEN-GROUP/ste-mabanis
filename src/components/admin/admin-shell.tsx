@@ -32,7 +32,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen bg-admin-bg">
+    <div className="font-admin flex min-h-screen bg-admin-bg">
       <AdminSidebar
         collapsed={collapsed}
         onToggle={toggleRail}
