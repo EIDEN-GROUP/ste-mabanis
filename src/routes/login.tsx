@@ -158,13 +158,13 @@ function AdminLogin() {
 
       <div className="flex lg:min-h-screen items-center lg:pr-20">
         <motion.div
-          className="scrollbar-gold relative z-10 flex flex-1 flex-col overflow-y-auto bg-white [--scroll-track:var(--color-white)] lg:ml-auto lg:w-[44%] lg:max-w-[38rem] lg:flex-none lg:rounded-lg"
+          className="scrollbar-gold relative z-10 flex flex-1 flex-col overflow-y-auto overflow-hidden rounded-2xl border border-white/20 bg-white/30 backdrop-blur-xl shadow-elegant [--scroll-track:var(--color-white)] lg:ml-auto lg:w-[44%] lg:max-w-[38rem] lg:flex-none"
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: EASE }}
         >
           <motion.div
-            className="flex flex-col justify-center px-5 py-8 sm:px-8 lg:px-10 lg:py-10"
+            className="flex flex-col justify-center px-6 py-8 sm:p-8 lg:p-10"
             variants={card}
             initial="hidden"
             animate="show"
@@ -189,7 +189,7 @@ function AdminLogin() {
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="username"
                     placeholder="direction@mabanis.com"
-                    className="mt-1.5 h-11 w-full rounded-md border border-line bg-white px-4 text-sm text-navy transition-[border-color,box-shadow] duration-300 outline-none placeholder:text-muted-foreground/60 hover:border-navy/30 focus:border-gold focus:ring-2 focus:ring-gold/25"
+                    className="mt-1.5 h-12 w-full rounded-xl border border-white/30 bg-white/50 px-5 text-sm text-navy backdrop-blur-sm transition-[border-color,box-shadow] duration-300 outline-none placeholder:text-navy/40 focus:border-gold focus:ring-2 focus:ring-gold/25"
                   />
                 </motion.label>
 
@@ -202,13 +202,13 @@ function AdminLogin() {
                       onChange={(e) => setPassword(e.target.value)}
                       autoComplete="current-password"
                       placeholder="••••••••"
-                      className="h-11 w-full rounded-md border border-line bg-white pr-12 pl-4 text-sm text-navy transition-[border-color,box-shadow] duration-300 outline-none placeholder:text-muted-foreground/60 hover:border-navy/30 focus:border-gold focus:ring-2 focus:ring-gold/25"
+                      className="h-12 w-full rounded-xl border border-white/30 bg-white/50 pr-12 pl-5 text-sm text-navy backdrop-blur-sm transition-[border-color,box-shadow] duration-300 outline-none placeholder:text-navy/40 focus:border-gold focus:ring-2 focus:ring-gold/25"
                     />
                     <button
                       type="button"
                       onClick={() => setReveal((v) => !v)}
                       aria-label={reveal ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                      className="absolute top-1/2 right-3 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground transition-colors hover:text-navy"
+                      className="absolute top-1/2 right-3 grid size-8 -translate-y-1/2 place-items-center rounded-md text-navy/50 transition-colors hover:text-navy"
                     >
                       {reveal ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
@@ -258,7 +258,7 @@ function AdminLogin() {
                   whileHover={busy ? {} : { y: -2 }}
                   whileTap={busy ? {} : { scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 28 }}
-                  className="btn-sheen group mt-5 flex h-11 w-full items-center justify-center gap-2.5 rounded-md bg-navy text-[0.82rem] font-medium text-white transition-colors duration-500 hover:bg-gold hover:text-navy disabled:cursor-not-allowed disabled:opacity-70"
+                  className="btn-sheen group mt-5 flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-gold text-[0.82rem] font-medium text-navy transition-colors duration-500 hover:bg-navy hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {busy ? (
                     <Loader2 className="size-4 animate-spin" />
