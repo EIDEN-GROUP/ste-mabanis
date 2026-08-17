@@ -4,6 +4,9 @@
   "engines": {
     "node": ">=22.12.0"
   },
+  "overrides": {
+    "@tanstack/router-core": "1.171.22"
+  },
   "sideEffects": false,
   "type": "module",
   "scripts": {
@@ -47,8 +50,8 @@
     "@supabase/supabase-js": "^2.112.2",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.101.1",
-    "@tanstack/react-router": "^1.170.27",
-    "@tanstack/react-start": "^1.168.44",
+    "@tanstack/react-router": "1.170.27",
+    "@tanstack/react-start": "1.168.44",
     "@tanstack/router-plugin": "1.168.23",
     "@types/pg": "^8.21.0",
     "class-variance-authority": "^0.7.1",
