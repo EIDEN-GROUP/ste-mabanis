@@ -26,6 +26,9 @@ alter table profiles
   add column if not exists staff_role staff_role;
 
 -- Create the auth users if they do not exist yet. No-op for existing emails.
+-- Note: no ON CONFLICT (email) target — modern Supabase enforces uniqueness
+-- through an index on lower(email), so a bare ON CONFLICT DO NOTHING is used
+-- (it skips conflicting rows whatever the underlying unique index is).
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
   raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
@@ -64,7 +67,7 @@ values
     '{"provider":"email","providers":["email"]}', '{}', now(), now(),
     '', '', '', ''
   )
-on conflict (email) do nothing;
+on conflict do nothing;
 
 -- Upsert each profile (creates it if missing, refreshes password + role if not).
 insert into profiles (id, name, role, staff_role, email, password_hash, created_at)
