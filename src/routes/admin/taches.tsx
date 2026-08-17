@@ -30,7 +30,13 @@ import type {
 import type { Patch, TaskInput } from "@/lib/admin/repository";
 import { formatDate, label, PRIORITY_LABELS, relativeTime } from "@/lib/admin/format";
 import { SEED_NOW } from "@/lib/admin/seed";
-import { StatCard, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
+import {
+  StatCard,
+  Modal,
+  AdminButton,
+  EmptyState,
+  SearchSelect,
+} from "@/components/admin/primitives";
 import { PriorityBadge } from "@/components/admin/status-badge";
 import { useAgentScope } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
@@ -110,6 +116,23 @@ function TasksPage() {
           hint="Échéance dépassée"
           icon={AlarmClock}
           index={0}
+          detail={{
+            what: "Les tâches non terminées dont la date d'échéance est déjà passée.",
+            how: "On prend les tâches qui ne sont ni terminées ni sans échéance, et on garde celles dont la date limite est antérieure à aujourd'hui. Une tâche sans échéance n'est jamais comptée en retard.",
+            why: "C'est la première colonne à vider chaque matin. Ces tâches portent presque toujours sur un client qui attend une réponse : plus elles restent ici, plus le lead refroidit.",
+            rows: [
+              {
+                label: "Dont priorité haute ou urgente",
+                value: String(
+                  overdue.filter((t) => t.priority === "high" || t.priority === "urgent").length,
+                ),
+              },
+              {
+                label: "Dont déjà en cours",
+                value: String(overdue.filter((t) => t.status === "doing").length),
+              },
+            ],
+          }}
         />
         <StatCard
           label="Pour aujourd'hui"
@@ -117,6 +140,11 @@ function TasksPage() {
           hint="À traiter ce jour"
           icon={CalendarClock}
           index={1}
+          detail={{
+            what: "Les tâches ouvertes dont l'échéance tombe aujourd'hui.",
+            how: "Parmi les tâches non terminées, on garde celles dont la date limite est celle du jour. Elles restent dans ce compteur jusqu'à ce qu'elles soient passées en « Terminé » sur le tableau ci-dessous.",
+            why: "C'est l'engagement de la journée. Traité en fin de journée, ce compteur doit être à zéro : ce qui reste bascule automatiquement dans « En retard » demain.",
+          }}
         />
         <StatCard
           label="Ouvertes"
@@ -124,6 +152,15 @@ function TasksPage() {
           hint="À faire + en cours"
           icon={StickyNote}
           index={2}
+          detail={{
+            what: "Toutes les tâches encore actives, quelle que soit leur échéance.",
+            how: "On additionne les colonnes « À faire » et « En cours » du tableau. Les tâches terminées sortent immédiatement de ce compteur.",
+            why: "C'est la charge de travail réelle de l'équipe. Un chiffre qui grimpe sans que « Terminées » ne suive signale que l'on crée des tâches plus vite qu'on ne les traite.",
+            rows: [
+              { label: "À faire", value: String(byStatus.todo.length) },
+              { label: "En cours", value: String(byStatus.doing.length) },
+            ],
+          }}
         />
         <StatCard
           label="Terminées"
@@ -131,6 +168,11 @@ function TasksPage() {
           hint="Au total"
           icon={Check}
           index={3}
+          detail={{
+            what: "Le cumul des tâches passées en « Terminé ».",
+            how: "On compte toutes les tâches au statut « Terminé » depuis la mise en service, sans limite de date. Un commercial ne voit que les siennes.",
+            why: "C'est l'historique du travail accompli. Rapporté au nombre de tâches ouvertes, il donne le rythme réel de traitement de l'équipe.",
+          }}
         />
       </div>
 
@@ -431,20 +473,15 @@ function TaskFormModal({
             className={fieldCls}
           />
         </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Priorité</span>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as TaskPriority)}
-            className={fieldCls}
-          >
-            {(Object.keys(PRIORITY_LABELS) as TaskPriority[]).map((p) => (
-              <option key={p} value={p}>
-                {label(PRIORITY_LABELS, p)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Priorité"
+          value={priority}
+          onChange={(v) => setPriority(v as TaskPriority)}
+          options={(Object.keys(PRIORITY_LABELS) as TaskPriority[]).map((p) => ({
+            value: p,
+            label: label(PRIORITY_LABELS, p),
+          }))}
+        />
         <label className="flex flex-col gap-1.5">
           <span className="text-xs text-muted-foreground uppercase">Échéance</span>
           <input
@@ -454,53 +491,39 @@ function TaskFormModal({
             className={fieldCls}
           />
         </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Agent</span>
-          <select
-            value={assigneeId}
-            onChange={(e) => setAssigneeId(e.target.value)}
-            className={fieldCls}
-          >
-            <option value=""> </option>
-            {agents.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Rattacher à</span>
-          <select
-            value={entityKind}
-            onChange={(e) => {
-              setEntityKind(e.target.value as typeof entityKind);
-              setEntityId("");
-            }}
-            className={fieldCls}
-          >
-            <option value="none">Aucun</option>
-            <option value="lead">Lead</option>
-            <option value="client">Client</option>
-            <option value="property">Bien</option>
-          </select>
-        </label>
+        <SearchSelect
+          label="Agent"
+          value={assigneeId}
+          onChange={setAssigneeId}
+          clearLabel="Non assigné"
+          placeholder="Non assigné"
+          searchPlaceholder="Nom de l'agent…"
+          options={agents.map((a) => ({ value: a.id, label: a.name }))}
+        />
+        <SearchSelect
+          label="Rattacher à"
+          value={entityKind}
+          onChange={(v) => {
+            setEntityKind(v as typeof entityKind);
+            setEntityId("");
+          }}
+          options={[
+            { value: "none", label: "Aucun" },
+            { value: "lead", label: "Lead" },
+            { value: "client", label: "Client" },
+            { value: "property", label: "Bien" },
+          ]}
+        />
         {entityKind !== "none" ? (
-          <label className="flex flex-col gap-1.5 sm:col-span-2">
-            <span className="text-xs text-muted-foreground uppercase">Élément</span>
-            <select
-              value={entityId}
-              onChange={(e) => setEntityId(e.target.value)}
-              className={fieldCls}
-            >
-              <option value="">Sélectionner…</option>
-              {entityOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SearchSelect
+            className="sm:col-span-2"
+            label="Élément"
+            value={entityId}
+            onChange={setEntityId}
+            placeholder="Sélectionner…"
+            searchPlaceholder="Tapez pour retrouver l'élément…"
+            options={entityOptions.map((o) => ({ value: o.id, label: o.label }))}
+          />
         ) : null}
       </div>
     </Modal>

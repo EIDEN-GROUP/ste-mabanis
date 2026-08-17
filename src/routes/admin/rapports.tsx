@@ -33,6 +33,106 @@ const TAB_TITLES: Record<ReportKey, string> = {
   activity: "Rapport d'activité",
 };
 
+/**
+ * What each report KPI means. Keyed by the label the server sends so a new
+ * indicator simply falls back to the generic explanation below.
+ */
+const KPI_HELP: Record<string, { what: string; how: string; why: string }> = {
+  "Biens créés": {
+    what: "Les biens actuellement au catalogue de l'agence.",
+    how: "On compte les biens dont le statut est « Disponible », « Réservé » ou « Sous offre ». Contrairement aux autres indicateurs de cet écran, celui-ci ne dépend pas de la période choisie : c'est une photo du portefeuille au jour d'aujourd'hui.",
+    why: "C'est ce que l'équipe a réellement à proposer aux acheteurs. La courbe en dessous montre, elle, le rythme des créations semaine par semaine sur la période.",
+  },
+  "Vendus / loués": {
+    what: "Les biens sortis du catalogue parce que l'affaire s'est conclue.",
+    how: "On compte les biens passés au statut « Vendu » ou « Loué » pendant la période.",
+    why: "C'est le débit réel de l'agence. Comparé aux biens créés, il indique si le stock se renouvelle ou s'épuise.",
+  },
+  "Prix moyen (MAD)": {
+    what: "Le prix moyen des biens créés pendant la période.",
+    how: "Somme des prix affichés des biens créés sur la période, divisée par leur nombre. Un seul bien d'exception peut tirer cette moyenne vers le haut.",
+    why: "Il montre le positionnement du portefeuille : monter en gamme se voit ici avant de se voir sur les honoraires.",
+  },
+  Clients: {
+    what: "Les fiches clients créées pendant la période.",
+    how: "On compte les clients dont la date de création tombe dans la période, qu'ils soient acheteurs, vendeurs, locataires ou investisseurs.",
+    why: "C'est la croissance du fichier de l'agence, la base sur laquelle s'appuient les campagnes marketing.",
+  },
+  "Leads créés": {
+    what: "Les opportunités commerciales ouvertes pendant la période.",
+    how: "On compte les leads dont la date de création tombe dans la période, toutes étapes et toutes sources confondues.",
+    why: "C'est le volume d'entrée du pipeline, à lire avec le taux de conversion juste à côté : beaucoup de leads mal qualifiés valent moins que peu de leads chauds.",
+  },
+  "Taux de conversion": {
+    what: "La part des leads de la période qui ont été gagnés.",
+    how: "Nombre de leads passés à l'étape « Gagné » divisé par le nombre de leads créés sur la période, en pourcentage.",
+    why: "C'est l'indicateur d'efficacité commerciale. Il se compare d'une période à l'autre, pas dans l'absolu.",
+  },
+  "Score moyen": {
+    what: "La qualité moyenne des leads de la période, sur 100.",
+    how: "Moyenne des scores des leads créés dans la période. Le score monte avec les échanges, les visites et le budget confirmé.",
+    why: "Un score moyen qui baisse alors que le volume monte signale une source qui apporte du contact peu qualifié.",
+  },
+  Agents: {
+    what: "Le nombre d'agents actifs dans le système.",
+    how: "Tous les comptes agents existants, sans filtre de période.",
+    why: "Sert de dénominateur : les commissions et les visites de la période se lisent par agent.",
+  },
+  Transactions: {
+    what: "Les dossiers de transaction ouverts pendant la période.",
+    how: "On compte les transactions dont la date de création tombe dans la période, clôturées ou non.",
+    why: "C'est le nombre d'affaires réellement engagées, l'étape qui suit un lead gagné.",
+  },
+  "Commissions (MAD)": {
+    what: "Les honoraires portés par les transactions de la période.",
+    how: "Somme des commissions de toutes les transactions créées dans la période, y compris celles encore en cours.",
+    why: "C'est le chiffre d'affaires généré par la période, à ne pas confondre avec l'encaissé qui suit la clôture.",
+  },
+  Visites: {
+    what: "Les visites de biens organisées pendant la période.",
+    how: "On compte les rendez-vous de type « Visite » dont la date tombe dans la période.",
+    why: "La visite est l'étape charnière entre l'intérêt et l'offre : son volume annonce les transactions du mois suivant.",
+  },
+  Actions: {
+    what: "Le total des interactions enregistrées avec les clients.",
+    how: "On compte toutes les entrées de la timeline créées dans la période : appels, e-mails, WhatsApp, visites, offres, notes et changements d'étape.",
+    why: "C'est le niveau d'activité brut de l'équipe. Les cartes suivantes le détaillent par type de contact.",
+  },
+  Appels: {
+    what: "Les appels téléphoniques enregistrés dans la timeline.",
+    how: "On compte les activités de type « Appel » sur la période. Elles sont créées à la main par l'agent après l'appel.",
+    why: "Le téléphone reste le canal qui fait avancer un lead chaud : son volume se lit à côté du nombre de visites obtenues.",
+  },
+  "E-mails": {
+    what: "Les e-mails échangés et consignés dans la timeline.",
+    how: "On compte les activités de type « E-mail » sur la période, envois de sélections de biens compris.",
+    why: "Canal de suivi plus que de conclusion : utile pour vérifier qu'aucun client n'est resté sans nouvelles.",
+  },
+  WhatsApp: {
+    what: "Les échanges WhatsApp consignés dans la timeline.",
+    how: "On compte les activités de type « WhatsApp » sur la période.",
+    why: "C'est souvent le canal le plus réactif au Maroc : un volume élevé accompagne généralement un bon taux de transformation.",
+  },
+  Offres: {
+    what: "Les offres d'achat reçues et enregistrées.",
+    how: "On compte les activités de type « Offre » sur la période.",
+    why: "C'est l'indicateur le plus proche du résultat : chaque offre est une transaction potentielle à la semaine suivante.",
+  },
+};
+
+function kpiDetail(labelText: string, from: string, to: string) {
+  const help = KPI_HELP[labelText];
+  const period = `Période analysée : du ${formatDate(from)} au ${formatDate(to)}. Changez les dates en haut de l'écran pour recalculer.`;
+  if (!help) {
+    return {
+      what: `Indicateur « ${labelText} » du rapport en cours.`,
+      how: period,
+      why: "Utilisez l'export CSV ou l'impression PDF pour conserver cette valeur et la comparer d'une période à l'autre.",
+    };
+  }
+  return { what: help.what, how: `${help.how} ${period}`, why: help.why };
+}
+
 function toYmd(d: Date) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -142,6 +242,7 @@ function ReportsPage() {
                 label={k.label}
                 value={formatKpi(k.label, k.value)}
                 index={i}
+                detail={kpiDetail(k.label, report.from, report.to)}
               />
             ))}
           </div>
@@ -152,7 +253,7 @@ function ReportsPage() {
                 <div>
                   <h2 className="display text-xl">{TAB_TITLES[tab]}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {formatDate(report.from)}   {formatDate(report.to)}
+                    {formatDate(report.from)} {formatDate(report.to)}
                   </p>
                 </div>
               </div>

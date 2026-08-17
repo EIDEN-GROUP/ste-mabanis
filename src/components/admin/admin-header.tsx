@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, Check, ChevronDown, LogOut, Menu, Search, UserRound } from "lucide-react";
+import { Bell, Check, ChevronDown, LogOut, Menu, UserRound } from "lucide-react";
+import { GlobalSearch } from "./global-search";
 import { logout } from "@/lib/admin/auth/session";
 import { notificationsQuery } from "@/lib/admin/queries";
 import { allNavItemsFor, pathAllowedFor } from "@/lib/admin/nav";
@@ -112,22 +113,7 @@ export function AdminHeader({
       </div>
 
       {/* Search collapses to an icon button on small screens. */}
-      <label className="relative hidden items-center md:flex">
-        <Search className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
-        <input
-          type="search"
-          placeholder="Rechercher…"
-          aria-label="Rechercher"
-          className="h-10 w-52 rounded-md border border-line bg-background pr-3 pl-9 text-sm transition-[width,border-color] duration-300 outline-none placeholder:text-muted-foreground focus:w-72 focus:border-gold lg:w-64 lg:focus:w-80"
-        />
-      </label>
-      <button
-        type="button"
-        aria-label="Rechercher"
-        className="grid size-10 shrink-0 place-items-center rounded-md border border-line text-navy transition-colors hover:border-gold md:hidden"
-      >
-        <Search className="size-4" />
-      </button>
+      <GlobalSearch />
 
       <div className="relative shrink-0" ref={panelRef}>
         <button

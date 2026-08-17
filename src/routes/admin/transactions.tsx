@@ -14,7 +14,13 @@ import {
 } from "@/lib/admin/queries";
 import { TRANSACTION_STAGES, type Transaction, type TransactionStage } from "@/lib/admin/types";
 import { formatDate, formatMoney, label, TRANSACTION_STAGE_LABELS } from "@/lib/admin/format";
-import { StatCard, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
+import {
+  StatCard,
+  Modal,
+  AdminButton,
+  EmptyState,
+  SearchSelect,
+} from "@/components/admin/primitives";
 import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +59,12 @@ function TransactionsPage() {
   const commission = open.reduce((s, t) => s + t.commission, 0);
   const closing = transactions.filter((t) => t.stage === "closing").length;
 
+  // Where the open dossiers currently sit, for the KPI explanation modal.
+  const stageRows = TRANSACTION_STAGES.map((s) => ({
+    label: label(TRANSACTION_STAGE_LABELS, s),
+    value: String(open.filter((t) => t.stage === s).length),
+  })).filter((r) => r.value !== "0");
+
   const selected = transactions.find((t) => t.id === selectedId) ?? null;
 
   return (
@@ -64,6 +76,12 @@ function TransactionsPage() {
           hint="Transactions ouvertes"
           icon={Circle}
           index={0}
+          detail={{
+            what: "Les dossiers de vente ou de location encore ouverts.",
+            how: "Une transaction est ouverte tant qu'elle n'a pas de date de clôture. Elle est créée quand un lead est gagné, puis avance étape par étape jusqu'à la clôture.",
+            why: "C'est le nombre de dossiers que l'agence doit mener au bout. Chacun mobilise du temps administratif : compromis, pièces, notaire.",
+            rows: stageRows,
+          }}
         />
         <StatCard
           label="Volume pipeline"
@@ -71,6 +89,11 @@ function TransactionsPage() {
           hint="Montant des transactions ouvertes"
           icon={ChevronRight}
           index={1}
+          detail={{
+            what: "La somme des montants négociés sur tous les dossiers ouverts.",
+            how: "On additionne le montant de chaque transaction non clôturée. Le montant est le prix effectivement négocié, qui peut différer du prix affiché du bien.",
+            why: "C'est le volume d'affaires que l'agence est en train de traiter. Il sert de base au calcul des commissions attendues sur la carte suivante.",
+          }}
         />
         <StatCard
           label="Commissions à percevoir"
@@ -78,6 +101,17 @@ function TransactionsPage() {
           hint="Base 2,5 % du prix"
           icon={CheckCircle2}
           index={2}
+          detail={{
+            what: "Les honoraires que l'agence encaissera si tous les dossiers ouverts vont au bout.",
+            how: "On additionne la commission de chaque transaction ouverte. Par défaut elle vaut 2,5 % du montant, mais elle est modifiable dossier par dossier dans la fiche de la transaction.",
+            why: "C'est une prévision, pas un encaissement : tant qu'un dossier n'est pas clôturé, la commission peut encore tomber. À comparer aux honoraires réalisés du tableau de bord pour mesurer l'écart entre prévu et réalisé.",
+            rows: [
+              {
+                label: "Taux moyen constaté",
+                value: pipelineValue ? `${((commission / pipelineValue) * 100).toFixed(1)} %` : "—",
+              },
+            ],
+          }}
         />
         <StatCard
           label="Clôtures imminentes"
@@ -85,6 +119,11 @@ function TransactionsPage() {
           hint="À l'étape clôture"
           icon={ChevronLeft}
           index={3}
+          detail={{
+            what: "Les dossiers arrivés à la dernière étape avant signature définitive.",
+            how: "On compte les transactions dont l'étape courante est « Clôture ». L'étape se change à la main depuis la fiche de la transaction, au fur et à mesure de l'avancement du dossier.",
+            why: "Ce sont les honoraires les plus proches d'être encaissés. Un dossier qui stagne à cette étape bloque un montant déjà négocié : c'est là qu'une relance du notaire ou de la banque a le plus d'effet.",
+          }}
         />
       </div>
 
@@ -92,7 +131,7 @@ function TransactionsPage() {
         <div>
           <p className="eyebrow">Pipeline des transactions</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            De l'intérêt à la clôture   cliquez sur un dossier pour le détailler.
+            De l'intérêt à la clôture cliquez sur un dossier pour le détailler.
           </p>
         </div>
         {canManage ? (
@@ -469,66 +508,51 @@ function TransactionFormModal({
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5 sm:col-span-2">
-            <span className="text-xs text-muted-foreground uppercase">Bien</span>
-            <select
-              value={propertyId}
-              onChange={(e) => setPropertyId(e.target.value)}
-              className={fieldCls}
-            >
-              <option value="">Sélectionner…</option>
-              {properties.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title} ({p.reference})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted-foreground uppercase">Acheteur</span>
-            <select
-              value={buyerClientId}
-              onChange={(e) => setBuyerClientId(e.target.value)}
-              className={fieldCls}
-            >
-              <option value="">Sélectionner…</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.firstName} {c.lastName}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted-foreground uppercase">Vendeur</span>
-            <select
-              value={sellerClientId}
-              onChange={(e) => setSellerClientId(e.target.value)}
-              className={fieldCls}
-            >
-              <option value=""> </option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.firstName} {c.lastName}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted-foreground uppercase">Agent</span>
-            <select
-              value={agentId}
-              onChange={(e) => setAgentId(e.target.value)}
-              className={fieldCls}
-            >
-              <option value=""> </option>
-              {agents.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SearchSelect
+            className="sm:col-span-2"
+            label="Bien"
+            value={propertyId}
+            onChange={setPropertyId}
+            placeholder="Sélectionner…"
+            searchPlaceholder="Titre ou référence…"
+            options={properties.map((p) => ({
+              value: p.id,
+              label: p.title,
+              hint: p.reference,
+            }))}
+          />
+          <SearchSelect
+            label="Acheteur"
+            value={buyerClientId}
+            onChange={setBuyerClientId}
+            placeholder="Sélectionner…"
+            searchPlaceholder="Nom de l'acheteur…"
+            options={clients.map((c) => ({
+              value: c.id,
+              label: `${c.firstName} ${c.lastName}`,
+            }))}
+          />
+          <SearchSelect
+            label="Vendeur"
+            value={sellerClientId}
+            onChange={setSellerClientId}
+            clearLabel="Non renseigné"
+            placeholder="Non renseigné"
+            searchPlaceholder="Nom du vendeur…"
+            options={clients.map((c) => ({
+              value: c.id,
+              label: `${c.firstName} ${c.lastName}`,
+            }))}
+          />
+          <SearchSelect
+            label="Agent"
+            value={agentId}
+            onChange={setAgentId}
+            clearLabel="Non assigné"
+            placeholder="Non assigné"
+            searchPlaceholder="Nom de l'agent…"
+            options={agents.map((a) => ({ value: a.id, label: a.name }))}
+          />
           <label className="flex flex-col gap-1.5">
             <span className="text-xs text-muted-foreground uppercase">Montant (MAD)</span>
             <input

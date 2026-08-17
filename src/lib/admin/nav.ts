@@ -35,7 +35,7 @@ export const navGroups: NavGroup[] = [
     title: "Pilotage",
     items: [
       { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, phase: 2, ready: true },
-      { to: "/admin/design", label: "Design system", icon: Palette, phase: 2, ready: true, roles: ["directrice"] },
+      // { to: "/admin/design", label: "Design system", icon: Palette, phase: 2, ready: true, roles: ["directrice"] },
     ],
   },
   {
@@ -62,9 +62,9 @@ export const navGroups: NavGroup[] = [
   {
     title: "Piloter",
     items: [
-      { to: "/admin/automatisations", label: "Automatisations", icon: Workflow, phase: 4, ready: true, roles: ["directrice"] },
-      { to: "/admin/matching", label: "Matching", icon: Scale, phase: 4, ready: true, roles: ["directrice", "commercial"] },
-      { to: "/admin/marketing", label: "Marketing", icon: Megaphone, phase: 4, ready: true, roles: ["directrice"] },
+      // { to: "/admin/automatisations", label: "Automatisations", icon: Workflow, phase: 4, ready: true, roles: ["directrice"] },
+      // { to: "/admin/matching", label: "Matching", icon: Scale, phase: 4, ready: true, roles: ["directrice", "commercial"] },
+      // { to: "/admin/marketing", label: "Marketing", icon: Megaphone, phase: 4, ready: true, roles: ["directrice"] },
       { to: "/admin/portail-client", label: "Portail client", icon: UserRound, phase: 4, ready: true, roles: ["directrice"] },
     ],
   },

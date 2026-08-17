@@ -2379,9 +2379,8 @@ export const supabaseRepository: SupabaseRepository = {
         from,
         to,
         kpis: [
-          { label: "Biens créés", value: list.length },
           {
-            label: "Biens actifs",
+            label: "Biens créés",
             value: properties.filter((p) => ACTIVE_PROPERTY_STATUSES.includes(p.status)).length,
           },
           { label: "Vendus / loués", value: sold.length },

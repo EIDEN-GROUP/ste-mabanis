@@ -62,6 +62,14 @@ export function relativeTime(iso: string, now: Date = SEED_NOW) {
   return formatDate(iso);
 }
 
+/**
+ * Fold a string down to something comparable: lower case, no accents. Used by
+ * every search field in the back office so "perinet" finds "Périnet".
+ */
+export function normalizeText(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
 /* ----------------------------------------------------------------- labels */
 
 export const PROPERTY_STATUS_LABELS: Record<string, string> = {

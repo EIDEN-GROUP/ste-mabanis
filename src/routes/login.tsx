@@ -158,7 +158,7 @@ function AdminLogin() {
 
       <div className="flex lg:min-h-screen items-center lg:pr-20">
         <motion.div
-          className="scrollbar-gold relative z-10 flex flex-1 flex-col overflow-y-auto overflow-hidden rounded-3xl border border-white/[0.08] bg-navy/[0.12] backdrop-blur-3xl shadow-[0px_2px_8px_0px_rgba(99,99,99,0.2)] [--scroll-track:rgba(255,255,255,0.08)] lg:ml-auto lg:w-[44%] lg:max-w-[38rem] lg:flex-none"
+          className="scrollbar-gold relative z-10 flex flex-1 flex-col overflow-y-auto overflow-hidden rounded-3xl bg-navy/[0.12] backdrop-blur-md shadow-[0px_2px_8px_0px_rgba(0,0,0,0.2)] [--scroll-track:rgba(0,0,0,0.08)] lg:ml-auto lg:w-[44%] lg:max-w-[38rem] lg:flex-none"
           initial={{ opacity: 0, scale: 0.96, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}

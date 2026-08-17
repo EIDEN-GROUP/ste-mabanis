@@ -1,7 +1,18 @@
-import { useEffect, type ReactNode } from "react";
-import { X, Inbox, TrendingUp, TrendingDown } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
+import {
+  X,
+  Inbox,
+  TrendingUp,
+  TrendingDown,
+  Info,
+  Search,
+  Check,
+  ChevronDown,
+  ArrowRight,
+} from "lucide-react";
 import { toast as sonnerToast } from "sonner";
-import { formatPercent } from "@/lib/admin/format";
+import { formatPercent, normalizeText } from "@/lib/admin/format";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------- Panel */
@@ -47,6 +58,28 @@ export function PanelHeader({
 
 /* ---------------------------------------------------------------- StatCard */
 
+/**
+ * What a card explains when it is opened. `what` answers "what am I looking
+ * at", `how` answers "where does this number come from" and `why` answers "what
+ * do I do with it"   the three questions a non-technical user actually asks.
+ */
+export type StatDetail = {
+  /** One sentence: what the number counts. */
+  what: string;
+  /** How it is computed   the rule in plain words, not a formula. */
+  how: string;
+  /** What to do when it moves. */
+  why?: string | undefined;
+  /** Optional breakdown table shown under the explanation. */
+  rows?: { label: string; value: string }[] | undefined;
+  /** Deep link to the screen that lets the user act on it. */
+  href?: string | undefined;
+  hrefLabel?: string | undefined;
+};
+
+const statCardSurface =
+  "stagger-in group relative w-full overflow-hidden rounded-md border border-line bg-admin-surface p-5 text-left transition-[border-color,box-shadow] duration-400 hover:border-gold/60 hover:shadow-panel";
+
 export function StatCard({
   label,
   value,
@@ -55,6 +88,8 @@ export function StatCard({
   icon: Icon,
   index = 0,
   className,
+  detail,
+  onClick,
 }: {
   label: string;
   value: string;
@@ -63,18 +98,17 @@ export function StatCard({
   icon?: React.ComponentType<{ className?: string }> | undefined;
   index?: number | undefined;
   className?: string | undefined;
+  detail?: StatDetail | undefined;
+  /** Overrides the built-in explanation modal. */
+  onClick?: (() => void) | undefined;
 }) {
+  const [open, setOpen] = useState(false);
   const positive = (delta ?? 0) >= 0;
   const Trend = positive ? TrendingUp : TrendingDown;
+  const clickable = Boolean(detail || onClick);
 
-  return (
-    <Panel
-      className={cn(
-        "stagger-in group relative overflow-hidden p-5 transition-[border-color,box-shadow] duration-400 hover:border-gold/60 hover:shadow-panel",
-        className,
-      )}
-      as="article"
-    >
+  const body = (
+    <>
       <div className="flex items-start gap-3" style={{ ["--i" as string]: index }}>
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.62rem] tracking-[0.2em] text-muted-foreground uppercase">
@@ -105,7 +139,152 @@ export function StatCard({
           {hint ? <span className="truncate text-muted-foreground">{hint}</span> : null}
         </div>
       ) : null}
-    </Panel>
+
+      {/* The affordance stays quiet until the card is hovered or focused so a
+          wall of KPIs does not turn into a wall of icons. */}
+      {clickable ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute top-3 right-3 text-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
+          <Info className="size-3.5" />
+        </span>
+      ) : null}
+    </>
+  );
+
+  if (!clickable) {
+    return <article className={cn(statCardSurface, "cursor-default", className)}>{body}</article>;
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => (onClick ? onClick() : setOpen(true))}
+        aria-haspopup={detail ? "dialog" : undefined}
+        title={`${label}   voir le détail`}
+        className={cn(
+          statCardSurface,
+          "cursor-pointer outline-none focus-visible:border-gold focus-visible:ring-2 focus-visible:ring-gold/35",
+          className,
+        )}
+      >
+        {body}
+      </button>
+
+      {detail ? (
+        <StatDetailModal
+          open={open}
+          onClose={() => setOpen(false)}
+          label={label}
+          value={value}
+          delta={delta}
+          hint={hint}
+          detail={detail}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function StatDetailModal({
+  open,
+  onClose,
+  label,
+  value,
+  delta,
+  hint,
+  detail,
+}: {
+  open: boolean;
+  onClose: () => void;
+  label: string;
+  value: string;
+  delta?: number | undefined;
+  hint?: string | undefined;
+  detail: StatDetail;
+}) {
+  const positive = (delta ?? 0) >= 0;
+  const Trend = positive ? TrendingUp : TrendingDown;
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={label}
+      description={detail.what}
+      size="md"
+      footer={
+        detail.href ? (
+          <>
+            <AdminButton variant="outline" onClick={onClose}>
+              Fermer
+            </AdminButton>
+            <Link to={detail.href} onClick={onClose}>
+              <AdminButton>
+                {detail.hrefLabel ?? "Ouvrir l'écran"}
+                <ArrowRight className="size-3.5" />
+              </AdminButton>
+            </Link>
+          </>
+        ) : (
+          <AdminButton variant="outline" onClick={onClose}>
+            Fermer
+          </AdminButton>
+        )
+      }
+    >
+      <div className="space-y-5">
+        <div className="rounded-md border border-line bg-admin-bg/50 px-4 py-4">
+          <p className="eyebrow">Valeur actuelle</p>
+          <p className="display mt-1 text-3xl tabular-nums">{value}</p>
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            {delta !== undefined ? (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 font-medium tabular-nums",
+                  positive ? "text-positive" : "text-negative",
+                )}
+              >
+                <Trend className="size-3.5" />
+                {formatPercent(delta)} vs période précédente
+              </span>
+            ) : null}
+            {hint ? <span className="text-muted-foreground">{hint}</span> : null}
+          </p>
+        </div>
+
+        <section>
+          <p className="eyebrow">Comment ce chiffre est calculé</p>
+          <p className="mt-2 text-sm leading-relaxed text-navy/80">{detail.how}</p>
+        </section>
+
+        {detail.why ? (
+          <section>
+            <p className="eyebrow">À quoi ça sert</p>
+            <p className="mt-2 text-sm leading-relaxed text-navy/80">{detail.why}</p>
+          </section>
+        ) : null}
+
+        {detail.rows?.length ? (
+          <section>
+            <p className="eyebrow mb-2">Détail</p>
+            <dl className="overflow-hidden rounded-md border border-line">
+              {detail.rows.map((r) => (
+                <div
+                  key={r.label}
+                  className="flex items-center gap-3 border-b border-line px-3.5 py-2.5 text-sm last:border-0"
+                >
+                  <dt className="min-w-0 flex-1 truncate text-muted-foreground">{r.label}</dt>
+                  <dd className="shrink-0 font-medium text-navy tabular-nums">{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ) : null}
+      </div>
+    </Modal>
   );
 }
 
@@ -408,6 +587,249 @@ export function Switch({
         )}
       />
     </button>
+  );
+}
+
+/* ------------------------------------------------------------ SearchSelect */
+
+export type SearchOption = {
+  value: string;
+  label: string;
+  /** Secondary line   reference, email, city…   also matched by the search. */
+  hint?: string | undefined;
+};
+
+/** Search box + list, in px   used to decide whether the panel opens upwards. */
+const PANEL_MAX_HEIGHT = 268;
+
+/**
+ * The back office replacement for a native <select>: a labelled field that
+ * opens a search box and filters the list as the user types. Lists here are
+ * clients, biens and agents   they grow past the point where scrolling a
+ * native dropdown is usable, and typing three letters is always faster.
+ */
+export function SearchSelect({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder = "Sélectionner…",
+  searchPlaceholder = "Tapez pour filtrer…",
+  clearLabel,
+  emptyLabel = "Aucun résultat",
+  disabled,
+  className,
+}: {
+  label?: string | undefined;
+  value: string;
+  onChange: (value: string) => void;
+  options: SearchOption[];
+  placeholder?: string | undefined;
+  searchPlaceholder?: string | undefined;
+  /** When set, an explicit "no value" row is offered first (e.g. "Sans bien associé"). */
+  clearLabel?: string | undefined;
+  emptyLabel?: string | undefined;
+  disabled?: boolean | undefined;
+  className?: string | undefined;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const [dropUp, setDropUp] = useState(false);
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const listId = useId();
+
+  const allOptions = useMemo<SearchOption[]>(
+    () => (clearLabel ? [{ value: "", label: clearLabel }, ...options] : options),
+    [clearLabel, options],
+  );
+
+  const filtered = useMemo(() => {
+    const q = normalizeText(query.trim());
+    if (!q) return allOptions;
+    return allOptions.filter(
+      (o) =>
+        normalizeText(o.label).includes(q) || (o.hint ? normalizeText(o.hint).includes(q) : false),
+    );
+  }, [allOptions, query]);
+
+  const selected = allOptions.find((o) => o.value === value);
+
+  // Close on any click that lands outside the field.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+    else setQuery("");
+  }, [open]);
+
+  // Flip the list above the field when it would otherwise open past the bottom
+  // of the viewport   the last select in a modal form is the common case.
+  useEffect(() => {
+    if (!open) {
+      setDropUp(false);
+      return;
+    }
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const below = window.innerHeight - rect.bottom;
+    setDropUp(below < PANEL_MAX_HEIGHT && rect.top > below);
+  }, [open]);
+
+  // Keep the highlighted row in view while arrowing through a long list.
+  useEffect(() => {
+    if (!open) return;
+    const node = listRef.current?.children[active] as HTMLElement | undefined;
+    node?.scrollIntoView({ block: "nearest" });
+  }, [active, open]);
+
+  const commit = (option: SearchOption) => {
+    onChange(option.value);
+    setOpen(false);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive((i) => (filtered.length ? (i + 1) % filtered.length : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((i) => (filtered.length ? (i - 1 + filtered.length) % filtered.length : 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const option = filtered[active];
+      if (option) commit(option);
+    } else if (e.key === "Escape") {
+      // Stop here so the surrounding Modal does not close with the list.
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+    }
+  };
+
+  const fieldCls =
+    "flex h-11 w-full items-center gap-2 rounded-md border border-line bg-admin-bg/40 px-3 text-left text-sm outline-none transition-colors";
+
+  return (
+    <div className={cn("flex flex-col gap-1.5", className)}>
+      {label ? (
+        <span className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">
+          {label}
+        </span>
+      ) : null}
+
+      <div ref={rootRef} className="relative">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={open ? listId : undefined}
+          className={cn(
+            fieldCls,
+            "focus-visible:border-gold",
+            open && "border-gold",
+            disabled ? "cursor-not-allowed opacity-60" : "hover:border-gold/60",
+          )}
+        >
+          <span className={cn("min-w-0 flex-1 truncate", !selected && "text-muted-foreground")}>
+            {selected?.label ?? placeholder}
+          </span>
+          {selected?.hint ? (
+            <span className="hidden shrink-0 text-xs text-muted-foreground sm:block">
+              {selected.hint}
+            </span>
+          ) : null}
+          <ChevronDown
+            aria-hidden
+            className={cn(
+              "size-4 shrink-0 text-muted-foreground transition-transform duration-300",
+              open && "rotate-180 text-gold",
+            )}
+          />
+        </button>
+
+        {open ? (
+          <div
+            className={cn(
+              "absolute z-50 w-full overflow-hidden rounded-md border border-gold/40 bg-admin-surface shadow-elegant",
+              dropUp ? "bottom-full mb-1" : "mt-1",
+            )}
+          >
+            <div className="relative flex items-center border-b border-line">
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute left-3 size-4 text-gold"
+              />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setActive(0);
+                }}
+                onKeyDown={onKeyDown}
+                placeholder={searchPlaceholder}
+                aria-label={label ? `Rechercher   ${label}` : "Rechercher"}
+                aria-autocomplete="list"
+                aria-controls={listId}
+                className="h-11 w-full bg-transparent pr-3 pl-9 text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {filtered.length === 0 ? (
+              <p className="px-3.5 py-4 text-sm text-muted-foreground">{emptyLabel}</p>
+            ) : (
+              <ul
+                ref={listRef}
+                id={listId}
+                role="listbox"
+                className="scrollbar-gold max-h-56 overflow-y-auto [--scroll-track:var(--admin-surface)]"
+              >
+                {filtered.map((o, i) => {
+                  const isSelected = o.value === value;
+                  return (
+                    <li
+                      key={o.value || "__empty"}
+                      role="option"
+                      aria-selected={isSelected}
+                      onMouseEnter={() => setActive(i)}
+                      onClick={() => commit(o)}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2 border-b border-line/60 px-3.5 py-2.5 text-sm last:border-0",
+                        i === active ? "bg-gold/10 text-navy" : "text-navy/80",
+                      )}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">{o.label}</span>
+                        {o.hint ? (
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {o.hint}
+                          </span>
+                        ) : null}
+                      </span>
+                      {isSelected ? <Check className="size-3.5 shrink-0 text-gold" /> : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }
 

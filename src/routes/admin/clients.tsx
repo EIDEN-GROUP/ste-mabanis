@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -45,12 +45,16 @@ import {
 } from "@/lib/admin/format";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { RoleBadge, TemperatureBadge } from "@/components/admin/status-badge";
-import { Modal, AdminButton, EmptyState, toast } from "@/components/admin/primitives";
+import { Modal, AdminButton, EmptyState, SearchSelect, toast } from "@/components/admin/primitives";
 import { useAgentScope } from "@/lib/admin/session";
 import type { Activity, Appointment, Lead } from "@/lib/admin/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/clients")({
+  // `q` is set by the header search so a hit lands on this screen already filtered.
+  validateSearch: (search: Record<string, unknown>): { q: string | undefined } => ({
+    q: typeof search["q"] === "string" && search["q"] ? search["q"] : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Clients   STE MABANIS" },
@@ -75,9 +79,15 @@ const ACTIVITY_ICONS = {
 } as const;
 
 function ClientsPage() {
-  const [query, setQuery] = useState<ClientQuery>({});
+  const { q } = Route.useSearch();
+  const [query, setQuery] = useState<ClientQuery>(q ? { search: q } : {});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+
+  // Arriving from the header search   or searching again while already here.
+  useEffect(() => {
+    if (q) setQuery((prev) => ({ ...prev, search: q }));
+  }, [q]);
 
   // A commercial workspace is scoped to one agent's book of business.
   const scope = useAgentScope();
@@ -684,56 +694,30 @@ function ClientFormModal({
         {field("Budget max (MAD)", form.budgetMax, (v) => set("budgetMax", v), { type: "number" })}
         {field("Score", form.score, (v) => set("score", v), { type: "number" })}
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">
-            Source
-          </span>
-          <select
-            value={form.source}
-            onChange={(e) => set("source", e.target.value)}
-            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-          >
-            {Object.entries(SOURCE_LABELS).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Source"
+          value={form.source}
+          onChange={(v) => set("source", v)}
+          options={Object.entries(SOURCE_LABELS).map(([key, value]) => ({
+            value: key,
+            label: value,
+          }))}
+        />
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">
-            Température
-          </span>
-          <select
-            value={form.temperature}
-            onChange={(e) => set("temperature", e.target.value as LeadTemperature)}
-            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-          >
-            {TEMPS.map((t) => (
-              <option key={t} value={t}>
-                {label(TEMPERATURE_LABELS, t)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Température"
+          value={form.temperature}
+          onChange={(v) => set("temperature", v as LeadTemperature)}
+          options={TEMPS.map((t) => ({ value: t, label: label(TEMPERATURE_LABELS, t) }))}
+        />
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">
-            Agent
-          </span>
-          <select
-            value={form.agentId}
-            onChange={(e) => set("agentId", e.target.value)}
-            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-          >
-            {agents.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Agent"
+          value={form.agentId}
+          onChange={(v) => set("agentId", v)}
+          searchPlaceholder="Nom de l'agent…"
+          options={agents.map((a) => ({ value: a.id, label: a.name }))}
+        />
 
         <fieldset className="flex flex-col gap-2 sm:col-span-2">
           <legend className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">

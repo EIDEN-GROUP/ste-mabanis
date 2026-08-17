@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -43,11 +43,21 @@ import { DataTable, type Column } from "@/components/admin/data-table";
 import { PropertyFilters } from "@/components/admin/property-filters";
 import { PropertyStatusBadge } from "@/components/admin/status-badge";
 import { PropertyGallery } from "@/components/admin/property-gallery";
-import { Modal, AdminButton, toast, LoadingState } from "@/components/admin/primitives";
+import {
+  Modal,
+  AdminButton,
+  toast,
+  LoadingState,
+  SearchSelect,
+} from "@/components/admin/primitives";
 import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/proprietes")({
+  // `q` is set by the header search so a hit lands on this screen already filtered.
+  validateSearch: (search: Record<string, unknown>): { q: string | undefined } => ({
+    q: typeof search["q"] === "string" && search["q"] ? search["q"] : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Propriétés   STE MABANIS" },
@@ -115,9 +125,15 @@ function readFiles(
 }
 
 function PropertiesPage() {
-  const [query, setQuery] = useState<PropertyQuery>({});
+  const { q } = Route.useSearch();
+  const [query, setQuery] = useState<PropertyQuery>(q ? { search: q } : {});
   const [selected, setSelected] = useState<AdminProperty | null>(null);
   const [creating, setCreating] = useState(false);
+
+  // Arriving from the header search   or searching again while already here.
+  useEffect(() => {
+    if (q) setQuery((prev) => ({ ...prev, search: q }));
+  }, [q]);
 
   const { data = [], isPending } = useQuery(propertiesQuery(query));
   const { data: agents = [] } = useQuery(agentsQuery());
@@ -621,7 +637,7 @@ function MediaManager({ property }: { property: AdminProperty }) {
         </ul>
       ) : (
         <p className="rounded-md border border-dashed border-line px-4 py-6 text-center text-xs text-muted-foreground">
-          Aucun élément   ajoutez des {KINDS[kind].label.toLowerCase()} ci-dessous.
+          Aucun élément ajoutez des {KINDS[kind].label.toLowerCase()} ci-dessous.
         </p>
       )}
 
@@ -866,39 +882,23 @@ function PropertyFormModal({
           </div>
         </label>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">
-            Statut
-          </span>
-          <select
-            value={form.status}
-            onChange={(e) => set("status", e.target.value as PropertyStatus)}
-            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-          >
-            {PROPERTY_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {label(PROPERTY_STATUS_LABELS, s)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Statut"
+          value={form.status}
+          onChange={(v) => set("status", v as PropertyStatus)}
+          options={PROPERTY_STATUSES.map((s) => ({
+            value: s,
+            label: label(PROPERTY_STATUS_LABELS, s),
+          }))}
+        />
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">
-            Agent en charge
-          </span>
-          <select
-            value={form.agentId}
-            onChange={(e) => set("agentId", e.target.value)}
-            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-          >
-            {(agents ?? []).map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Agent en charge"
+          value={form.agentId}
+          onChange={(v) => set("agentId", v)}
+          searchPlaceholder="Nom de l'agent…"
+          options={(agents ?? []).map((a) => ({ value: a.id, label: a.name }))}
+        />
 
         <label className="flex flex-col gap-1.5 sm:col-span-2">
           <span className="text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">

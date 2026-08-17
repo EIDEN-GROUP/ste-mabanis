@@ -134,16 +134,19 @@ function DesignSystemPage() {
   return (
     <div className="space-y-6">
       <Panel className="p-5">
-        <p className="eyebrow">Phase 2   fondations</p>
+        <p className="eyebrow">Phase 2 fondations</p>
         <h2 className="display mt-2 text-3xl">Bibliothèque de composants</h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
           Chaque composant utilise les tokens sémantiques de{" "}
-          <code className="rounded-sm bg-sand px-1.5 py-0.5 text-xs">src/styles.css</code>   aucune
+          <code className="rounded-sm bg-sand px-1.5 py-0.5 text-xs">src/styles.css</code> aucune
           couleur n'est codée en dur. Tous sont responsives de 375 à 1440 px.
         </p>
       </Panel>
 
-      <Block title="StatCard" note="Tuile d'indicateur avec delta et icône.">
+      <Block
+        title="StatCard"
+        note="Tuile d'indicateur avec delta et icône. Avec la prop « detail », la tuile devient cliquable et ouvre son explication."
+      >
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatCard
             index={0}
@@ -152,6 +155,15 @@ function DesignSystemPage() {
             delta={8}
             hint="en ligne"
             icon={Building2}
+            detail={{
+              what: "Exemple d'indicateur cliquable : le nombre de biens en ligne.",
+              how: "Chaque tuile reçoit une explication en trois temps   ce que le chiffre représente, comment il est calculé, et ce qu'il faut en faire.",
+              why: "Le back-office s'utilise sans formation : la définition d'un indicateur est toujours à un clic, jamais dans un document séparé.",
+              rows: [
+                { label: "Disponibles", value: "18" },
+                { label: "Sous offre", value: "6" },
+              ],
+            }}
           />
           <StatCard index={1} label="Pipeline" value="18,4 M MAD" delta={14} hint="en cours" />
           <StatCard index={2} label="Visites" value="37" delta={-6} hint="30 jours" />
@@ -219,7 +231,7 @@ function DesignSystemPage() {
         <div className="mt-5 flex items-center gap-3 border-t border-line pt-5">
           <Switch checked={switchOn} onChange={setSwitchOn} label="Exemple d'interrupteur" />
           <span className="text-sm text-muted-foreground">
-            Switch   {switchOn ? "activé" : "désactivé"}
+            Switch {switchOn ? "activé" : "désactivé"}
           </span>
         </div>
       </Block>

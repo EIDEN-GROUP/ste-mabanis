@@ -1,7 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Clock, CalendarDays, CheckCircle2, Eye } from "lucide-react";
+import {
+  Plus,
+  Clock,
+  CalendarDays,
+  CheckCircle2,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   appointmentsQuery,
   agentsQuery,
@@ -16,11 +24,16 @@ import type { Appointment, AppointmentKind, AppointmentStatus } from "@/lib/admi
 import { APPOINTMENT_LABELS, formatDate, formatTime, label } from "@/lib/admin/format";
 import { SEED_NOW } from "@/lib/admin/seed";
 import { Calendar } from "@/components/admin/calendar";
-import { StatCard, Modal, AdminButton } from "@/components/admin/primitives";
+import { StatCard, Modal, AdminButton, SearchSelect } from "@/components/admin/primitives";
 import { useAgentScope } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/agenda")({
+  // `rdv` is set by the header search: it opens that appointment and moves the
+  // calendar to its date.
+  validateSearch: (search: Record<string, unknown>): { rdv: string | undefined } => ({
+    rdv: typeof search["rdv"] === "string" && search["rdv"] ? search["rdv"] : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Agenda   STE MABANIS" },
@@ -31,6 +44,27 @@ export const Route = createFileRoute("/admin/agenda")({
 });
 
 type View = "jour" | "semaine" | "mois";
+
+const PREV_LABEL: Record<View, string> = {
+  jour: "Jour précédent",
+  semaine: "Semaine précédente",
+  mois: "Mois précédent",
+};
+
+const NEXT_LABEL: Record<View, string> = {
+  jour: "Jour suivant",
+  semaine: "Semaine suivante",
+  mois: "Mois suivant",
+};
+
+/** Left edge colour of a timeline block, matching the month-view chips. */
+const KIND_EDGE: Record<AppointmentKind, string> = {
+  viewing: "border-l-gold",
+  valuation: "border-l-blue",
+  signature: "border-l-positive",
+  call: "border-l-muted-foreground/40",
+  meeting: "border-l-status-archived",
+};
 
 const KIND_TONE: Record<AppointmentKind, string> = {
   viewing: "border-gold/50 text-gold",
@@ -70,6 +104,34 @@ function startOfWeek(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() - day);
 }
 
+function addDays(d: Date, n: number) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+}
+
+/** The period the toolbar is currently pointing at, spelled out in full. */
+function rangeLabel(view: View, anchor: Date) {
+  if (view === "jour") {
+    return anchor.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }
+  if (view === "mois") {
+    return anchor.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  }
+  const from = startOfWeek(anchor);
+  const to = addDays(from, 6);
+  const sameMonth = from.getMonth() === to.getMonth();
+  const left = from.toLocaleDateString(
+    "fr-FR",
+    sameMonth ? { day: "numeric" } : { day: "numeric", month: "short" },
+  );
+  const right = to.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  return `${left} – ${right}`;
+}
+
 function toLocalInput(d: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -80,10 +142,39 @@ function toLocalTime(d: Date) {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** Breakdown by appointment type, for the KPI explanation modals. */
+function kindRows(items: Appointment[]) {
+  const counts = new Map<AppointmentKind, number>();
+  for (const a of items) counts.set(a.kind, (counts.get(a.kind) ?? 0) + 1);
+  return [...counts.entries()].map(([kind, n]) => ({
+    label: label(APPOINTMENT_LABELS, kind),
+    value: String(n),
+  }));
+}
+
 function AgendaPage() {
   const [view, setView] = useState<View>("semaine");
+  // The period the agenda is pointing at. One anchor for the three views: the
+  // step size changes, the date does not.
+  const [anchor, setAnchor] = useState<Date>(() => new Date(SEED_NOW));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+
+  const step = (dir: -1 | 1) =>
+    setAnchor((d) =>
+      view === "jour"
+        ? addDays(d, dir)
+        : view === "semaine"
+          ? addDays(d, dir * 7)
+          : new Date(d.getFullYear(), d.getMonth() + dir, 1),
+    );
+
+  const isOnToday =
+    view === "mois"
+      ? anchor.getFullYear() === SEED_NOW.getFullYear() && anchor.getMonth() === SEED_NOW.getMonth()
+      : view === "semaine"
+        ? sameDay(startOfWeek(anchor), startOfWeek(SEED_NOW))
+        : sameDay(anchor, SEED_NOW);
 
   // A commercial workspace only sees the appointments its agent runs.
   const scope = useAgentScope();
@@ -113,6 +204,21 @@ function AgendaPage() {
 
   const selected = visibleAppointments.find((a) => a.id === selectedId) ?? null;
 
+  // A hit from the header search: open that appointment and move the calendar
+  // onto its day, so closing the modal leaves you on the right date.
+  // Guarded by a ref: `setAnchor` takes a fresh Date, and `visibleAppointments`
+  // is a new array every render, so without it the effect would re-fire itself.
+  const { rdv } = Route.useSearch();
+  const handledRdv = useRef<string | null>(null);
+  useEffect(() => {
+    if (!rdv || handledRdv.current === rdv) return;
+    const target = visibleAppointments.find((a) => a.id === rdv);
+    if (!target) return;
+    handledRdv.current = rdv;
+    setSelectedId(rdv);
+    setAnchor(new Date(target.startsAt));
+  }, [rdv, visibleAppointments]);
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -122,6 +228,12 @@ function AgendaPage() {
           hint="Rendez-vous du jour"
           icon={Clock}
           index={0}
+          detail={{
+            what: "Tous les rendez-vous inscrits à la date d'aujourd'hui.",
+            how: "On compte les rendez-vous dont la date de début tombe aujourd'hui, tous types confondus : visites, estimations, signatures, appels et réunions. Un commercial ne voit que ses propres rendez-vous ; la direction voit ceux de toute l'équipe.",
+            why: "C'est le programme de la journée. Ouvrez la vue « Jour » ci-dessous pour les voir placés heure par heure et repérer les créneaux encore libres.",
+            rows: kindRows(today),
+          }}
         />
         <StatCard
           label="7 prochains jours"
@@ -129,6 +241,12 @@ function AgendaPage() {
           hint={"Dont visites : " + String(week.filter((a) => a.kind === "viewing").length)}
           icon={CalendarDays}
           index={1}
+          detail={{
+            what: "Les rendez-vous à venir sur les sept prochains jours, ceux déjà terminés exclus.",
+            how: "On prend les rendez-vous entre aujourd'hui et dans sept jours, puis on retire ceux dont le statut est « Terminé ». Les annulations et les absences restent comptées tant qu'elles n'ont pas été supprimées.",
+            why: "C'est la charge de travail de la semaine. Si elle est vide en milieu de semaine, c'est le moment de relancer les leads chauds pour caler des visites.",
+            rows: kindRows(week.filter((a) => a.status !== "done")),
+          }}
         />
         <StatCard
           label="Terminés cette semaine"
@@ -136,6 +254,11 @@ function AgendaPage() {
           hint="Visites débriefées"
           icon={CheckCircle2}
           index={2}
+          detail={{
+            what: "Les rendez-vous de la semaine qui ont été marqués comme terminés.",
+            how: "Parmi les rendez-vous des sept prochains jours, on compte ceux passés au statut « Terminé ». Le statut se change depuis la fiche du rendez-vous, et passer une visite en « Terminé » ouvre directement le formulaire de débrief.",
+            why: "Un rendez-vous terminé sans débrief est une information perdue : le niveau d'intérêt du client et la conclusion de la visite alimentent le score du lead. Comparez ce chiffre au nombre de rendez-vous passés pour repérer les débriefs manquants.",
+          }}
         />
         <StatCard
           label="Visites à venir"
@@ -145,16 +268,24 @@ function AgendaPage() {
           hint="Toutes périodes"
           icon={Eye}
           index={3}
+          detail={{
+            what: "Toutes les visites de biens encore à réaliser, sans limite de date.",
+            how: "On compte les rendez-vous de type « Visite » dont le statut n'est pas « Terminé », y compris ceux planifiés dans plusieurs semaines.",
+            why: "C'est le volume de visites que l'agence s'est engagée à faire. Chaque visite réalisée et débriefée fait avancer un lead dans le pipeline : ce chiffre annonce les offres des prochaines semaines.",
+          }}
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Toolbar: which view, which period, and the way to move through it.
+          The same three controls drive day, week and month. */}
+      <div className="flex flex-wrap items-center gap-3">
         <div className="flex overflow-hidden rounded-md border border-line">
           {(["jour", "semaine", "mois"] as const).map((v) => (
             <button
               key={v}
               type="button"
               onClick={() => setView(v)}
+              aria-pressed={view === v}
               className={cn(
                 "px-4 py-2.5 text-[0.68rem] tracking-[0.14em] uppercase transition-colors",
                 view === v ? "bg-navy text-white" : "text-muted-foreground hover:text-navy",
@@ -164,15 +295,66 @@ function AgendaPage() {
             </button>
           ))}
         </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => step(-1)}
+            aria-label={PREV_LABEL[view]}
+            title={PREV_LABEL[view]}
+            className="grid size-10 place-items-center rounded-md border border-line text-navy transition-colors hover:border-gold hover:text-gold"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setAnchor(new Date(SEED_NOW))}
+            disabled={isOnToday}
+            className={cn(
+              "h-10 rounded-md border border-line px-3 text-[0.62rem] tracking-[0.14em] uppercase transition-colors",
+              isOnToday
+                ? "cursor-default text-muted-foreground/50"
+                : "text-navy hover:border-gold hover:text-gold",
+            )}
+          >
+            Aujourd'hui
+          </button>
+          <button
+            type="button"
+            onClick={() => step(1)}
+            aria-label={NEXT_LABEL[view]}
+            title={NEXT_LABEL[view]}
+            className="grid size-10 place-items-center rounded-md border border-line text-navy transition-colors hover:border-gold hover:text-gold"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
+
+        <p
+          aria-live="polite"
+          className="display min-w-0 flex-1 truncate text-lg capitalize sm:text-xl"
+        >
+          {rangeLabel(view, anchor)}
+        </p>
+
         <AdminButton onClick={() => setCreating(true)}>
           <Plus className="size-3.5" /> Nouveau rendez-vous
         </AdminButton>
       </div>
 
       {view === "mois" ? (
-        <Calendar appointments={visibleAppointments} />
+        <Calendar
+          appointments={visibleAppointments}
+          month={anchor}
+          onSelectAppointment={setSelectedId}
+        />
       ) : (
-        <Timeline view={view} appointments={visibleAppointments} onSelect={setSelectedId} />
+        <Timeline
+          view={view}
+          anchor={anchor}
+          appointments={visibleAppointments}
+          onSelect={setSelectedId}
+        />
       )}
 
       <AppointmentModal
@@ -200,70 +382,127 @@ function AgendaPage() {
 
 function Timeline({
   view,
+  anchor,
   appointments,
   onSelect,
 }: {
   view: View;
+  anchor: Date;
   appointments: Appointment[];
   onSelect: (id: string) => void;
 }) {
-  const days = useMemo(() => {
-    if (view === "jour") return [SEED_NOW];
-    const monday = startOfWeek(SEED_NOW);
-    return Array.from({ length: 7 }, (_, i) => new Date(monday.getTime() + i * 86_400_000));
-  }, [view]);
+  const isDay = view === "jour";
 
-  const hours = Array.from({ length: DAY_SPAN_MIN / 60 }, (_, i) => DAY_START_MIN / 60 + i);
+  const days = useMemo(() => {
+    if (isDay) return [anchor];
+    const monday = startOfWeek(anchor);
+    return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+  }, [isDay, anchor]);
+
+  const hours = Array.from({ length: DAY_SPAN_MIN / 60 + 1 }, (_, i) => DAY_START_MIN / 60 + i);
+  const gridHeight = `${(DAY_SPAN_MIN / 60) * 3.5}rem`;
+
+  // "Now" marker, only when the day being looked at is the current one.
+  const nowMinutes = minutesOf(SEED_NOW.toISOString());
+  const nowVisible = nowMinutes >= DAY_START_MIN && nowMinutes <= DAY_END_MIN;
+  const nowTop = ((nowMinutes - DAY_START_MIN) / DAY_SPAN_MIN) * 100;
+
+  // The hour gutter is a real column, so labels never sit on top of an event.
+  const columns = `4rem repeat(${days.length}, minmax(0, 1fr))`;
 
   return (
     <div className="overflow-hidden rounded-md border border-line bg-admin-surface">
-      <div
-        className={cn("grid border-b border-line", view === "jour" ? "grid-cols-1" : "grid-cols-7")}
-      >
-        {days.map((d) => {
-          const isToday = sameDay(d, SEED_NOW);
-          return (
-            <div
-              key={d.toISOString()}
-              className={cn(
-                "border-r border-line py-3 text-center last:border-r-0",
-                isToday && "bg-gold/8",
-              )}
-            >
-              <p className="text-[0.58rem] tracking-[0.16em] text-muted-foreground uppercase">
-                {d.toLocaleDateString("fr-FR", { weekday: "short" })}
-              </p>
-              <p className={cn("display mt-0.5 text-lg", isToday && "text-gold")}>{d.getDate()}</p>
-            </div>
-          );
-        })}
-      </div>
+      <div className={cn("scrollbar-gold", isDay ? "" : "overflow-x-auto")}>
+        <div className={cn(isDay ? "min-w-0" : "min-w-[46rem]")}>
+          {/* -------------------------------------------------- day headers */}
+          <div className="grid border-b border-line" style={{ gridTemplateColumns: columns }}>
+            <div className="border-r border-line" />
+            {days.map((d) => {
+              const isToday = sameDay(d, SEED_NOW);
+              const count = appointments.filter((a) => sameDay(new Date(a.startsAt), d)).length;
+              return (
+                <div
+                  key={d.toISOString()}
+                  className={cn(
+                    "border-r border-line py-3 text-center last:border-r-0",
+                    isToday && "bg-gold/8",
+                  )}
+                >
+                  <p className="text-[0.58rem] tracking-[0.16em] text-muted-foreground uppercase">
+                    {d.toLocaleDateString(
+                      "fr-FR",
+                      isDay ? { weekday: "long" } : { weekday: "short" },
+                    )}
+                  </p>
+                  <p className={cn("display mt-0.5 text-lg", isToday && "text-gold")}>
+                    {isDay
+                      ? d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })
+                      : d.getDate()}
+                  </p>
+                  <p className="mt-0.5 text-[0.58rem] text-muted-foreground tabular-nums">
+                    {count === 0 ? "—" : `${count} RDV`}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
 
-      <div className="overflow-x-auto">
-        <div
-          className="relative min-w-[720px]"
-          style={{ height: `${(DAY_SPAN_MIN / 60) * 3.5}rem` }}
-        >
-          <div className="grid h-full grid-cols-7">
-            {days.map((d) => (
+          {/* ------------------------------------------------------- grid */}
+          <div
+            className="relative grid"
+            style={{ gridTemplateColumns: columns, height: gridHeight }}
+          >
+            {/* Hour rules across the full width, drawn once behind the columns. */}
+            {hours.map((h) => (
               <div
-                key={d.toISOString()}
-                className="relative border-r border-line/60 last:border-r-0"
-              >
-                {hours.map((h) => (
-                  <div
-                    key={h}
-                    className="absolute inset-x-0 border-t border-line/50 text-right pr-2"
-                    style={{ top: `${((h * 60 - DAY_START_MIN) / DAY_SPAN_MIN) * 100}%` }}
-                  >
-                    <span className="align-top text-[0.55rem] text-muted-foreground tabular-nums">
-                      {String(h).padStart(2, "0")}:00
-                    </span>
-                  </div>
-                ))}
-                {appointments
-                  .filter((a) => sameDay(new Date(a.startsAt), d))
-                  .map((a) => {
+                key={`rule-${h}`}
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 border-t border-line/50"
+                style={{ top: `${((h * 60 - DAY_START_MIN) / DAY_SPAN_MIN) * 100}%` }}
+              />
+            ))}
+
+            {/* Labels sit just under their rule rather than astride it, so the
+                first hour is not half-clipped by the panel's rounded edge. */}
+            <div className="relative border-r border-line">
+              {hours.slice(0, -1).map((h) => (
+                <span
+                  key={h}
+                  className="absolute right-2 text-[0.6rem] text-muted-foreground tabular-nums"
+                  style={{
+                    top: `calc(${((h * 60 - DAY_START_MIN) / DAY_SPAN_MIN) * 100}% + 2px)`,
+                  }}
+                >
+                  {String(h).padStart(2, "0")}:00
+                </span>
+              ))}
+            </div>
+
+            {days.map((d) => {
+              const isToday = sameDay(d, SEED_NOW);
+              const items = appointments
+                .filter((a) => sameDay(new Date(a.startsAt), d))
+                .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+
+              return (
+                <div
+                  key={d.toISOString()}
+                  className={cn(
+                    "relative border-r border-line/60 last:border-r-0",
+                    isToday && "bg-gold/4",
+                  )}
+                >
+                  {isToday && nowVisible ? (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-0 z-10 border-t border-negative/70"
+                      style={{ top: `${nowTop}%` }}
+                    >
+                      <span className="absolute -top-1 -left-1 size-2 rounded-full bg-negative" />
+                    </div>
+                  ) : null}
+
+                  {items.map((a) => {
                     const start = minutesOf(a.startsAt);
                     const end = Math.max(start + 30, minutesOf(a.endsAt));
                     const top = ((start - DAY_START_MIN) / DAY_SPAN_MIN) * 100;
@@ -274,21 +513,45 @@ function Timeline({
                         key={a.id}
                         type="button"
                         onClick={() => onSelect(a.id)}
+                        title={`${formatTime(a.startsAt)} – ${formatTime(a.endsAt)} · ${a.title}`}
                         className={cn(
-                          "absolute inset-x-1 flex flex-col gap-0.5 overflow-hidden rounded-md border-l-2 bg-sand px-2 py-1 text-left transition-colors hover:border-gold hover:bg-gold/10",
+                          "absolute inset-x-1 overflow-hidden rounded-md border border-line border-l-2 bg-admin-surface px-2 py-1 text-left transition-colors hover:border-gold hover:bg-gold/10",
+                          KIND_EDGE[a.kind],
                           cancelled && "opacity-60",
                         )}
                         style={{ top: `${top}%`, height: `max(${height}%, 1.75rem)` }}
                       >
-                        <span className="text-[0.6rem] font-medium text-navy tabular-nums">
-                          {formatTime(a.startsAt)}
+                        {/* The day view has the room to say more than the hour. */}
+                        <span
+                          className={cn(
+                            "flex gap-1.5",
+                            isDay ? "flex-row items-baseline" : "flex-col",
+                          )}
+                        >
+                          <span className="shrink-0 text-[0.62rem] font-medium text-navy tabular-nums">
+                            {formatTime(a.startsAt)}
+                            {isDay ? ` – ${formatTime(a.endsAt)}` : ""}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate text-[0.68rem] text-navy/80">
+                            {a.title}
+                          </span>
+                          {isDay ? (
+                            <span className="shrink-0 rounded-md border border-line px-1.5 py-0.5 text-[0.55rem] tracking-[0.1em] text-muted-foreground uppercase">
+                              {label(APPOINTMENT_LABELS, a.kind)}
+                            </span>
+                          ) : null}
                         </span>
-                        <span className="truncate text-[0.65rem] text-navy/80">{a.title}</span>
+                        {isDay && a.location ? (
+                          <span className="mt-0.5 block truncate text-[0.6rem] text-muted-foreground">
+                            {a.location}
+                          </span>
+                        ) : null}
                       </button>
                     );
                   })}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -557,8 +820,8 @@ function AppointmentFormModal({
   onClose,
 }: {
   appointment?: Appointment | undefined;
-  clients: { firstName: string; lastName: string; id: string }[];
-  properties: { title: string; id: string }[];
+  clients: { firstName: string; lastName: string; id: string; email?: string | undefined }[];
+  properties: { title: string; id: string; reference?: string | undefined }[];
   agents: { name: string; id: string }[];
   defaultAgentId?: string | undefined;
   onClose: () => void;
@@ -630,20 +893,15 @@ function AppointmentFormModal({
       ]}
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Type</span>
-          <select
-            value={kind}
-            onChange={(e) => setKind(e.target.value as AppointmentKind)}
-            className={fieldCls}
-          >
-            {(Object.keys(APPOINTMENT_LABELS) as AppointmentKind[]).map((k) => (
-              <option key={k} value={k}>
-                {label(APPOINTMENT_LABELS, k)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Type"
+          value={kind}
+          onChange={(v) => setKind(v as AppointmentKind)}
+          options={(Object.keys(APPOINTMENT_LABELS) as AppointmentKind[]).map((k) => ({
+            value: k,
+            label: label(APPOINTMENT_LABELS, k),
+          }))}
+        />
         <label className="flex flex-col gap-1.5">
           <span className="text-xs text-muted-foreground uppercase">Titre</span>
           <input
@@ -680,47 +938,37 @@ function AppointmentFormModal({
             />
           </div>
         </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Client</span>
-          <select
-            value={clientId}
-            onChange={(e) => setClientId(e.target.value)}
-            className={fieldCls}
-          >
-            <option value=""> </option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.firstName} {c.lastName}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Bien</span>
-          <select
-            value={propertyId}
-            onChange={(e) => setPropertyId(e.target.value)}
-            className={fieldCls}
-          >
-            <option value=""> </option>
-            {properties.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Agent</span>
-          <select value={agentId} onChange={(e) => setAgentId(e.target.value)} className={fieldCls}>
-            <option value=""> </option>
-            {agents.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Client"
+          value={clientId}
+          onChange={setClientId}
+          clearLabel="Sans client"
+          placeholder="Sans client"
+          searchPlaceholder="Nom du client…"
+          options={clients.map((c) => ({
+            value: c.id,
+            label: `${c.firstName} ${c.lastName}`,
+            hint: c.email,
+          }))}
+        />
+        <SearchSelect
+          label="Bien"
+          value={propertyId}
+          onChange={setPropertyId}
+          clearLabel="Sans bien"
+          placeholder="Sans bien"
+          searchPlaceholder="Titre ou référence…"
+          options={properties.map((p) => ({ value: p.id, label: p.title, hint: p.reference }))}
+        />
+        <SearchSelect
+          label="Agent"
+          value={agentId}
+          onChange={setAgentId}
+          clearLabel="Non assigné"
+          placeholder="Non assigné"
+          searchPlaceholder="Nom de l'agent…"
+          options={agents.map((a) => ({ value: a.id, label: a.name }))}
+        />
         <label className="flex flex-col gap-1.5">
           <span className="text-xs text-muted-foreground uppercase">Lieu</span>
           <input

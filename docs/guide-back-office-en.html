@@ -1,0 +1,1702 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Back-office Guide · STE MABANIS</title>
+    <style>
+      /* ------------------------------------------------------------ page */
+      @page {
+        size: A4;
+        margin: 16mm 15mm 20mm;
+      }
+
+      :root {
+        --navy: #071a2f;
+        --blue: #0d3154;
+        --gold: #c9a45c;
+        --gold-soft: #e3cfa4;
+        --sand: #f7f5f0;
+        --line: #e2ded4;
+        --ink: #14202e;
+        --muted: #61707f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        font-size: 10pt;
+        line-height: 1.62;
+        color: var(--ink);
+      }
+
+      /* Repeated on every printed page by Chrome. */
+      .running-footer {
+        position: fixed;
+        bottom: -13mm;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        border-top: 0.5pt solid var(--line);
+        padding-top: 2mm;
+        font-size: 7pt;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* ----------------------------------------------------------- cover */
+      .cover {
+        display: flex;
+        flex-direction: column;
+        height: 261mm;
+        background: var(--navy);
+        color: #fff;
+        padding: 22mm 18mm;
+        page-break-after: always;
+      }
+
+      .cover .mark {
+        font-size: 9pt;
+        letter-spacing: 0.42em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+
+      .cover .rule {
+        width: 26mm;
+        height: 1.5pt;
+        background: var(--gold);
+        margin: 10mm 0;
+      }
+
+      .cover h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 34pt;
+        line-height: 1.12;
+        font-weight: 400;
+        margin: 0;
+      }
+
+      .cover .lede {
+        margin-top: 8mm;
+        max-width: 115mm;
+        font-size: 11pt;
+        line-height: 1.7;
+        color: #cfd8e2;
+      }
+
+      .cover .foot {
+        margin-top: auto;
+        display: flex;
+        gap: 14mm;
+        border-top: 0.5pt solid rgba(201, 164, 92, 0.4);
+        padding-top: 6mm;
+      }
+
+      .cover .foot div {
+        font-size: 8.5pt;
+        color: #cfd8e2;
+      }
+
+      .cover .foot span {
+        display: block;
+        font-size: 7pt;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 1.5mm;
+      }
+
+      /* --------------------------------------------------------- headings */
+      h2 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 19pt;
+        font-weight: 400;
+        line-height: 1.2;
+        color: var(--navy);
+        margin: 0 0 2mm;
+        page-break-after: avoid;
+      }
+
+      h3 {
+        font-size: 11.5pt;
+        font-weight: 600;
+        color: var(--blue);
+        margin: 7mm 0 2mm;
+        page-break-after: avoid;
+      }
+
+      h4 {
+        font-size: 10pt;
+        font-weight: 600;
+        color: var(--navy);
+        margin: 5mm 0 1.5mm;
+        page-break-after: avoid;
+      }
+
+      .eyebrow {
+        font-size: 7.5pt;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin: 0 0 1.5mm;
+      }
+
+      .chapter {
+        page-break-before: always;
+      }
+
+      .chapter-head {
+        border-bottom: 1pt solid var(--navy);
+        padding-bottom: 3mm;
+        margin-bottom: 6mm;
+      }
+
+      p {
+        margin: 0 0 3mm;
+      }
+
+      strong {
+        color: var(--navy);
+      }
+
+      /* ------------------------------------------------------------ lists */
+      ul,
+      ol {
+        margin: 0 0 4mm;
+        padding-left: 5.5mm;
+      }
+
+      li {
+        margin-bottom: 1.6mm;
+      }
+
+      .steps {
+        list-style: none;
+        counter-reset: step;
+        padding: 0;
+        margin: 0 0 4mm;
+      }
+
+      .steps li {
+        counter-increment: step;
+        position: relative;
+        padding-left: 9mm;
+        margin-bottom: 2.5mm;
+        page-break-inside: avoid;
+      }
+
+      .steps li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 0.2mm;
+        width: 6mm;
+        height: 6mm;
+        border: 0.5pt solid var(--gold);
+        border-radius: 1mm;
+        color: var(--gold);
+        font-size: 8pt;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ----------------------------------------------------------- tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 0 5mm;
+        font-size: 9pt;
+        page-break-inside: auto;
+      }
+
+      thead {
+        display: table-header-group;
+      }
+
+      th {
+        text-align: left;
+        background: var(--sand);
+        border: 0.5pt solid var(--line);
+        padding: 2mm 2.5mm;
+        font-size: 7.5pt;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--navy);
+        font-weight: 600;
+      }
+
+      td {
+        border: 0.5pt solid var(--line);
+        padding: 2mm 2.5mm;
+        vertical-align: top;
+      }
+
+      tr {
+        page-break-inside: avoid;
+      }
+
+      td.tick {
+        text-align: center;
+        color: var(--gold);
+        font-weight: 700;
+      }
+
+      td.no {
+        text-align: center;
+        color: #c3cbd3;
+      }
+
+      .term {
+        white-space: nowrap;
+        font-weight: 600;
+        color: var(--navy);
+      }
+
+      /* --------------------------------------------------------- callouts */
+      .note {
+        border-left: 2pt solid var(--gold);
+        background: var(--sand);
+        padding: 3mm 4mm;
+        margin: 0 0 5mm;
+        page-break-inside: avoid;
+      }
+
+      .note p:last-child {
+        margin-bottom: 0;
+      }
+
+      .note .tag {
+        display: block;
+        font-size: 7pt;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 1.5mm;
+      }
+
+      .note.warn {
+        border-left-color: #b4423a;
+        background: #fbf3f2;
+      }
+
+      .note.warn .tag {
+        color: #b4423a;
+      }
+
+      /* ------------------------------------------------------------- toc */
+      .toc {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        columns: 2;
+        column-gap: 10mm;
+      }
+
+      .toc li {
+        break-inside: avoid;
+        margin-bottom: 2.5mm;
+        padding-left: 10mm;
+        position: relative;
+        font-size: 9.5pt;
+      }
+
+      .toc .n {
+        position: absolute;
+        left: 0;
+        color: var(--gold);
+        font-weight: 600;
+      }
+
+      .toc small {
+        display: block;
+        color: var(--muted);
+        font-size: 8pt;
+        line-height: 1.4;
+      }
+
+      /* ----------------------------------------------------------- badges */
+      .chip {
+        display: inline-block;
+        border: 0.5pt solid var(--line);
+        border-radius: 1mm;
+        padding: 0.3mm 1.8mm;
+        font-size: 7.5pt;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--navy);
+        background: #fff;
+        white-space: nowrap;
+      }
+
+      .chip.gold {
+        border-color: var(--gold);
+        background: rgba(201, 164, 92, 0.14);
+      }
+
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2mm;
+        margin: 0 0 5mm;
+      }
+
+      .flow span {
+        border: 0.5pt solid var(--line);
+        border-left: 1.5pt solid var(--gold);
+        padding: 1.6mm 3mm;
+        font-size: 8.5pt;
+        background: #fff;
+      }
+
+      .lead {
+        font-size: 10.5pt;
+        color: var(--blue);
+        margin-bottom: 5mm;
+      }
+
+      .kicker {
+        color: var(--muted);
+        font-size: 9pt;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="running-footer">
+      <span>STE MABANIS · Back-office guide</span>
+      <span>August 2026 edition</span>
+    </div>
+
+    <!-- =============================================================== cover -->
+    <section class="cover">
+      <p class="mark">STE MABANIS · Agadir</p>
+      <div class="rule"></div>
+      <h1>Back-office guide</h1>
+      <p class="lede">
+        Everything the management console does, screen by screen: the property portfolio, clients,
+        the sales pipeline, the calendar, transactions, documents, tasks and reports. Written to be
+        read without any technical background.
+      </p>
+      <div class="foot">
+        <div><span>Document</span>Complete user guide</div>
+        <div><span>Audience</span>Management, sales, support</div>
+        <div><span>Version</span>1.0 — August 2026</div>
+      </div>
+    </section>
+
+    <!-- ================================================================= toc -->
+    <section>
+      <p class="eyebrow">Contents</p>
+      <h2>What this guide covers</h2>
+      <p class="lead">
+        Chapters 1 to 3 set the scene: what the system does, how you sign in, and which conventions
+        recur on every screen. Chapters 4 to 13 take each screen in turn. Chapters 14 to 17 are the
+        day-to-day reference.
+      </p>
+
+      <ul class="toc">
+        <li>
+          <span class="n">1</span>The system at a glance
+          <small>What the console manages, and how a contact becomes a signed deal.</small>
+        </li>
+        <li>
+          <span class="n">2</span>Signing in and choosing your workspace
+          <small>The three workspaces and what each one sees.</small>
+        </li>
+        <li>
+          <span class="n">3</span>Conventions used everywhere
+          <small>Menu, search, clickable cards, filtering lists, tables, badges.</small>
+        </li>
+        <li>
+          <span class="n">4</span>Dashboard
+          <small>The six indicators, today's priorities and the charts.</small>
+        </li>
+        <li>
+          <span class="n">5</span>Properties
+          <small>Create, edit, publish and retire a listing.</small>
+        </li>
+        <li>
+          <span class="n">6</span>Clients
+          <small>The client record, the score, the activity timeline.</small>
+        </li>
+        <li>
+          <span class="n">7</span>CRM pipeline
+          <small>The eight stages, moving leads, conversion.</small>
+        </li>
+        <li>
+          <span class="n">8</span>Calendar
+          <small>Day, Week and Month views, navigation, and viewing debriefs.</small>
+        </li>
+        <li>
+          <span class="n">9</span>Transactions
+          <small>From first interest to closing, commissions and payments.</small>
+        </li>
+        <li>
+          <span class="n">10</span>Documents
+          <small>Upload, categories, versions, attachments.</small>
+        </li>
+        <li>
+          <span class="n">11</span>Tasks
+          <small>The three-column board and the automatic reminders.</small>
+        </li>
+        <li>
+          <span class="n">12</span>Reports
+          <small>Four reports, one date range, one export.</small>
+        </li>
+        <li>
+          <span class="n">13</span>Client portal and modules in preparation
+          <small>What is planned, and what already feeds it.</small>
+        </li>
+        <li>
+          <span class="n">14</span>Who can do what
+          <small>The complete permission matrix by role.</small>
+        </li>
+        <li>
+          <span class="n">15</span>The recommended routine
+          <small>What to do daily, weekly and monthly.</small>
+        </li>
+        <li>
+          <span class="n">16</span>Glossary
+          <small>The system's vocabulary in plain language.</small>
+        </li>
+        <li>
+          <span class="n">17</span>Frequently asked questions
+          <small>The cases that keep coming up, and what to do.</small>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================================== ch. 1 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 1</p>
+        <h2>The system at a glance</h2>
+      </div>
+
+      <p class="lead">
+        The system has two faces sharing one database: the public website that visitors see, and
+        the back office where the agency works. What the team enters in the back office appears on
+        the website; what a visitor does on the website comes back into the back office.
+      </p>
+
+      <h3>What the console manages</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 30mm">Object</th>
+            <th>What it represents</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term">Property</td>
+            <td>
+              A listing in the portfolio: reference, price, surface, neighbourhood, photos, status,
+              agent in charge. This is what appears on the public website.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Client</td>
+            <td>
+              A person known to the agency, with one or more roles (buyer, seller, tenant, landlord,
+              investor), a budget and a score.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Lead</td>
+            <td>
+              A sales opportunity: a client, optionally a property, and a stage in the pipeline. One
+              client can carry several leads.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Appointment</td>
+            <td>
+              A viewing, valuation, signing, call or meeting, placed in the calendar and assigned to
+              an agent.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Transaction</td>
+            <td>
+              The file that opens when a lead is won: negotiated amount, commission, administrative
+              stages, payments.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Document</td>
+            <td>
+              A file in the deal (mandate, sale agreement, land title…) attached to a property, a
+              client or a transaction, with version history.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Task</td>
+            <td>
+              An action to carry out, with a due date, a priority and an assignee. Some are created
+              automatically by the system.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Activity</td>
+            <td>
+              A record of an exchange (call, email, WhatsApp, viewing, offer, note) that feeds the
+              timeline of a client or a lead.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>The through-line: from visitor to signed deal</h3>
+      <p>
+        Every screen serves a single chain. Understanding it is enough to know where to go for any
+        action.
+      </p>
+
+      <div class="flow">
+        <span>A property is published</span>
+        <span>A visitor views it</span>
+        <span>They become a client + a lead</span>
+        <span>The lead moves along the pipeline</span>
+        <span>A viewing is booked</span>
+        <span>The viewing is debriefed</span>
+        <span>An offer is made</span>
+        <span>The lead is won</span>
+        <span>A transaction opens</span>
+        <span>Documents are gathered</span>
+        <span>The transaction closes</span>
+        <span>Fees are counted</span>
+      </div>
+
+      <div class="note">
+        <span class="tag">Key point</span>
+        <p>
+          Nothing is deleted along the way. A sold property moves to the "Sold" status and leaves
+          the public website, but stays in the history and in the reports. That is what makes
+          period-over-period comparison possible.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== ch. 2 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 2</p>
+        <h2>Signing in and choosing your workspace</h2>
+      </div>
+
+      <h3>Signing in</h3>
+      <ol class="steps">
+        <li>Open the website address and add <strong>/login</strong> at the end.</li>
+        <li>Enter your work email address and your password.</li>
+        <li>
+          Tick <strong>Stay signed in</strong> on your own computer only; on a shared machine, leave
+          it unchecked.
+        </li>
+        <li>
+          You land on your workspace dashboard. The whole back office requires a valid session: any
+          attempt to open an /admin address without being signed in returns to the login page.
+        </li>
+      </ol>
+
+      <div class="note warn">
+        <span class="tag">Security</span>
+        <p>
+          The back office is never indexed by search engines and is password-protected. Do not share
+          your account: actions are attributed to the signed-in agent, and that attribution is what
+          makes per-agent reporting meaningful.
+        </p>
+      </div>
+
+      <h3>The three workspaces</h3>
+      <p>
+        Your role is set at sign-in. It decides which screens appear in the menu and which buttons
+        are available inside each screen.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 34mm">Workspace</th>
+            <th>What it allows</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term">Director<br /><span class="kicker">Management &amp; administration</span></td>
+            <td>
+              Full access to every area. Portfolio, sales and budget management. Reports and
+              oversight. <strong>The only role allowed to delete data</strong> and to create a
+              property.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Sales agent<br /><span class="kicker">Sales &amp; client relations</span></td>
+            <td>
+              Views and edits properties. Manages <strong>their own</strong> clients, leads and
+              viewings: records assigned to another agent do not appear. Read access to their
+              transactions and documents.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Executive assistant<br /><span class="kicker">Operational support</span></td>
+            <td>
+              The whole agency's calendar and viewings, documents, tasks, and creating or updating
+              clients. Read-only on properties and transactions. No access to the CRM pipeline.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Screens visible per workspace</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Screen</th>
+            <th style="width: 22mm">Director</th>
+            <th style="width: 22mm">Sales agent</th>
+            <th style="width: 22mm">Assistant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Dashboard</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Properties</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Clients</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>CRM pipeline</td><td class="tick">✓</td><td class="tick">✓</td><td class="no">·</td></tr>
+          <tr><td>Calendar</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Transactions</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Documents</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Tasks</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Reports</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Client portal</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+        </tbody>
+      </table>
+
+      <h3>The workspace switcher</h3>
+      <p>
+        Top right, the button with a gold dot shows the active workspace. Opening it lists what the
+        workspace allows and, for a sales agent, shows under "Work as" whose portfolio is being
+        viewed. Management can switch between workspaces to check what each team member sees; other
+        roles are fixed to their own.
+      </p>
+      <p>
+        The same menu holds the <strong>Sign out</strong> button, which clears the session and
+        returns to the login page.
+      </p>
+    </section>
+
+    <!-- ============================================================== ch. 3 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 3</p>
+        <h2>Conventions used everywhere</h2>
+      </div>
+
+      <p class="lead">
+        The back office deliberately repeats the same objects from screen to screen. Five minutes
+        spent on this chapter saves relearning every screen.
+      </p>
+
+      <h3>The frame</h3>
+      <ul>
+        <li>
+          <strong>The sidebar (left)</strong> — screens grouped by family: Oversight, Portfolio,
+          Operations, Analysis. Only the screens your workspace allows are listed.
+        </li>
+        <li>
+          <strong>The header (top)</strong> — the current screen name, search, the workspace
+          switcher, and the notification bell with its unread counter.
+        </li>
+        <li>
+          <strong>The bottom bar (on phones)</strong> — four shortcuts: Dashboard, Properties,
+          Pipeline, Calendar. The full menu opens from the button at the top left.
+        </li>
+      </ul>
+
+      <h3>Indicator cards are clickable</h3>
+      <p>
+        Every figure card in the system — on the dashboard and on the other screens — opens with one
+        click. A small information icon appears in the corner on hover. The window that opens always
+        answers the same three questions, in this order:
+      </p>
+      <ol class="steps">
+        <li><strong>Current value</strong> — the figure, its change, and the period covered.</li>
+        <li>
+          <strong>How this figure is calculated</strong> — the exact rule in plain words: what is
+          counted, and what is not.
+        </li>
+        <li>
+          <strong>What it is for</strong> — how to read a rise or a fall, and what to do when the
+          indicator moves.
+        </li>
+      </ol>
+      <p>
+        Many cards add a numeric <strong>breakdown</strong> (by stage, by category, by appointment
+        type) and a button leading straight to the screen where you can act.
+      </p>
+
+      <div class="note">
+        <span class="tag">Tip</span>
+        <p>
+          No indicator definition needs to be memorised: it is always one click away. If a figure is
+          questioned in a meeting, open the card rather than interpreting it.
+        </p>
+      </div>
+
+      <h3>Dropdown lists are searchable</h3>
+      <p>
+        Everywhere you pick a client, a property, an agent, a category or a status, the field works
+        the same way:
+      </p>
+      <ol class="steps">
+        <li>Click the field: a search box opens with the cursor already in place.</li>
+        <li>
+          Type three or four letters. The list narrows live — the search covers the label
+          <em>and</em> the second line (property reference, client email), and ignores accents and
+          capitals.
+        </li>
+        <li>
+          Click the row you want, or use the ↑ ↓ arrows then <strong>Enter</strong>.
+          <strong>Esc</strong> closes the list without changing anything.
+        </li>
+      </ol>
+      <p>
+        When a field is optional, the first row explicitly offers the empty value ("No property
+        attached", "Unassigned"…). That is how you remove an attachment already made.
+      </p>
+
+      <h3>Tables</h3>
+      <ul>
+        <li>Clicking a column header sorts; clicking again reverses the sort.</li>
+        <li>Clicking a row opens the matching record.</li>
+        <li>
+          Secondary columns disappear on small screens to keep reading comfortable; the information
+          stays in the record.
+        </li>
+      </ul>
+
+      <h3>Windows</h3>
+      <p>
+        Records and forms open in a <strong>window</strong> in the middle of the screen (as a sheet
+        sliding up from the bottom on phones). Close it with the cross, by clicking outside, or with
+        <strong>Esc</strong>. Advanced filters use a <strong>side panel</strong> that closes the
+        same way.
+      </p>
+      <p>
+        Every save shows a short confirmation at the bottom of the screen. A red message flags a
+        missing required field: nothing is lost, complete it and try again.
+      </p>
+
+      <h3>The visual vocabulary</h3>
+
+      <h4>Property statuses</h4>
+      <table>
+        <thead>
+          <tr><th style="width: 30mm">Status</th><th style="width: 30mm">On the website</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="chip">Draft</span></td><td>No</td><td>Listing still being prepared, never published.</td></tr>
+          <tr><td><span class="chip gold">Available</span></td><td>Yes</td><td>For sale or to let, open to viewings.</td></tr>
+          <tr><td><span class="chip gold">Reserved</span></td><td>Yes</td><td>A buyer is committed; the listing stays visible.</td></tr>
+          <tr><td><span class="chip gold">Under offer</span></td><td>Yes</td><td>An offer is being considered.</td></tr>
+          <tr><td><span class="chip">Sold</span></td><td>No</td><td>Deal closed; the listing leaves the public catalogue.</td></tr>
+          <tr><td><span class="chip">Rented</span></td><td>No</td><td>Lease signed; the listing leaves the public catalogue.</td></tr>
+          <tr><td><span class="chip">Archived</span></td><td>No</td><td>Withdrawn without a deal (mandate expired, seller pulled out).</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Client or lead temperature</h4>
+      <p>
+        A score from 0 to 100 with a word attached: <span class="chip">Cold</span>
+        <span class="chip">Warm</span> <span class="chip gold">Hot</span>. The score rises with
+        exchanges, viewings and a confirmed budget. It can also be set by hand in the record when
+        the agent knows something the system does not.
+      </p>
+
+      <h4>Task priority</h4>
+      <p>
+        <span class="chip">Low</span> <span class="chip">Normal</span>
+        <span class="chip">High</span> <span class="chip gold">Urgent</span> — priority does not
+        change the due date; it decides which of two tasks due the same day comes first.
+      </p>
+
+      <h4>Client roles</h4>
+      <p>
+        <span class="chip">Buyer</span> <span class="chip">Seller</span>
+        <span class="chip">Tenant</span> <span class="chip">Landlord</span>
+        <span class="chip">Investor</span> — a client can hold several: someone selling their flat
+        to buy a bigger one is a seller <em>and</em> a buyer.
+      </p>
+    </section>
+
+    <!-- ============================================================== ch. 4 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 4</p>
+        <h2>Dashboard</h2>
+      </div>
+
+      <p class="lead">
+        The home screen. It answers a single question: where does the agency stand today, and what
+        should be tackled first?
+      </p>
+
+      <h3>The six indicators</h3>
+      <p>
+        Three cards per row, two rows. Each card shows the value, the change against the previous
+        period, and opens to give its full definition.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 28mm">Indicator</th>
+            <th>What it counts</th>
+            <th style="width: 42mm">What it should trigger</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term">Active listings</td>
+            <td>Properties online: Available, Reserved and Under offer statuses.</td>
+            <td>If it falls, restart seller prospecting.</td>
+          </tr>
+          <tr>
+            <td class="term">New leads</td>
+            <td>Incoming contacts created over the last 30 days, all sources combined.</td>
+            <td>If it falls, check which source has dried up.</td>
+          </tr>
+          <tr>
+            <td class="term">Viewings</td>
+            <td>Viewing-type appointments over the last 30 days, whatever their status.</td>
+            <td>Many leads and few viewings = qualification is stuck.</td>
+          </tr>
+          <tr>
+            <td class="term">Pipeline</td>
+            <td>The combined value of leads that are neither won nor lost.</td>
+            <td>Revenue currently under negotiation.</td>
+          </tr>
+          <tr>
+            <td class="term">Fees</td>
+            <td>
+              Commissions on transactions closed since the start of the year.
+              <em>Visible to management only.</em>
+            </td>
+            <td>The actual result, the basis for target tracking.</td>
+          </tr>
+          <tr>
+            <td class="term">Conversion</td>
+            <td>Share of leads won among leads concluded (won + lost).</td>
+            <td>Measures the quality of sales work, not volume.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Today's priorities</h3>
+      <p>
+        The left column lists what must be handled today, sorted by urgency:
+        <strong>Overdue</strong> (red), <strong>Today</strong>, <strong>Coming up</strong>. Each
+        line is a shortcut: one click opens the item concerned, be it a task, an appointment or a
+        lead. An empty list means every deadline is being met.
+      </p>
+
+      <h3>The charts</h3>
+      <ul>
+        <li>
+          <strong>Leads and viewings</strong> — two curves over the past months. The gap between
+          them reads at a glance: it is the rate at which contacts turn into viewings.
+        </li>
+        <li>
+          <strong>Revenue by month</strong> — fees collected month by month, as bars.
+        </li>
+        <li>
+          <strong>Lead sources</strong> — where contacts come from, as a ring with a numeric legend
+          below. This is the card that justifies acquisition budgets.
+        </li>
+      </ul>
+
+      <h3>Roles and permissions</h3>
+      <p>
+        At the bottom of the screen, a table summarises who can do what in the agency, with your own
+        role highlighted in gold. It mirrors the full matrix in chapter 14.
+      </p>
+    </section>
+
+    <!-- ============================================================== ch. 5 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 5</p>
+        <h2>Properties</h2>
+      </div>
+
+      <p class="lead">
+        The agency's portfolio. This is where a listing is born, is published, changes status and
+        eventually leaves the catalogue.
+      </p>
+
+      <h3>Reading the list</h3>
+      <p>
+        Properties appear as a table: reference, title, neighbourhood, price, surface, status,
+        agent. The search bar filters on title and reference; the <strong>Filters</strong> button
+        opens a side panel to narrow by status, type, transaction (sale or rental), neighbourhood
+        and price range. Clicking a row opens the record.
+      </p>
+
+      <h3>Creating a property</h3>
+      <ol class="steps">
+        <li>The <strong>New property</strong> button, top right (management only).</li>
+        <li>
+          Fill in the title, type, transaction, city and neighbourhood, then the price, surface and
+          number of rooms.
+        </li>
+        <li>
+          Write the description: this is the text website visitors will read, not an internal note.
+        </li>
+        <li>
+          List the features separated by commas (pool, lift, parking…) — they become the bullet
+          points on the public listing.
+        </li>
+        <li>
+          Choose the <strong>status</strong> and the <strong>agent in charge</strong> from the
+          searchable dropdowns.
+        </li>
+        <li>Save, then add the photos from the record.</li>
+      </ol>
+
+      <div class="note">
+        <span class="tag">Photos</span>
+        <p>
+          The first photo is the <strong>cover</strong>: it is the one used everywhere else on the
+          website. Change it by designating another image as the cover in the gallery; the order of
+          the other photos is freely adjustable.
+        </p>
+      </div>
+
+      <h3>Keeping the record alive</h3>
+      <p>
+        The record shows the counters that matter: <strong>views over 30 days</strong> and
+        <strong>number of leads</strong> generated. A property with many views but no leads has a
+        price or photo problem; a property with few views has a visibility problem.
+      </p>
+      <p>
+        The status is changed directly from the record and takes effect on the public website
+        immediately. A sold property is never deleted: it moves to "Sold", leaves the catalogue and
+        stays in the reports. Permanent deletion exists but is reserved for management, and only
+        makes sense for a record created by mistake.
+      </p>
+    </section>
+
+    <!-- ============================================================== ch. 6 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 6</p>
+        <h2>Clients</h2>
+      </div>
+
+      <p class="lead">
+        The agency's contact base. One record per person, however they first got in touch.
+      </p>
+
+      <h3>Finding a client</h3>
+      <p>
+        The search covers name, email and phone. Below it, two sets of filters that combine: by
+        <strong>role</strong> (buyer, seller, tenant, landlord, investor) and by
+        <strong>temperature</strong> (cold, warm, hot). A sales agent only sees the clients they own.
+      </p>
+
+      <h3>Creating or editing a record</h3>
+      <p>
+        First name, last name and email are required; everything else can be completed later. The
+        budget range, the city and the notes are what make matching useful — a record without a
+        budget cannot be matched to a property.
+      </p>
+      <p>
+        Source, temperature and agent are picked from searchable lists. Roles are tick boxes: a
+        client can hold several.
+      </p>
+
+      <h3>The client record</h3>
+      <p>It opens with a click on the row and reads in three tabs:</p>
+      <ul>
+        <li>
+          <strong>Activity</strong> — the chronological timeline of every exchange: calls, emails,
+          WhatsApp, viewings, offers, notes, stage changes. This is the memory of the relationship;
+          an agent picking up the file finds everything there.
+        </li>
+        <li><strong>Leads</strong> — the open opportunities for this client.</li>
+        <li><strong>Appointments</strong> — past and upcoming appointments.</li>
+      </ul>
+      <p>
+        Temperature can be changed with one click from the record, without opening the edit form.
+      </p>
+    </section>
+
+    <!-- ============================================================== ch. 7 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 7</p>
+        <h2>CRM pipeline</h2>
+      </div>
+
+      <p class="lead">
+        The sales tracking board. Each column is a stage; each card is a live opportunity. The
+        screen is reserved for management and sales agents.
+      </p>
+
+      <h3>The eight stages</h3>
+      <table>
+        <thead>
+          <tr><th style="width: 30mm">Stage</th><th>What it means</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="term">New</td><td>The contact has just arrived; nobody has called yet.</td></tr>
+          <tr><td class="term">Contacted</td><td>A first exchange has taken place.</td></tr>
+          <tr><td class="term">Qualified</td><td>The need and the budget are known and consistent.</td></tr>
+          <tr><td class="term">Viewing</td><td>One or more viewings are booked or done.</td></tr>
+          <tr><td class="term">Offer</td><td>A priced proposal has been passed to the seller.</td></tr>
+          <tr><td class="term">Negotiation</td><td>Terms are under discussion.</td></tr>
+          <tr><td class="term">Won</td><td>Agreement reached — this is what opens a transaction.</td></tr>
+          <tr><td class="term">Lost</td><td>The deal will not happen; the card stays for analysis.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Moving a lead</h3>
+      <p>
+        Two ways, your choice. With a mouse, <strong>drag the card</strong> from one column to
+        another. Otherwise, the small list under each card lets you pick the stage — the safest
+        method on a touch screen, and the only one from the keyboard.
+      </p>
+      <p>
+        At the top of each column: the number of leads and their combined value. A column that fills
+        up without emptying is a stage where the process is stuck.
+      </p>
+
+      <h3>The three counters</h3>
+      <p>
+        Above the board, three clickable cards: <strong>Open leads</strong>, <strong>Hot</strong>
+        and <strong>Pipeline value</strong>. As everywhere, one click opens their definition and the
+        breakdown by stage.
+      </p>
+
+      <h3>A lead's record</h3>
+      <p>Clicking a card opens the record. It shows, and lets you change:</p>
+      <ul>
+        <li>the pipeline stage and the temperature, with one click on the dedicated buttons;</li>
+        <li>the deal value, the score, the source and the agent responsible;</li>
+        <li>
+          the <strong>next action</strong> and its date — this is the field that feeds "Today's
+          priorities" on the dashboard;
+        </li>
+        <li>the lead's activity timeline and the client's contact details.</li>
+      </ul>
+
+      <h3>Creating a lead</h3>
+      <ol class="steps">
+        <li>The <strong>New lead</strong> button.</li>
+        <li>
+          Pick an existing client from the searchable list, or switch to
+          <strong>Create a new client</strong> to enter first name, last name, email and phone
+          without leaving the window.
+        </li>
+        <li>
+          Attach the property concerned if it is known: the lead value automatically takes the
+          property's price.
+        </li>
+        <li>Set the source, the starting temperature and an initial score.</li>
+        <li>
+          Save. The lead starts at the <strong>New</strong> stage and a first-contact task due
+          within 24 hours is created automatically.
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============================================================== ch. 8 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 8</p>
+        <h2>Calendar</h2>
+      </div>
+
+      <p class="lead">
+        The agency's schedule: viewings, valuations, signings, calls and meetings. A sales agent
+        sees only their own appointments; management and support see the whole team's.
+      </p>
+
+      <h3>The four counters</h3>
+      <p>
+        <strong>Today</strong>, <strong>Next 7 days</strong>, <strong>Completed this week</strong>
+        and <strong>Upcoming viewings</strong>. Click any of them for its definition and its
+        breakdown by appointment type.
+      </p>
+
+      <h3>The navigation bar</h3>
+      <p>
+        A single bar drives all three views. From left to right:
+        <strong>Day / Week / Month</strong>, then the <strong>‹</strong> and
+        <strong>›</strong> arrows, the <strong>Today</strong> button, and the label of the period on
+        screen.
+      </p>
+      <p>
+        The arrows move by a step matched to the view: <strong>one day</strong> in Day view,
+        <strong>one week</strong> in Week view, <strong>one month</strong> in Month view. The
+        "Today" button returns to the current date and greys out when you are already there.
+        Switching view keeps the date: you move from the week of 12 May to 12 May in Day view
+        without losing your place.
+      </p>
+
+      <h3>Day view</h3>
+      <p>
+        The day takes the full width, from 8 am to 8 pm, with the hours in a column on the left.
+        Each appointment is a block placed at its time and sized to its real duration, showing the
+        full time range, the title, the type and the location. A red line marks the current time
+        when the day on screen is today. Clicking a block opens the appointment record.
+      </p>
+
+      <h3>Week view</h3>
+      <p>
+        The seven days side by side, Monday to Sunday, on the same hourly grid. Each day header
+        recalls the number of appointments, and the current day is tinted. On a small screen the
+        grid scrolls sideways rather than squeezing the columns.
+      </p>
+
+      <h3>Month view</h3>
+      <p>
+        Each cell shows the <strong>day's programme</strong>: up to three appointments as chips
+        carrying the time and the title, then a "+ N more" line if the day is busy. The colour of
+        the left edge indicates the type — gold for a viewing, blue for a valuation, green for a
+        signing. A cancelled appointment is struck through.
+      </p>
+      <ul>
+        <li>Clicking a <strong>chip</strong> opens that appointment's record directly.</li>
+        <li>
+          Clicking the <strong>cell</strong> selects the day: the full detail, every appointment
+          included, appears below the calendar.
+        </li>
+      </ul>
+
+      <h3>Creating an appointment</h3>
+      <ol class="steps">
+        <li>The <strong>New appointment</strong> button.</li>
+        <li>Pick the type: Viewing, Valuation, Signing, Call or Meeting.</li>
+        <li>Give it a meaningful title — this is what appears in the month cells.</li>
+        <li>Set the date and the time range.</li>
+        <li>
+          Attach the client, the property and the agent through the searchable lists; all three are
+          optional, but an attached appointment feeds the client's timeline.
+        </li>
+        <li>Add the location, then save.</li>
+      </ol>
+
+      <h3>Statuses and debriefs</h3>
+      <p>
+        From an appointment record, the status changes with one click:
+        <span class="chip">Scheduled</span> <span class="chip gold">Confirmed</span>
+        <span class="chip">Completed</span> <span class="chip">Cancelled</span>
+        <span class="chip">No-show</span>.
+      </p>
+      <div class="note">
+        <span class="tag">The move that matters</span>
+        <p>
+          Marking a viewing <strong>Completed</strong> immediately opens the debrief form: client
+          interest from 0 to 5, outcome, next action. Those three pieces of information feed the
+          lead's score and tomorrow's priorities. A viewing left undebriefed is a viewing lost to
+          follow-up.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== ch. 9 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 9</p>
+        <h2>Transactions</h2>
+      </div>
+
+      <p class="lead">
+        Administrative tracking of concluded deals, from agreement to final signature.
+      </p>
+
+      <h3>The four counters</h3>
+      <p>
+        <strong>In progress</strong> (open files), <strong>Pipeline volume</strong> (sum of
+        negotiated amounts), <strong>Commissions receivable</strong> and
+        <strong>Imminent closings</strong>. Each opens to give its calculation rule.
+      </p>
+
+      <h3>The eight stages of a file</h3>
+      <div class="flow">
+        <span>Interest</span><span>Viewing</span><span>Offer</span><span>Negotiation</span>
+        <span>Agreement</span><span>Contract</span><span>Payment</span><span>Closing</span>
+      </div>
+      <p>
+        The stage is changed by hand from the record, at the file's real pace. A transaction stays
+        "open" until it has a closing date: that date, and nothing else, moves the commission from
+        "receivable" to the fees earned on the dashboard.
+      </p>
+
+      <h3>Creating a transaction</h3>
+      <p>
+        Pick the property, the buyer, the seller and the agent — all from searchable lists — then
+        enter the amount actually negotiated, which may differ from the listed price. The
+        <strong>commission</strong> defaults to 2.5% of the amount and remains editable file by
+        file.
+      </p>
+
+      <h3>Payments</h3>
+      <p>
+        Each file keeps its own schedule: add an instalment with its amount and date, then mark it
+        paid when the funds arrive. The gap between the total amount and the payments received reads
+        directly in the record.
+      </p>
+    </section>
+
+    <!-- ============================================================= ch. 10 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 10</p>
+        <h2>Documents</h2>
+      </div>
+
+      <p class="lead">
+        The agency's library: everything that must be found on the day of a signing or an audit.
+      </p>
+
+      <h3>The seven categories</h3>
+      <p>
+        <span class="chip">Mandate</span> <span class="chip">Land title</span>
+        <span class="chip">Sale agreement</span> <span class="chip">Contract</span>
+        <span class="chip">Invoice</span> <span class="chip">Survey</span>
+        <span class="chip">Other</span>
+      </p>
+      <p>
+        The tabs above the list filter by category, and the search covers the file name. The four
+        clickable counters give the number of documents, the storage volume, the categories in use
+        and the cumulative version count.
+      </p>
+
+      <h3>Uploading a document</h3>
+      <ol class="steps">
+        <li>The <strong>Upload</strong> button, then choose the file.</li>
+        <li>Select the category.</li>
+        <li>
+          Attach it to a <strong>property</strong> and/or a <strong>client</strong> — that
+          attachment is what will let you find it from the relevant record, and later share it in
+          the client portal.
+        </li>
+        <li>Save.</li>
+      </ol>
+
+      <div class="note">
+        <span class="tag">Versions</span>
+        <p>
+          Uploading a file with the same name as an existing document creates a
+          <strong>new version</strong> rather than a duplicate. The version number appears in the
+          list: a sale agreement at version 3 has been renegotiated twice, and the earlier versions
+          remain available.
+        </p>
+      </div>
+
+      <p>
+        Deleting a document is reserved for management; the other roles can upload and consult.
+      </p>
+    </section>
+
+    <!-- ============================================================= ch. 11 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 11</p>
+        <h2>Tasks</h2>
+      </div>
+
+      <p class="lead">
+        The agency's shared reminder board, in three columns:
+        <strong>To do</strong>, <strong>In progress</strong>, <strong>Done</strong>.
+      </p>
+
+      <h3>The four counters</h3>
+      <p>
+        <strong>Overdue</strong>, <strong>Due today</strong>, <strong>Open</strong> and
+        <strong>Completed</strong>. The exact rule for each is in its explanation window; the only
+        one to watch every morning is "Overdue", which should trend towards zero.
+      </p>
+
+      <h3>Creating a task</h3>
+      <ol class="steps">
+        <li>The <strong>New task</strong> button.</li>
+        <li>Phrase the title as an action, with the client's name: "Chase Mr Alaoui for the file documents".</li>
+        <li>Choose the priority and the due date.</li>
+        <li>Assign an agent — without one, the task appears in nobody's workspace.</li>
+        <li>
+          Attach it if needed to a lead, a client or a property: pick the type first under
+          <strong>Attach to</strong>, then the specific item in the searchable list that appears
+          just below.
+        </li>
+      </ol>
+
+      <h3>Automatic tasks</h3>
+      <p>The system creates some by itself, and they appear on the board like any other:</p>
+      <ul>
+        <li>a <strong>first contact within 24 hours</strong> task for every new lead;</li>
+        <li>a <strong>debrief</strong> reminder after a past viewing that has not been filled in.</li>
+      </ul>
+      <p>
+        Tasks whose due date is near or past automatically rise into "Today's priorities" on the
+        dashboard.
+      </p>
+    </section>
+
+    <!-- ============================================================= ch. 12 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 12</p>
+        <h2>Reports</h2>
+      </div>
+
+      <p class="lead">
+        The analysis screen, reserved for management. Four reports, a date range of your choosing,
+        one export.
+      </p>
+
+      <h3>Choosing the period</h3>
+      <p>
+        Two date fields at the top of the screen set the period analysed; the default is the last 90
+        days. The round button beside them restores the default dates. Every indicator, the curve
+        and the table recalculate at once.
+      </p>
+
+      <h3>The four reports</h3>
+      <table>
+        <thead>
+          <tr><th style="width: 26mm">Report</th><th>What it shows</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term">Properties</td>
+            <td>
+              Properties created, active listings, sold or rented, average price. Weekly creation
+              curve, and the detail property by property.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">CRM</td>
+            <td>
+              Clients and leads created, conversion rate, average score. The report that answers
+              "are we converting better than before?".
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Agents</td>
+            <td>
+              Number of agents, transactions, commissions and viewings over the period, with the
+              detail per agent. The basis for a team review.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Activity</td>
+            <td>
+              Total interactions, split into calls, emails, WhatsApp, viewings and offers, plus the
+              log of the last 60 actions.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        As elsewhere, every indicator card opens to give its definition, including a reminder of the
+        period.
+      </p>
+
+      <h3>Exporting</h3>
+      <ul>
+        <li>
+          <strong>CSV</strong> — the report table as a file you can open in Excel, for a specific
+          calculation or layout.
+        </li>
+        <li>
+          <strong>Print / PDF</strong> — a laid-out version of the report; in the print dialog,
+          choose "Save as PDF" to send it by email.
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================================= ch. 13 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 13</p>
+        <h2>Client portal and modules in preparation</h2>
+      </div>
+
+      <h3>The client portal</h3>
+      <p>
+        The <strong>Client portal</strong> screen describes the private space that will be opened to
+        the agency's clients: secure access, through a personal link, to follow their file without
+        calling. Four modules are planned:
+      </p>
+      <ul>
+        <li><strong>Favourite properties</strong> — the listings a client pins to find again.</li>
+        <li><strong>My viewings</strong> — past and upcoming viewings, with the viewing notes.</li>
+        <li><strong>My documents</strong> — the files the agency shares in one click.</li>
+        <li>
+          <strong>My transaction</strong> — step-by-step progress: offer, sale agreement, financing,
+          deed.
+        </li>
+      </ul>
+      <p>
+        The data architecture this needs — clients, viewings, documents, transactions — is already
+        in place and fed by the team's daily work. The portal will consume it as it stands: the
+        better the records are kept today, the richer the portal will be on the day it opens.
+      </p>
+
+      <h3>Modules built but not enabled</h3>
+      <p>Three further screens are developed and can be added to the menu on request:</p>
+      <ul>
+        <li>
+          <strong>Matching</strong> — automatic pairing of buyer clients with active listings, based
+          on budget and criteria, with a selection sent out.
+        </li>
+        <li>
+          <strong>Marketing</strong> — email and WhatsApp campaigns, their open and click
+          statistics, and management of the properties featured on the home page.
+        </li>
+        <li>
+          <strong>Automations</strong> — the rules that create tasks by themselves, with their
+          execution log and the switch to turn them on.
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================================= ch. 14 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 14</p>
+        <h2>Who can do what</h2>
+      </div>
+
+      <p class="lead">
+        The complete permission matrix. It is also visible at the bottom of the dashboard, where
+        your own role appears in gold.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th style="width: 22mm">Director</th>
+            <th style="width: 22mm">Sales agent</th>
+            <th style="width: 22mm">Assistant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Open the dashboard</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Open properties</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Create a property</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Edit a property</td><td class="tick">✓</td><td class="tick">✓</td><td class="no">·</td></tr>
+          <tr><td>Delete a property</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Open clients</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Create a client</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Edit a client</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Delete a client</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Open the CRM pipeline</td><td class="tick">✓</td><td class="tick">✓</td><td class="no">·</td></tr>
+          <tr><td>Move a lead</td><td class="tick">✓</td><td class="tick">✓</td><td class="no">·</td></tr>
+          <tr><td>Convert a lead</td><td class="tick">✓</td><td class="tick">✓</td><td class="no">·</td></tr>
+          <tr><td>Delete a lead</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Open the calendar</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Manage viewings and appointments</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Open transactions</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Manage transactions</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Delete a transaction</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Open documents</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Manage documents</td><td class="tick">✓</td><td class="no">·</td><td class="tick">✓</td></tr>
+          <tr><td>Open tasks</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Manage tasks</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+          <tr><td>Open reports</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Export reports</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Open the client portal</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Matching and sending selections</td><td class="tick">✓</td><td class="tick">✓</td><td class="no">·</td></tr>
+          <tr><td>Manage marketing campaigns</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+          <tr><td>Enable automations</td><td class="tick">✓</td><td class="no">·</td><td class="no">·</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <span class="tag">Two principles</span>
+        <p>
+          <strong>Deletion is always reserved for management.</strong> Data created by mistake can
+          be archived by any role; only management can erase it for good.
+        </p>
+        <p>
+          <strong>A sales agent only sees their own portfolio.</strong> Their clients, their leads,
+          their appointments and their tasks. This is not about trust but about legibility: everyone
+          works from their own list.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================= ch. 15 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 15</p>
+        <h2>The recommended routine</h2>
+      </div>
+
+      <h3>Every morning — 10 minutes</h3>
+      <ol class="steps">
+        <li>Open the <strong>dashboard</strong> and read "Today's priorities".</li>
+        <li>
+          Move to <strong>Tasks</strong>: the "Overdue" counter should be cleared before starting
+          anything else.
+        </li>
+        <li>
+          Open the <strong>calendar in Day view</strong> to check the programme and confirm the
+          appointments still marked "Scheduled".
+        </li>
+      </ol>
+
+      <h3>After every appointment — 2 minutes</h3>
+      <ol class="steps">
+        <li>Mark the appointment <strong>Completed</strong>.</li>
+        <li>Fill in the debrief: interest out of 5, outcome, next action.</li>
+        <li>Adjust the lead's stage and temperature accordingly.</li>
+      </ol>
+
+      <h3>Every Friday — 20 minutes</h3>
+      <ol class="steps">
+        <li>
+          Go through the <strong>pipeline</strong> column by column: any card without a next action
+          must be given one.
+        </li>
+        <li>Check that "Hot" leads have been contacted during the week.</li>
+        <li>
+          Open the <strong>calendar in Month view</strong> to spot empty days next week and fill
+          them.
+        </li>
+        <li>Review the <strong>transaction</strong> files sitting at the "Closing" stage.</li>
+      </ol>
+
+      <h3>At the start of each month — 30 minutes (management)</h3>
+      <ol class="steps">
+        <li>Open <strong>Reports</strong> for the month just gone and export all four to CSV.</li>
+        <li>
+          Compare conversion and average score with the previous month: that is the measure of sales
+          work.
+        </li>
+        <li>
+          Look at <strong>lead sources</strong> on the dashboard before deciding acquisition
+          budgets.
+        </li>
+        <li>
+          Check the number of <strong>active listings</strong>: it determines the month ahead.
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============================================================= ch. 16 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 16</p>
+        <h2>Glossary</h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th style="width: 34mm">Term</th><th>Definition</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="term">Lead</td><td>A sales opportunity: a client, optionally a property, and a stage in the pipeline. One client can carry several leads.</td></tr>
+          <tr><td class="term">Pipeline</td><td>The sequence of eight stages a lead passes through, and by extension the total value of live deals.</td></tr>
+          <tr><td class="term">Stage</td><td>A lead's position in the pipeline, from "New" to "Won" or "Lost".</td></tr>
+          <tr><td class="term">Temperature</td><td>How keen a client is: cold, warm or hot, backed by a score from 0 to 100.</td></tr>
+          <tr><td class="term">Score</td><td>A 0–100 rating summarising the quality of a contact: exchanges, viewings, confirmed budget.</td></tr>
+          <tr><td class="term">Source</td><td>The channel the contact came through: website, referral, portal, social media, phone, agency walk-in.</td></tr>
+          <tr><td class="term">Conversion</td><td>The share of concluded leads that were won, as a percentage.</td></tr>
+          <tr><td class="term">Debrief</td><td>The report on a viewing: level of interest, outcome, next action.</td></tr>
+          <tr><td class="term">Next action</td><td>What to do next on a lead, with its date. Feeds today's priorities.</td></tr>
+          <tr><td class="term">Transaction</td><td>The administrative file for a concluded deal, from agreement to closing.</td></tr>
+          <tr><td class="term">Commission</td><td>The agency's fee on a transaction, 2.5% of the amount by default.</td></tr>
+          <tr><td class="term">Closing</td><td>The last stage of a transaction. Until it is dated, the commission is only a forecast.</td></tr>
+          <tr><td class="term">Version</td><td>A document's revision number. Re-uploading a file with the same name increments it.</td></tr>
+          <tr><td class="term">Timeline</td><td>The chronological sequence of exchanges with a client or on a lead.</td></tr>
+          <tr><td class="term">Workspace</td><td>The role you are signed in under, which determines the screens and actions available.</td></tr>
+          <tr><td class="term">Matching</td><td>Automatic pairing of active listings with buyer clients according to their budget and criteria.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================= ch. 17 -->
+    <section class="chapter">
+      <div class="chapter-head">
+        <p class="eyebrow">Chapter 17</p>
+        <h2>Frequently asked questions</h2>
+      </div>
+
+      <h4>I cannot see a screen someone mentioned.</h4>
+      <p>
+        It does not belong to your workspace. The CRM pipeline does not exist for support; reports
+        and the client portal are reserved for management. Chapter 2 gives the exact list per role.
+      </p>
+
+      <h4>A client my colleague created does not appear in my list.</h4>
+      <p>
+        That is expected: a sales agent only sees the records they own. To take over a file,
+        management changes the agent in charge on the client record.
+      </p>
+
+      <h4>I cannot find the delete button.</h4>
+      <p>
+        Deletion is reserved for management, for every object. In most cases the right move is not
+        to delete but to change the status: "Archived" for a property, "Lost" for a lead. The
+        history stays, and the reports stay accurate.
+      </p>
+
+      <h4>A dashboard figure surprises me.</h4>
+      <p>
+        Click it. The window states what is counted, what is not, and over which period. Nine times
+        out of ten the difference is the period: "30 days" is not "this month".
+      </p>
+
+      <h4>The dropdown list is too long.</h4>
+      <p>
+        Do not scroll it: type. Every list in the back office filters as you type, on the label as
+        well as the reference or the email, ignoring accents.
+      </p>
+
+      <h4>How do I get back to today in the calendar?</h4>
+      <p>
+        The <strong>Today</strong> button, between the two arrows. It is greyed out when you are
+        already there.
+      </p>
+
+      <h4>I forgot to debrief yesterday's viewing.</h4>
+      <p>
+        Find it in the calendar — Month view, then click the chip on the right day — and mark it
+        "Completed": the debrief form opens, however old the appointment is.
+      </p>
+
+      <h4>Do my changes show on the public website straight away?</h4>
+      <p>
+        Yes. The website and the back office share one database: a status or price change is
+        immediate. That is why a property being prepared should stay in "Draft" until the record is
+        complete.
+      </p>
+
+      <h4>Can I work from my phone?</h4>
+      <p>
+        Yes, every screen adapts. The bottom bar gives access to the four most-used screens, windows
+        open as sliding sheets, and wide grids — pipeline, week calendar, month calendar — scroll
+        sideways rather than compressing their content.
+      </p>
+    </section>
+  </body>
+</html>

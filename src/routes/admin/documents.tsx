@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -22,11 +22,21 @@ import {
 } from "@/lib/admin/queries";
 import type { DocumentCategory, StoredDocument } from "@/lib/admin/types";
 import { DOCUMENT_LABELS, formatBytes, formatDate, label } from "@/lib/admin/format";
-import { StatCard, Modal, AdminButton, EmptyState } from "@/components/admin/primitives";
+import {
+  StatCard,
+  Modal,
+  AdminButton,
+  EmptyState,
+  SearchSelect,
+} from "@/components/admin/primitives";
 import { useCan } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/documents")({
+  // `q` is set by the header search so a hit lands on this screen already filtered.
+  validateSearch: (search: Record<string, unknown>): { q: string | undefined } => ({
+    q: typeof search["q"] === "string" && search["q"] ? search["q"] : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Documents   STE MABANIS" },
@@ -39,8 +49,17 @@ export const Route = createFileRoute("/admin/documents")({
 const CATEGORIES = Object.keys(DOCUMENT_LABELS) as DocumentCategory[];
 
 function DocumentsPage() {
+  const { q } = Route.useSearch();
   const [category, setCategory] = useState<DocumentCategory | "all">("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(q ?? "");
+
+  // Arriving from the header search   or searching again while already here.
+  useEffect(() => {
+    if (q) {
+      setSearch(q);
+      setCategory("all");
+    }
+  }, [q]);
   const [preview, setPreview] = useState<StoredDocument | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -65,6 +84,12 @@ function DocumentsPage() {
   const totalBytes = documents.reduce((s, d) => s + d.sizeBytes, 0);
   const versions = documents.reduce((s, d) => s + d.version, 0);
 
+  // Used by the KPI explanation modals: how the library actually breaks down.
+  const categoryRows = CATEGORIES.map((c) => ({
+    label: label(DOCUMENT_LABELS, c),
+    value: String(documents.filter((d) => d.category === c).length),
+  })).filter((r) => r.value !== "0");
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -74,6 +99,12 @@ function DocumentsPage() {
           hint="Fichiers archivés"
           icon={FolderOpen}
           index={0}
+          detail={{
+            what: "Le nombre de fichiers conservés dans la bibliothèque de l'agence.",
+            how: "Chaque fichier déposé compte pour un document, quelle que soit sa catégorie. Remplacer un fichier existant crée une nouvelle version et n'ajoute pas de document supplémentaire.",
+            why: "C'est la mémoire administrative de l'agence : mandats, compromis, diagnostics, pièces d'identité. Un dossier complet au moment de la signature évite les allers-retours avec le notaire.",
+            rows: categoryRows,
+          }}
         />
         <StatCard
           label="Volume total"
@@ -81,6 +112,19 @@ function DocumentsPage() {
           hint="Toutes catégories"
           icon={HardDrive}
           index={1}
+          detail={{
+            what: "L'espace de stockage occupé par l'ensemble des fichiers.",
+            how: "On additionne la taille de tous les documents, toutes versions confondues. Les photos de biens en haute définition pèsent le plus lourd.",
+            why: "Utile pour anticiper le coût de stockage et repérer les fichiers trop lourds : un PDF scanné à très haute résolution ralentit son ouverture par le client dans le portail.",
+            rows: [
+              {
+                label: "Taille moyenne par fichier",
+                value: documents.length
+                  ? formatBytes(Math.round(totalBytes / documents.length))
+                  : "—",
+              },
+            ],
+          }}
         />
         <StatCard
           label="Catégories"
@@ -88,6 +132,12 @@ function DocumentsPage() {
           hint={"Sur " + CATEGORIES.length + " possibles"}
           icon={Layers}
           index={2}
+          detail={{
+            what: "Le nombre de catégories de classement effectivement utilisées.",
+            how: `On compte les catégories distinctes présentes parmi les documents déposés, sur les ${CATEGORIES.length} catégories prévues par le système.`,
+            why: "Une catégorie jamais utilisée est souvent le signe d'un type de pièce qu'on oublie de collecter. Le filtre en dessous permet de vérifier catégorie par catégorie ce qui manque.",
+            rows: categoryRows,
+          }}
         />
         <StatCard
           label="Versions"
@@ -95,6 +145,11 @@ function DocumentsPage() {
           hint="Historique cumulé"
           icon={FileText}
           index={3}
+          detail={{
+            what: "Le nombre total de versions de fichiers conservées.",
+            how: "Chaque document démarre en version 1. Déposer un fichier portant le même nom incrémente sa version, et on additionne ici les numéros de version de tous les documents.",
+            why: "Un document très versionné signale un dossier qui a beaucoup circulé, souvent un compromis renégocié. L'historique permet de revenir à une version antérieure en cas de litige.",
+          }}
         />
       </div>
 
@@ -313,7 +368,7 @@ function UploadModal({
   properties,
   onClose,
 }: {
-  clients: { firstName: string; lastName: string; id: string }[];
+  clients: { firstName: string; lastName: string; id: string; email?: string | undefined }[];
   properties: { title: string; reference: string; id: string }[];
   onClose: () => void;
 }) {
@@ -386,7 +441,7 @@ function UploadModal({
           ) : (
             <>
               <p className="text-sm text-navy">Glissez un fichier ici ou cliquez pour parcourir</p>
-              <p className="text-xs text-muted-foreground">PDF, images, documents   20 Mo max</p>
+              <p className="text-xs text-muted-foreground">PDF, images, documents 20 Mo max</p>
             </>
           )}
           <input
@@ -397,52 +452,40 @@ function UploadModal({
           />
         </div>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Catégorie</span>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as DocumentCategory)}
-            className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {label(DOCUMENT_LABELS, c)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Catégorie"
+          value={category}
+          onChange={(v) => setCategory(v as DocumentCategory)}
+          options={CATEGORIES.map((c) => ({ value: c, label: label(DOCUMENT_LABELS, c) }))}
+        />
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted-foreground uppercase">Bien (optionnel)</span>
-            <select
-              value={propertyId}
-              onChange={(e) => setPropertyId(e.target.value)}
-              className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-            >
-              <option value=""> </option>
-              {properties.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title} ({p.reference})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted-foreground uppercase">Client (optionnel)</span>
-            <select
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              className="h-11 rounded-md border border-line bg-admin-bg/40 px-3 text-sm outline-none focus:border-gold"
-            >
-              <option value=""> </option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.firstName} {c.lastName}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SearchSelect
+            label="Bien (optionnel)"
+            value={propertyId}
+            onChange={setPropertyId}
+            clearLabel="Aucun bien"
+            placeholder="Aucun bien"
+            searchPlaceholder="Titre ou référence…"
+            options={properties.map((p) => ({
+              value: p.id,
+              label: p.title,
+              hint: p.reference,
+            }))}
+          />
+          <SearchSelect
+            label="Client (optionnel)"
+            value={clientId}
+            onChange={setClientId}
+            clearLabel="Aucun client"
+            placeholder="Aucun client"
+            searchPlaceholder="Nom du client…"
+            options={clients.map((c) => ({
+              value: c.id,
+              label: `${c.firstName} ${c.lastName}`,
+              hint: c.email,
+            }))}
+          />
         </div>
       </div>
     </Modal>

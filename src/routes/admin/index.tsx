@@ -21,13 +21,7 @@ import {
   LoadingState,
   EmptyState,
 } from "@/components/admin/primitives";
-import {
-  AreaTrendChart,
-  CategoryBarChart,
-  ChartLegend,
-  DonutChart,
-  TrendChart,
-} from "@/components/admin/charts";
+import { CategoryBarChart, ChartLegend, DonutChart, TrendChart } from "@/components/admin/charts";
 import { ACTION_ROLES, type AdminAction } from "@/lib/admin/permissions";
 import { useAgentScope, useAgentsForRole, useSession } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
@@ -110,6 +104,23 @@ function DashboardPage() {
   const isDirectrice = role === "directrice";
   const agentName = commercialAgents.find((a) => a.id === agentId)?.name;
 
+  // Breakdowns shown inside the KPI explanation modals   the same series the
+  // charts below are built from, read as a table instead of a curve.
+  const views30d = data.viewsSeries.at(-1)?.views ?? 0;
+  const viewsPerListing = kpis.activelistings ? Math.round(views30d / kpis.activelistings) : 0;
+  const sourceRows = data.sourceBreakdown.map((s) => ({
+    label: label(SOURCE_LABELS, s.label),
+    value: formatNumber(s.value),
+  }));
+  const stageRows = data.pipelineByStage.map((p) => ({
+    label: label(STAGE_LABELS, p.label),
+    value: formatNumber(p.value),
+  }));
+  const revenueRows = data.revenueSeries.slice(-3).map((r) => ({
+    label: r.month,
+    value: formatMoney(r.revenue, true),
+  }));
+
   return (
     <div className="space-y-6">
       {/* ---------------------------------------------------------- greeting */}
@@ -122,8 +133,10 @@ function DashboardPage() {
       </section>
 
       {/* ---------------------------------------------------------- KPIs */}
+      {/* Three per row, two rows: six equal cards read as one block instead of
+          a thin six-across strip. */}
       <section>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           <StatCard
             index={0}
             label="Biens actifs"
@@ -131,6 +144,17 @@ function DashboardPage() {
             delta={kpis.deltas["activelistings"]}
             hint="en ligne"
             icon={Building2}
+            detail={{
+              what: "Le nombre de biens visibles par le public sur le site en ce moment.",
+              how: "On compte les biens dont le statut est « Disponible » ou « Sous offre ». Les biens vendus, loués, en brouillon ou archivés ne sont pas comptés.",
+              why: "C'est le stock commercial de l'agence. S'il baisse, l'équipe manquera de biens à proposer aux acheteurs dans les semaines qui viennent : c'est le signal qu'il faut relancer la prospection vendeurs.",
+              rows: [
+                { label: "Vues du site (30 j)", value: formatNumber(views30d) },
+                { label: "Vues par bien en moyenne", value: formatNumber(viewsPerListing) },
+              ],
+              href: "/admin/proprietes",
+              hrefLabel: "Voir les biens",
+            }}
           />
           <StatCard
             index={1}
@@ -139,6 +163,14 @@ function DashboardPage() {
             delta={kpis.deltas["newLeads30d"]}
             hint="30 jours"
             icon={UserPlus}
+            detail={{
+              what: "Les contacts entrants créés au cours des 30 derniers jours.",
+              how: "Chaque formulaire du site, appel enregistré ou fiche saisie à la main crée un lead daté. On compte ceux dont la date de création tombe dans les 30 derniers jours, toutes étapes du pipeline confondues.",
+              why: "C'est le carburant du pipeline. Le pourcentage à côté compare aux 30 jours précédents : en baisse, il faut regarder les sources ci-dessous et remettre du budget ou de la relance là où elles se sont taries.",
+              rows: sourceRows,
+              href: "/admin/crm",
+              hrefLabel: "Ouvrir le CRM",
+            }}
           />
           <StatCard
             index={2}
@@ -147,6 +179,13 @@ function DashboardPage() {
             delta={kpis.deltas["viewings30d"]}
             hint="30 jours"
             icon={CalendarCheck}
+            detail={{
+              what: "Les visites de biens organisées sur les 30 derniers jours.",
+              how: "On compte les rendez-vous de type « Visite » dont la date tombe dans les 30 derniers jours, quel que soit leur statut (planifiée, confirmée, terminée).",
+              why: "La visite est l'étape qui transforme un contact en acheteur. Beaucoup de leads et peu de visites veut dire que la qualification bloque ; beaucoup de visites et peu d'offres veut dire que les biens proposés ne correspondent pas à la demande.",
+              href: "/admin/agenda",
+              hrefLabel: "Ouvrir l'agenda",
+            }}
           />
           <StatCard
             index={3}
@@ -155,6 +194,14 @@ function DashboardPage() {
             delta={kpis.deltas["pipelineValue"]}
             hint="en cours"
             icon={Wallet}
+            detail={{
+              what: "La valeur totale des affaires encore ouvertes.",
+              how: "On additionne la valeur de chaque lead qui n'est ni « Gagné » ni « Perdu ». La valeur d'un lead est le prix du bien qui lui est associé, ou le montant saisi à la main s'il n'y a pas de bien.",
+              why: "C'est le chiffre d'affaires potentiel en cours de négociation, pas encore encaissé. Comparé aux honoraires réalisés, il indique combien de mois d'activité sont déjà sécurisés.",
+              rows: stageRows,
+              href: "/admin/crm",
+              hrefLabel: "Ouvrir le pipeline",
+            }}
           />
           {isDirectrice ? (
             <StatCard
@@ -164,6 +211,14 @@ function DashboardPage() {
               delta={kpis.deltas["revenueYtd"]}
               hint="cumul"
               icon={TrendingUp}
+              detail={{
+                what: "Les honoraires d'agence encaissés depuis le début de l'année.",
+                how: "On additionne la commission de chaque transaction arrivée à l'étape « Clôturée ». Une affaire signée mais pas encore clôturée reste dans le pipeline et n'est pas comptée ici.",
+                why: "C'est le résultat réel de l'agence, celui qui sert de base au suivi d'objectif. Seule la direction voit cette carte.",
+                rows: revenueRows,
+                href: "/admin/transactions",
+                hrefLabel: "Voir les transactions",
+              }}
             />
           ) : null}
           <StatCard
@@ -173,6 +228,13 @@ function DashboardPage() {
             delta={kpis.deltas["conversionRate"]}
             hint="leads gagnés"
             icon={Percent}
+            detail={{
+              what: "La part des leads qui aboutissent à une affaire signée.",
+              how: "Nombre de leads à l'étape « Gagné » divisé par le nombre total de leads traités (gagnés + perdus), exprimé en pourcentage. Les leads encore en cours ne comptent pas : ils n'ont pas encore de résultat.",
+              why: "Ce taux mesure la qualité du travail commercial plutôt que le volume. Un taux qui monte avec un volume stable signifie que l'équipe qualifie mieux ; un taux qui chute alors que les leads augmentent signale des contacts moins qualifiés.",
+              href: "/admin/crm",
+              hrefLabel: "Ouvrir le CRM",
+            }}
           />
         </div>
       </section>
@@ -240,19 +302,6 @@ function DashboardPage() {
       {/* ------------------------------------------------------- charts */}
       <section className="grid gap-4 lg:grid-cols-2">
         <Panel>
-          <PanelHeader eyebrow="Audience" title="Vues du site" />
-          <div className="p-4">
-            <AreaTrendChart
-              data={data.viewsSeries as unknown as Record<string, string | number>[]}
-              xKey="month"
-              dataKey="views"
-              name="Vues"
-              formatter={formatNumber}
-            />
-          </div>
-        </Panel>
-
-        <Panel>
           <PanelHeader eyebrow="Honoraires" title="Revenus par mois" />
           <div className="p-4">
             <CategoryBarChart
@@ -261,22 +310,6 @@ function DashboardPage() {
               dataKey="revenue"
               name="Honoraires"
               formatter={(v) => formatMoney(v, true)}
-            />
-          </div>
-        </Panel>
-
-        <Panel>
-          <PanelHeader eyebrow="CRM" title="Pipeline par étape" />
-          <div className="p-4">
-            <CategoryBarChart
-              data={data.pipelineByStage.map((p) => ({
-                label: label(STAGE_LABELS, p.label),
-                value: p.value,
-              }))}
-              xKey="label"
-              dataKey="value"
-              name="Leads"
-              horizontal
             />
           </div>
         </Panel>

@@ -29,6 +29,7 @@ import {
   Modal,
   AdminButton,
   EmptyState,
+  SearchSelect,
   toast,
 } from "@/components/admin/primitives";
 import { CategoryBarChart, ChartLegend } from "@/components/admin/charts";
@@ -64,6 +65,12 @@ const STATUS_STYLE: Record<MarketingCampaign["status"], string> = {
   sent: "border-positive/40 text-positive",
 };
 
+/** Percentage of `part` over `whole`, or an em dash when there is nothing to divide by. */
+function rate(part: number | undefined, whole: number | undefined) {
+  if (!part || !whole) return "—";
+  return `${Math.round((part / whole) * 100)} %`;
+}
+
 function MarketingPage() {
   const { data: stats } = useQuery(marketingStatsQuery());
   const { data: properties = [] } = useQuery(propertiesQuery({}));
@@ -90,6 +97,11 @@ function MarketingPage() {
     [properties],
   );
 
+  // Destinataires touchés par les campagnes réellement parties.
+  const audience = campaigns
+    .filter((c) => c.status === "sent")
+    .reduce((s, c) => s + c.audienceCount, 0);
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -99,6 +111,11 @@ function MarketingPage() {
           hint="Sur toutes les périodes"
           icon={Send}
           index={0}
+          detail={{
+            what: "Le nombre de campagnes parties vers les clients, tous canaux confondus.",
+            how: "On compte les campagnes passées au statut « Envoyée ». Les brouillons et les campagnes programmées ne sont pas comptés tant qu'elles ne sont pas parties.",
+            why: "C'est le rythme de communication de l'agence. Trop peu et le fichier clients s'endort, trop et les désabonnements montent : une à deux par mois est le rythme habituel.",
+          }}
         />
         <StatCard
           label="Ouvertures"
@@ -106,6 +123,17 @@ function MarketingPage() {
           hint="Cumulées"
           icon={Mail}
           index={1}
+          detail={{
+            what: "Le nombre de fois où un destinataire a ouvert un message de l'agence.",
+            how: "Chaque ouverture est remontée par l'outil d'envoi et cumulée sur toutes les campagnes. Un même destinataire qui rouvre le message est compté à chaque fois.",
+            why: "L'ouverture dépend surtout de l'objet du message et de l'heure d'envoi. Un taux d'ouverture faible sur une campagne veut presque toujours dire que l'objet n'a pas accroché.",
+            rows: [
+              {
+                label: "Taux d'ouverture",
+                value: rate(totals?.opens, audience),
+              },
+            ],
+          }}
         />
         <StatCard
           label="Clics"
@@ -113,6 +141,14 @@ function MarketingPage() {
           hint="Liens visités"
           icon={MousePointerClick}
           index={2}
+          detail={{
+            what: "Le nombre de clics sur les liens contenus dans les campagnes.",
+            how: "On cumule les clics sur les liens de toutes les campagnes envoyées, principalement les liens vers les fiches de biens.",
+            why: "Le clic est le vrai signal d'intérêt : le destinataire est allé voir le bien. C'est cet indicateur, pas l'ouverture, qu'il faut regarder pour juger du choix des biens mis en avant.",
+            rows: [
+              { label: "Taux de clic sur ouvertures", value: rate(totals?.clicks, totals?.opens) },
+            ],
+          }}
         />
         <StatCard
           label="Conversions"
@@ -120,6 +156,14 @@ function MarketingPage() {
           hint="Leads générés"
           icon={Users}
           index={3}
+          detail={{
+            what: "Les leads créés à la suite d'une campagne.",
+            how: "Quand un destinataire clique puis remplit un formulaire de contact, le lead créé est rattaché à la campagne d'origine et compté ici.",
+            why: "C'est le retour concret des campagnes : ce que le marketing rapporte au pipeline. Rapporté au nombre de clics, il indique si les fiches de biens tiennent la promesse du message.",
+            rows: [
+              { label: "Conversion sur clics", value: rate(totals?.conversions, totals?.clicks) },
+            ],
+          }}
         />
       </div>
 
@@ -432,20 +476,15 @@ function CampaignModal({ onClose }: { onClose: () => void }) {
             className={fieldCls}
           />
         </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground uppercase">Canal</span>
-          <select
-            value={channel}
-            onChange={(e) => setChannel(e.target.value as CampaignChannel)}
-            className={fieldCls}
-          >
-            {(Object.keys(CHANNEL_LABELS) as CampaignChannel[]).map((c) => (
-              <option key={c} value={c}>
-                {label(CHANNEL_LABELS, c)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Canal"
+          value={channel}
+          onChange={(v) => setChannel(v as CampaignChannel)}
+          options={(Object.keys(CHANNEL_LABELS) as CampaignChannel[]).map((c) => ({
+            value: c,
+            label: label(CHANNEL_LABELS, c),
+          }))}
+        />
         <label className="flex flex-col gap-1.5">
           <span className="text-xs text-muted-foreground uppercase">Taille de l'audience</span>
           <input
