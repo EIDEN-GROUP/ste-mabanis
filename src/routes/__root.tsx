@@ -115,6 +115,9 @@ function RootComponent() {
   // The admin brings its own shell (sidebar, header, bottom nav), so it must not
   // inherit the public site's header, footer or WhatsApp button.
   const isAdmin = pathname.startsWith("/admin");
+  // The login screen is a standalone full-screen page: it carries its own brand
+  // header, so the public site header must not float above it.
+  const isLogin = pathname === "/login";
 
   if (isAdmin) {
     return (
@@ -133,7 +136,7 @@ function RootComponent() {
       <MotionConfig reducedMotion="user">
         <BrandLoader phase={intro.phase} />
         <SmoothScroll />
-        <SiteHeader />
+        {!isLogin ? <SiteHeader /> : null}
         {/* Opaque and stacked above the footer, which is pinned behind the page
             and uncovered as this block scrolls off it. */}
         <main className="relative z-10 bg-background">
