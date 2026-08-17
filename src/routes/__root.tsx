@@ -146,8 +146,8 @@ function RootComponent() {
             <Outlet />
           </PageTransition>
         </main>
-        <SiteFooter />
-        <WhatsAppButton />
+        {!isLogin ? <SiteFooter /> : null}
+        {!isLogin ? <WhatsAppButton /> : null}
         <Toaster position="bottom-center" />
       </MotionConfig>
     </QueryClientProvider>

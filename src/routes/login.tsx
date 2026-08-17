@@ -158,10 +158,10 @@ function AdminLogin() {
 
       <div className="flex lg:min-h-screen items-center lg:pr-20">
         <motion.div
-          className="scrollbar-gold relative z-10 flex flex-1 flex-col overflow-y-auto overflow-hidden rounded-2xl border border-white/20 bg-white/30 backdrop-blur-xl shadow-elegant [--scroll-track:var(--color-white)] lg:ml-auto lg:w-[44%] lg:max-w-[38rem] lg:flex-none"
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, ease: EASE }}
+          className="scrollbar-gold relative z-10 flex flex-1 flex-col overflow-y-auto overflow-hidden rounded-3xl border border-white/[0.08] bg-navy/[0.12] backdrop-blur-3xl shadow-[0px_2px_8px_0px_rgba(99,99,99,0.2)] [--scroll-track:rgba(255,255,255,0.08)] lg:ml-auto lg:w-[44%] lg:max-w-[38rem] lg:flex-none"
+          initial={{ opacity: 0, scale: 0.96, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <motion.div
             className="flex flex-col justify-center px-6 py-8 sm:p-8 lg:p-10"
@@ -172,29 +172,29 @@ function AdminLogin() {
             <div className="mx-auto w-full max-w-[26rem]">
               <motion.h1
                 variants={line}
-                className="display text-[clamp(1.7rem,3vw,2.2rem)] uppercase text-navy"
+                className="display text-[clamp(1.7rem,3vw,2.2rem)] uppercase text-white"
               >
                 Connexion
               </motion.h1>
-              <motion.p variants={line} className="mt-2 text-[0.85rem] text-muted-foreground">
+              <motion.p variants={line} className="mt-2 text-[0.85rem] text-white/60">
                 Connectez-vous pour reprendre la main sur le portefeuille et les clients.
               </motion.p>
 
               <form onSubmit={submit} className="mt-6">
                 <motion.label variants={line} className="block">
-                  <span className="text-[0.78rem] font-semibold text-navy">Adresse e-mail</span>
+                  <span className="text-[0.78rem] font-semibold text-white/80">Adresse e-mail</span>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="username"
                     placeholder="direction@mabanis.com"
-                    className="mt-1.5 h-12 w-full rounded-xl border border-white/30 bg-white/50 px-5 text-sm text-navy backdrop-blur-sm transition-[border-color,box-shadow] duration-300 outline-none placeholder:text-navy/40 focus:border-gold focus:ring-2 focus:ring-gold/25"
+                    className="mt-1.5 h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.06] px-5 text-sm text-white placeholder:text-white/25 transition-[border-color,box-shadow] duration-300 outline-none focus:border-gold/70 focus:ring-2 focus:ring-gold/20"
                   />
                 </motion.label>
 
                 <motion.label variants={line} className="mt-4 block">
-                  <span className="text-[0.78rem] font-semibold text-navy">Mot de passe</span>
+                  <span className="text-[0.78rem] font-semibold text-white/80">Mot de passe</span>
                   <span className="relative mt-1.5 block">
                     <input
                       type={reveal ? "text" : "password"}
@@ -202,13 +202,13 @@ function AdminLogin() {
                       onChange={(e) => setPassword(e.target.value)}
                       autoComplete="current-password"
                       placeholder="••••••••"
-                      className="h-12 w-full rounded-xl border border-white/30 bg-white/50 pr-12 pl-5 text-sm text-navy backdrop-blur-sm transition-[border-color,box-shadow] duration-300 outline-none placeholder:text-navy/40 focus:border-gold focus:ring-2 focus:ring-gold/25"
+                      className="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.06] pr-12 pl-5 text-sm text-white placeholder:text-white/25 transition-[border-color,box-shadow] duration-300 outline-none focus:border-gold/70 focus:ring-2 focus:ring-gold/20"
                     />
                     <button
                       type="button"
                       onClick={() => setReveal((v) => !v)}
                       aria-label={reveal ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                      className="absolute top-1/2 right-3 grid size-8 -translate-y-1/2 place-items-center rounded-md text-navy/50 transition-colors hover:text-navy"
+                      className="absolute top-1/2 right-3 grid size-8 -translate-y-1/2 place-items-center rounded-md text-white/40 transition-colors hover:text-white"
                     >
                       {reveal ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
@@ -219,18 +219,18 @@ function AdminLogin() {
                   variants={line}
                   className="mt-3.5 flex flex-wrap items-center justify-between gap-3"
                 >
-                  <label className="flex cursor-pointer items-center gap-2.5 text-[0.8rem] text-muted-foreground">
+                  <label className="flex cursor-pointer items-center gap-2.5 text-[0.8rem] text-white/60">
                     <input
                       type="checkbox"
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
-                      className="size-4 cursor-pointer accent-navy"
+                      className="size-4 cursor-pointer accent-gold"
                     />
                     Rester connecté
                   </label>
                   <Link
                     to="/contact"
-                    className="link-underline text-[0.8rem] text-navy transition-colors hover:text-gold"
+                    className="link-underline text-[0.8rem] text-white/60 transition-colors hover:text-gold"
                   >
                     Mot de passe oublié ?
                   </Link>
@@ -258,7 +258,7 @@ function AdminLogin() {
                   whileHover={busy ? {} : { y: -2 }}
                   whileTap={busy ? {} : { scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 28 }}
-                  className="btn-sheen group mt-5 flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-gold text-[0.82rem] font-medium text-navy transition-colors duration-500 hover:bg-navy hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
+                  className="btn-sheen group mt-5 flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-gold text-[0.82rem] font-medium text-navy transition-colors duration-500 hover:bg-white hover:text-navy disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {busy ? (
                     <Loader2 className="size-4 animate-spin" />
@@ -273,10 +273,10 @@ function AdminLogin() {
 
               <motion.p
                 variants={line}
-                className="mt-6 text-center text-[0.75rem] text-muted-foreground"
+                className="mt-6 text-center text-[0.75rem] text-white/40"
               >
                 Besoin d'un accès ?{" "}
-                <Link to="/contact" className="link-underline text-navy hover:text-gold">
+                <Link to="/contact" className="link-underline text-white/60 hover:text-gold">
                   Contactez la direction
                 </Link>
               </motion.p>
