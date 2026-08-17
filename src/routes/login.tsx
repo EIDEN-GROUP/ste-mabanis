@@ -8,7 +8,7 @@ import { login, verifySession } from "@/lib/admin/auth/session";
 import { images } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/admin_/login")({
+export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Connexion | Administration STE MABANIS" },

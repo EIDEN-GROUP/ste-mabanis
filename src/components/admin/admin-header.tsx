@@ -30,7 +30,7 @@ export function AdminHeader({
   const title = useCurrentTitle();
   const { data = [] } = useQuery(notificationsQuery());
   const unread = data.filter((n) => !n.read).length;
-  const { role, roleInfo, agentId, switchRole, switchAgent } = useSession();
+  const { role, roleInfo, agentId, switchRole, switchAgent, roleLocked, name } = useSession();
   const agents = useAgentsForRole("commercial");
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -112,12 +112,12 @@ export function AdminHeader({
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          aria-label={`Mon espace : ${roleInfo.label}`}
+          aria-label={`Mon espace : ${name ?? roleInfo.label}`}
           className="flex h-10 items-center gap-2 border border-line bg-admin-surface px-3 text-sm transition-colors hover:border-gold"
         >
           <span className="size-2 shrink-0 rounded-full bg-gold" />
           <span className="hidden max-w-[10rem] truncate text-navy sm:block">
-            {roleInfo.label}
+            {roleLocked && name ? name : roleInfo.label}
           </span>
           <ChevronDown className={cn("size-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
         </button>
@@ -128,43 +128,52 @@ export function AdminHeader({
               <p className="text-[0.58rem] tracking-[0.2em] text-muted-foreground uppercase">
                 Mon espace de travail
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Choisissez un rôle pour voir ses accès et ses actions.
-              </p>
+              {roleLocked ? (
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Connecté en tant que <span className="font-medium text-navy">{name}</span> —{" "}
+                  {roleInfo.label}
+                </p>
+              ) : (
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Choisissez un rôle pour voir ses accès et ses actions.
+                </p>
+              )}
             </div>
 
-            <ul className="max-h-72 overflow-y-auto">
-              {ROLE_ORDER.map((r) => {
-                const info = STAFF_ROLES[r];
-                const active = r === role;
-                return (
-                  <li key={r}>
-                    <button
-                      type="button"
-                      onClick={() => pickRole(r)}
-                      className={cn(
-                        "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
-                        active ? "bg-sand" : "hover:bg-sand/60",
-                      )}
-                    >
-                      <span
+            {!roleLocked ? (
+              <ul className="max-h-72 overflow-y-auto">
+                {ROLE_ORDER.map((r) => {
+                  const info = STAFF_ROLES[r];
+                  const active = r === role;
+                  return (
+                    <li key={r}>
+                      <button
+                        type="button"
+                        onClick={() => pickRole(r)}
                         className={cn(
-                          "mt-1.5 size-2 shrink-0 rounded-full",
-                          active ? "bg-gold" : "bg-muted-foreground/40",
+                          "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
+                          active ? "bg-sand" : "hover:bg-sand/60",
                         )}
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-2 text-sm font-medium text-navy">
-                          {info.label}
-                          {active ? <Check className="size-3.5 text-gold" /> : null}
+                      >
+                        <span
+                          className={cn(
+                            "mt-1.5 size-2 shrink-0 rounded-full",
+                            active ? "bg-gold" : "bg-muted-foreground/40",
+                          )}
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2 text-sm font-medium text-navy">
+                            {info.label}
+                            {active ? <Check className="size-3.5 text-gold" /> : null}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">{info.tagline}</span>
                         </span>
-                        <span className="block text-xs text-muted-foreground">{info.tagline}</span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
 
             {role === "commercial" ? (
               <div className="border-t border-line px-4 py-3">

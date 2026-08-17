@@ -21,6 +21,10 @@ export type Session = {
   roleInfo: RoleInfo;
   /** Identity of the logged-in agent (the agent whose records are scoped). */
   agentId: string | null;
+  /** Display name of the authenticated staff member (server-verified). */
+  name: string | null;
+  /** True when the role comes from the login and cannot be switched. */
+  roleLocked: boolean;
   switchRole: (role: StaffRole) => void;
   switchAgent: (agentId: string | null) => void;
   can: (action: AdminAction) => boolean;
@@ -32,28 +36,46 @@ function agentsFor(role: StaffRole) {
   return seedAgents.filter((a) => AGENT_STAFF_ROLE[a.id] === role);
 }
 
-export function SessionProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<StaffRole>("directrice");
+export function SessionProvider({
+  children,
+  initialRole,
+  roleLocked = false,
+  userName = null,
+}: {
+  children: ReactNode;
+  /** Server-verified role from the login session; wins over saved prefs. */
+  initialRole?: StaffRole;
+  /** When true the workspace role is fixed and cannot be switched. */
+  roleLocked?: boolean;
+  userName?: string | null;
+}) {
+  const [role, setRole] = useState<StaffRole>(initialRole ?? "directrice");
   const [agentId, setAgentId] = useState<string | null>(null);
 
-  // Read the stored workspace after mount so SSR and hydration agree.
+  // Read the stored workspace after mount so SSR and hydration agree. The
+  // server-verified login role always wins over any saved preference.
   useEffect(() => {
+    if (initialRole) return;
     const savedRole = localStorage.getItem(ROLE_STORAGE_KEY);
     if (VALID_ROLES.includes(savedRole as StaffRole)) {
       setRole(savedRole as StaffRole);
       const savedAgent = localStorage.getItem(AGENT_STORAGE_KEY);
       if (savedAgent) setAgentId(savedAgent);
     }
-  }, []);
+  }, [initialRole]);
 
-  const switchRole = useCallback((next: StaffRole) => {
-    setRole(next);
-    localStorage.setItem(ROLE_STORAGE_KEY, next);
-    if (next !== "commercial") {
-      setAgentId(null);
-      localStorage.removeItem(AGENT_STORAGE_KEY);
-    }
-  }, []);
+  const switchRole = useCallback(
+    (next: StaffRole) => {
+      if (roleLocked) return;
+      setRole(next);
+      localStorage.setItem(ROLE_STORAGE_KEY, next);
+      if (next !== "commercial") {
+        setAgentId(null);
+        localStorage.removeItem(AGENT_STORAGE_KEY);
+      }
+    },
+    [roleLocked],
+  );
 
   const switchAgent = useCallback((next: string | null) => {
     setAgentId(next);
@@ -61,25 +83,30 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     else localStorage.removeItem(AGENT_STORAGE_KEY);
   }, []);
 
-  const value = useMemo<Session>(() => {
-    // A commercial always acts as one of the commercial agents.
-    const effectiveAgent =
-      role === "commercial" &&
-      agentId &&
-      agentsFor("commercial").some((a) => a.id === agentId)
-        ? agentId
-        : role === "commercial"
-          ? (agentsFor("commercial")[0]?.id ?? null)
-          : agentId;
-    return {
-      role,
-      roleInfo: STAFF_ROLES[role],
-      agentId: effectiveAgent,
-      switchRole,
-      switchAgent,
-      can: (action) => can(role, action),
-    };
-  }, [role, agentId, switchRole, switchAgent]);
+  const value = useMemo<Session>(
+    () => {
+      // A commercial always acts as one of the commercial agents.
+      const effectiveAgent =
+        role === "commercial" &&
+        agentId &&
+        agentsFor("commercial").some((a) => a.id === agentId)
+          ? agentId
+          : role === "commercial"
+            ? (agentsFor("commercial")[0]?.id ?? null)
+            : agentId;
+      return {
+        role,
+        roleInfo: STAFF_ROLES[role],
+        agentId: effectiveAgent,
+        name: userName,
+        roleLocked,
+        switchRole,
+        switchAgent,
+        can: (action) => can(role, action),
+      };
+    },
+    [role, agentId, switchRole, switchAgent, userName, roleLocked],
+  );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
