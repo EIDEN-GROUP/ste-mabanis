@@ -39,10 +39,13 @@ function Home() {
 
   return (
     <>
-      <HomeHero />
+      {/* Phones get the search panel inside the hero, over the video */}
+      <HomeHero>
+        <HeroSearch />
+      </HomeHero>
 
-      {/* Search bar straddles the hero edge on desktop, sits below it on mobile */}
-      <div className="relative z-30 mx-auto -mt-px max-w-[100rem] px-5 sm:px-8 lg:-mt-[5.5rem] lg:px-12">
+      {/* From lg the panel straddles the hero's bottom edge instead */}
+      <div className="relative z-30 mx-auto hidden max-w-[100rem] px-5 sm:px-8 lg:-mt-[5.5rem] lg:block lg:px-12">
         <HeroSearch />
       </div>
 
@@ -62,9 +65,13 @@ function Home() {
           }
         />
         {/* Snap carousel on phones, grid from sm up four stacked cards is too much scroll. */}
-        <div className="-mx-5 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4 xl:gap-8 [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-5 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4 xl:gap-8 [&::-webkit-scrollbar]:hidden">
           {featured.map((p, i) => (
-            <Reveal key={p.slug} delay={i * 90} className="w-[82%] shrink-0 snap-start sm:w-auto sm:shrink">
+            <Reveal
+              key={p.slug}
+              delay={i * 90}
+              className="w-[82%] shrink-0 snap-start sm:w-auto sm:shrink"
+            >
               <PropertyCard
                 property={p}
                 className="h-full transition-shadow duration-700 hover:shadow-elegant"
@@ -90,7 +97,7 @@ function Home() {
             <div className="lg:max-w-10/12">
               <p className="text-white">
                 <TextReveal
-                  text="Une connaissance approfondie d'Agadir et de ses quartiers pour vous guider vers les adresses qui correspondent réellement à votre projet."
+                  text="Une connaissance approfondie d’Agadir et de ses quartiers pour vous guider vers les adresses qui correspondent réellement à votre projet."
                   delay={220}
                   className="text-[clamp(1.05rem,2.2vw,1.5rem)]"
                 />

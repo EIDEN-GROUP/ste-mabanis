@@ -40,14 +40,14 @@ const services = [
   // },
 ];
 
-const SERVICES_GRID = "lg:grid lg:grid-cols-[minmax(0,38fr)_minmax(0,44fr)_minmax(0,18fr)] lg:gap-x-8";
-const SERVICES_SERVICES_SPRING = { stiffness: 110, damping: 30, mass: 0.4 };
+const GRID = "lg:grid lg:grid-cols-[minmax(0,38fr)_minmax(0,44fr)_minmax(0,18fr)] lg:gap-x-8";
+const SPRING = { stiffness: 110, damping: 30, mass: 0.4 };
 
 export function CinematicServices() {
   return (
     <section className="bg-ink text-white">
       <div
-        className={`mx-auto max-w-[100rem] px-5 pt-20 sm:px-8 pb-16 sm:pt-24 lg:items-start lg:px-12 lg:pt-20 SERVICES_GRID`}
+        className={`mx-auto max-w-[100rem] px-5 pt-20 sm:px-8 pb-16 sm:pt-24 lg:items-start lg:px-12 lg:pt-20 ${GRID}`}
       >
         <Reveal>
           <p className="eyebrow flex items-center gap-4">
@@ -101,8 +101,8 @@ function ServiceRow({ service }: { service: (typeof services)[number] }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const imageY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
 
-  const titleY = useSpring(useTransform(scrollYProgress, [0, 1], [36, -36]), SERVICES_SPRING);
-  const arrowX = useSpring(useTransform(scrollYProgress, [0, 0.5, 1], [-26, 0, 14]), SERVICES_SPRING);
+  const titleY = useSpring(useTransform(scrollYProgress, [0, 1], [36, -36]), SPRING);
+  const arrowX = useSpring(useTransform(scrollYProgress, [0, 0.5, 1], [-26, 0, 14]), SPRING);
 
   useEffect(() => {
     setAnimated(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -133,7 +133,7 @@ function ServiceRow({ service }: { service: (typeof services)[number] }) {
         </div>
 
         <div
-          className={`relative mx-auto flex max-w-[100rem] flex-col gap-y-10 px-5 py-16 sm:px-8 sm:py-20 lg:min-h-[15vh] lg:items-center lg:px-12 lg:py-16 SERVICES_GRID`}
+          className={`relative mx-auto flex max-w-[100rem] flex-col gap-y-10 px-5 py-16 sm:px-8 sm:py-20 lg:min-h-[15vh] lg:items-center lg:px-12 lg:py-16 ${GRID}`}
         >
           <div className="flex items-start gap-5 sm:gap-7">
             <Reveal className="shrink-0">
@@ -184,6 +184,3 @@ function ServiceRow({ service }: { service: (typeof services)[number] }) {
     </div>
   );
 }
-
-const GRID = "lg:grid lg:grid-cols-[minmax(0,38fr)_minmax(0,44fr)_minmax(0,18fr)] lg:gap-x-8";
-const SERVICES_SPRING = { stiffness: 110, damping: 30, mass: 0.4 };

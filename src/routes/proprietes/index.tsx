@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SlidersHorizontal, X } from "lucide-react";
 import { PageHero } from "@/components/layout-bits";
 import { PropertyCard } from "@/components/property-card";
 import { Reveal } from "@/components/motion";
+import { getLenis } from "@/components/smooth-scroll";
 import { useFavorites } from "@/hooks/use-favorites";
-import { locations, properties, propertyTypes, type Transaction } from "@/lib/site-data";
+import { images, locations, properties, propertyTypes, type Transaction } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
 type PropertySearch = {
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/proprietes/")({
   }),
   head: () => ({
     meta: [
-      { title: "Propriétés à vendre et à louer à Agadir — STE MABANIS" },
+      { title: "Propriétés à vendre et à louer à Agadir   STE MABANIS" },
       {
         name: "description",
         content:
@@ -52,9 +53,24 @@ function PropertiesPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const { favorites } = useFavorites();
+  const resultsRef = useRef<HTMLElement>(null);
 
-  const update = (patch: Partial<PropertySearch>) =>
-    navigate({ search: (prev: PropertySearch) => ({ ...prev, ...patch }) });
+  const scrollToResults = () => {
+    const el = resultsRef.current;
+    if (!el) return;
+    const lenis = getLenis();
+    if (lenis) lenis.scrollTo(el, { offset: -88 });
+    else el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const update = (patch: Partial<PropertySearch>) => {
+    navigate({
+      search: (prev: PropertySearch) => ({ ...prev, ...patch }),
+      resetScroll: false,
+    });
+    // A filter change lands on the results section top, not the top of the page.
+    if (!filtersOpen) scrollToResults();
+  };
 
   const results = useMemo(() => {
     let list = properties.filter((p) => p.transaction === search.transaction);
@@ -87,7 +103,7 @@ function PropertiesPage() {
         <select
           value={search.lieu}
           onChange={(e) => update({ lieu: e.target.value })}
-          className="h-11 w-full border border-line bg-background px-3 text-sm outline-none focus:border-gold"
+          className="h-11 w-full rounded-md border border-line bg-background px-3 text-sm outline-none focus:border-gold"
         >
           <option value="">Tous les quartiers</option>
           {locations.map((l) => (
@@ -102,7 +118,7 @@ function PropertiesPage() {
         <select
           value={search.type}
           onChange={(e) => update({ type: e.target.value })}
-          className="h-11 w-full border border-line bg-background px-3 text-sm outline-none focus:border-gold"
+          className="h-11 w-full rounded-md border border-line bg-background px-3 text-sm outline-none focus:border-gold"
         >
           <option value="">Tous les types</option>
           {propertyTypes.map((t) => (
@@ -117,7 +133,7 @@ function PropertiesPage() {
         <select
           value={String(search.prixMax)}
           onChange={(e) => update({ prixMax: Number(e.target.value) })}
-          className="h-11 w-full border border-line bg-background px-3 text-sm outline-none focus:border-gold"
+          className="h-11 w-full rounded-md border border-line bg-background px-3 text-sm outline-none focus:border-gold"
         >
           <option value="0">Sans limite</option>
           {(search.transaction === "vente"
@@ -152,7 +168,7 @@ function PropertiesPage() {
               type="button"
               onClick={() => update({ chambres: n })}
               className={cn(
-                "h-10 min-w-11 border px-3 text-sm transition-colors",
+                "h-10 min-w-11 rounded-md border px-3 text-sm transition-colors",
                 search.chambres === n
                   ? "border-gold bg-gold text-navy"
                   : "border-line hover:border-navy",
@@ -178,11 +194,13 @@ function PropertiesPage() {
     <>
       <PageHero
         eyebrow="Portefeuille"
-        title={<>Chaque bien a été visité avant d'être publié.</>}
-        intro="Villas, appartements, riads, penthouses et locaux professionnels sur Agadir et le littoral. Aucun bien n'entre ici sans vérification du titre foncier."
+        lead="Nos"
+        trail="propriétés"
+        intro="Chaque bien a été visité avant d'être publié. Villas, appartements, riads, penthouses et locaux professionnels sur Agadir et le littoral : aucun bien n'entre ici sans vérification du titre foncier."
+        image={images.property2}
       />
 
-      <section className="px-5 py-12 sm:px-8 sm:py-16 lg:px-12">
+      <section ref={resultsRef} className="px-5 py-12 sm:px-8 sm:py-16 lg:px-12">
         <div className="mx-auto max-w-[100rem]">
           {/* Tabs */}
           <div className="flex flex-wrap items-center gap-6 border-b border-line">
@@ -207,7 +225,7 @@ function PropertiesPage() {
                 type="button"
                 onClick={() => setOnlyFavorites((v) => !v)}
                 className={cn(
-                  "border px-4 py-2 text-xs tracking-[0.14em] uppercase transition-colors",
+                  "rounded-md border px-4 py-2 text-xs tracking-[0.14em] uppercase transition-colors",
                   onlyFavorites ? "border-gold bg-gold text-navy" : "border-line hover:border-navy",
                 )}
               >
@@ -216,7 +234,7 @@ function PropertiesPage() {
               <select
                 value={search.tri}
                 onChange={(e) => update({ tri: e.target.value })}
-                className="h-9 border border-line bg-background px-3 text-xs outline-none focus:border-gold"
+                className="h-9 rounded-md border border-line bg-background px-3 text-xs outline-none focus:border-gold"
                 aria-label="Trier les résultats"
               >
                 <option value="recent">Plus récents</option>
@@ -227,7 +245,7 @@ function PropertiesPage() {
               <button
                 type="button"
                 onClick={() => setFiltersOpen(true)}
-                className="inline-flex items-center gap-2 border border-line px-4 py-2 text-xs tracking-[0.14em] uppercase lg:hidden"
+                className="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2 text-xs tracking-[0.14em] uppercase lg:hidden"
               >
                 <SlidersHorizontal className="size-3.5" /> Filtres
                 {activeCount ? ` (${activeCount})` : ""}
@@ -251,14 +269,15 @@ function PropertiesPage() {
 
               {results.length ? (
                 <div className="mt-6 grid gap-8 sm:grid-cols-2 2xl:grid-cols-3">
+                  {/* Delay is capped so a long result list does not wait a second to appear. */}
                   {results.map((p, i) => (
-                    <Reveal key={p.slug} delay={i * 60}>
+                    <Reveal key={p.slug} delay={Math.min(i, 5) * 70}>
                       <PropertyCard property={p} />
                     </Reveal>
                   ))}
                 </div>
               ) : (
-                <div className="mt-8 border border-line bg-card p-10 text-center">
+                <div className="mt-8 rounded-md border border-line bg-card p-10 text-center">
                   <h2 className="display text-3xl">Aucun bien ne correspond encore</h2>
                   <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
                     Élargissez vos critères ou confiez-nous votre recherche : une partie de notre
@@ -291,9 +310,12 @@ function PropertiesPage() {
           )}
           onClick={() => setFiltersOpen(false)}
         />
+        {/* `data-lenis-prevent` : sans lui, le défilement inertiel capte le
+            geste au-dessus du tiroir et fait bouger la page derrière. */}
         <div
+          data-lenis-prevent
           className={cn(
-            "absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto bg-background p-6 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto overscroll-contain bg-background p-6 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
             filtersOpen ? "translate-y-0" : "translate-y-full",
           )}
         >
@@ -306,7 +328,10 @@ function PropertiesPage() {
           {filters}
           <button
             type="button"
-            onClick={() => setFiltersOpen(false)}
+            onClick={() => {
+              setFiltersOpen(false);
+              scrollToResults();
+            }}
             className="mt-8 w-full bg-navy py-4 text-[0.7rem] tracking-[0.18em] text-white uppercase"
           >
             Voir les {results.length} résultats

@@ -5,27 +5,27 @@ import { Section, SectionHeading } from "@/components/layout-bits";
 import { EASE } from "@/components/motion";
 import { articles, type Article } from "@/lib/site-data";
 
-const BLOG_VIEWPORT = { once: true, amount: 0.2 } as const;
+const VIEWPORT = { once: true, amount: 0.2 } as const;
 
 /** Text and dividers share one entrance: a short rise, staggered by the parent. */
-const BLOG_RISE = {
+const RISE = {
   hidden: { opacity: 0, y: 18 },
   show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: EASE } },
 };
 
-const BLOG_LINE = {
+const LINE = {
   hidden: { scaleX: 0 },
   show: { scaleX: 1, transition: { duration: 1.15, ease: EASE } },
 };
 
 /** The photograph is uncovered left to right, like a curtain pulled aside. */
-const BLOG_WIPE = {
+const WIPE = {
   hidden: { clipPath: "inset(0% 100% 0% 0%)" },
   show: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.25, ease: EASE } },
 };
 
 /**
- * Editorial blog list: no cards, no shadows — the house section heading, then
+ * Editorial blog list: no cards, no shadows   the house section heading, then
  * full-width rows separated by hairlines, each pairing a dated write-up with a
  * landscape photograph. Content comes from the shared `articles` source, so
  * every row links to a real /actualites/$slug page.
@@ -58,8 +58,8 @@ export function BlogSection() {
           className="block h-px origin-left bg-foreground/15"
           initial="hidden"
           whileInView="show"
-          viewport={BLOG_VIEWPORT}
-          variants={BLOG_LINE}
+          viewport={VIEWPORT}
+          variants={LINE}
         />
       </div>
     </Section>
@@ -72,7 +72,7 @@ function BlogArticle({ article, index }: { article: Article; index: number }) {
       className="relative"
       initial="hidden"
       whileInView="show"
-      viewport={BLOG_VIEWPORT}
+      viewport={VIEWPORT}
       variants={{
         hidden: {},
         show: { transition: { staggerChildren: 0.08, delayChildren: index * 0.04 } },
@@ -80,7 +80,7 @@ function BlogArticle({ article, index }: { article: Article; index: number }) {
     >
       <motion.span
         className="absolute inset-x-0 top-0 h-px origin-left bg-foreground/15"
-        variants={BLOG_LINE}
+        variants={LINE}
       />
 
       <Link
@@ -91,7 +91,7 @@ function BlogArticle({ article, index }: { article: Article; index: number }) {
         <motion.time
           dateTime={article.iso}
           className="text-[0.74rem] tracking-[0.1em] text-foreground/45 lg:col-start-1 lg:row-start-1"
-          variants={BLOG_RISE}
+          variants={RISE}
         >
           {article.iso}
         </motion.time>
@@ -101,7 +101,7 @@ function BlogArticle({ article, index }: { article: Article; index: number }) {
             stretching to whatever the text column happens to measure. */}
         <motion.div
           className="overflow-hidden lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start"
-          variants={BLOG_WIPE}
+          variants={WIPE}
         >
           <motion.img
             src={article.image}
@@ -120,19 +120,19 @@ function BlogArticle({ article, index }: { article: Article; index: number }) {
         <div className="lg:col-start-1 lg:row-start-2 lg:self-end">
           <motion.h3
             className="max-w-[26rem] text-[clamp(1.45rem,2.3vw,2.1rem)] leading-[1.15] font-medium tracking-[-0.03em] text-foreground transition-opacity duration-500 group-hover:opacity-60"
-            variants={BLOG_RISE}
+            variants={RISE}
           >
             {article.title}
           </motion.h3>
           <motion.p
             className="mt-4 max-w-[24rem] text-[0.92rem] leading-[1.75] text-muted-foreground"
-            variants={BLOG_RISE}
+            variants={RISE}
           >
             {article.excerpt}
           </motion.p>
           <motion.span
             className="mt-8 inline-flex items-center gap-2.5 rounded-md border border-foreground/20 px-5 py-2.5 text-[0.72rem] tracking-[0.04em] text-foreground transition-colors duration-500 group-hover:border-foreground/70"
-            variants={BLOG_RISE}
+            variants={RISE}
           >
             Lire l'article
             <ArrowRight className="size-3.5 transition-transform duration-500 group-hover:translate-x-1" />
@@ -142,22 +142,3 @@ function BlogArticle({ article, index }: { article: Article; index: number }) {
     </motion.article>
   );
 }
-
-const VIEWPORT = { once: true, amount: 0.2 } as const;
-
-/** Text and dividers share one entrance: a short rise, staggered by the parent. */
-const RISE = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: EASE } },
-};
-
-const LINE = {
-  hidden: { scaleX: 0 },
-  show: { scaleX: 1, transition: { duration: 1.15, ease: EASE } },
-};
-
-/** The photograph is uncovered left to right, like a curtain pulled aside. */
-const WIPE = {
-  hidden: { clipPath: "inset(0% 100% 0% 0%)" },
-  show: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.25, ease: EASE } },
-};

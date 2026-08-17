@@ -6,11 +6,15 @@ import property5 from "@/assets/property-5.jpg";
 import property6 from "@/assets/property-6.jpg";
 import locationAgadir from "@/assets/location-agadir.jpg";
 import locationTaghazout from "@/assets/location-taghazout.jpg";
+import testimonialsImage from "@/assets/testimonials.png";
 import locationMarina from "@/assets/location-marina.jpg";
+import CtaMarina from "@/assets/morocco agadir.png";
 import locationFounty from "@/assets/location-founty.jpg";
 import editorial1 from "@/assets/editorial-1.jpg";
 import teamOffice from "@/assets/team-office.jpg";
-import testimonialsImage from "@/assets/testimonials.png";
+import heroAgadir from "@/assets/hero-agadir.jpg";
+import officeMandat from "@/assets/office-mandat.jpg";
+import agenceImage from "@/assets/testimonials.png";
 
 export const images = {
   property1,
@@ -21,23 +25,43 @@ export const images = {
   property6,
   locationAgadir,
   locationTaghazout,
+  testimonialsImage,
   locationMarina,
+  CtaMarina,
   locationFounty,
   editorial1,
   teamOffice,
-  testimonialsImage,
+  heroAgadir,
+  officeMandat,
+  agenceImage,
 };
 
 export const agency = {
   name: "STE MABANIS",
+  legalName: "STE Gestion et Services MABANIS",
   tagline: "Ste Gestion et Services",
-  phone: "+212 528 84 12 90",
-  mobile: "+212 661 24 78 35",
-  whatsapp: "212661247835",
+  activity: "Agence immobilière, services et conseil",
+  /** Both public numbers are mobiles; the first one also carries WhatsApp. */
+  phone: "+212 662 64 51 79",
+  mobile: "+212 620 22 60 50",
+  whatsapp: "212662645179",
   email: "contact@mabanis.au",
-  address: "Avenue Hassan II, Immeuble Anfa, 2ème étage, Talborjt, Agadir 80000",
+  address: "Imm. 13, Magasin N°03, Come Miftah Sahel, Anza – Agadir",
+  area: "Anza, Agadir",
+  city: "Agadir, Souss-Massa, Maroc",
+  legalForm: "SARL à associé unique",
+  capital: "50 000 MAD",
+  /** Kept at neighbourhood level: the street line does not geocode reliably. */
+  mapQuery: "Anza, Agadir, Maroc",
   hours: "Lundi – Vendredi : 9h – 18h30 · Samedi : 9h – 13h",
 };
+
+/** The agency's live accounts. Share-sheet tracking params stripped. */
+export const socials = [
+  { label: "Instagram", href: "https://www.instagram.com/stemabanis" },
+  { label: "Threads", href: "https://www.threads.com/@stemabanis" },
+  { label: "Facebook", href: "https://www.facebook.com/546734788522803" },
+] as const;
 
 export type Transaction = "vente" | "location";
 
@@ -334,6 +358,8 @@ export type Agent = {
   name: string;
   role: string;
   initials: string;
+  /** Portrait for the team rail; the monogram stands in until there is one. */
+  photo?: string;
   expertise: string;
   bio: string;
   phone: string;
@@ -452,7 +478,7 @@ export const locations: Location[] = [
     slug: "taghazout",
     name: "Taghazout & Taghazout Bay",
     city: "Taghazout",
-    image: locationTaghazout,
+    image: testimonialsImage,
     intro:
       "Le littoral surf devenu destination de villégiature : resorts, golf et villas front d'océan.",
     editorial: [
@@ -517,7 +543,10 @@ export type Article = {
   slug: string;
   title: string;
   category: string;
+  /** Human-readable, French. */
   date: string;
+  /** Same day in YYYY-MM-DD   for <time dateTime> and the editorial blog list. */
+  iso: string;
   readTime: string;
   excerpt: string;
   image: string;
@@ -530,6 +559,7 @@ export const articles: Article[] = [
     title: "Marché immobilier d'Agadir : ce qui a réellement changé en 2026",
     category: "Analyse de marché",
     date: "12 juin 2026",
+    iso: "2026-06-12",
     readTime: "6 min",
     excerpt:
       "Prix au m², délais de vente, profil des acquéreurs : notre lecture du premier semestre, chiffres de nos transactions à l'appui.",
@@ -546,6 +576,7 @@ export const articles: Article[] = [
     title: "Acheter au Maroc quand on réside à l'étranger : le guide pratique",
     category: "Guide d'achat",
     date: "28 mai 2026",
+    iso: "2026-05-28",
     readTime: "8 min",
     excerpt:
       "Compromis, notaire, transfert de fonds, rapatriement du produit de la vente : les étapes réelles, sans jargon.",
@@ -563,12 +594,13 @@ export const articles: Article[] = [
     title: "Vendre au bon prix : pourquoi les trois premières semaines décident de tout",
     category: "Conseil vendeur",
     date: "9 mai 2026",
+    iso: "2026-05-09",
     readTime: "5 min",
     excerpt:
       "Un bien mal positionné dès le départ perd en moyenne 9 % de sa valeur finale. Voici comment l'éviter.",
     image: images.property1,
     body: [
-      "Une mise en marché se joue dans les vingt premiers jours. C'est la période où votre bien est vu par les acheteurs déjà en recherche active — ceux qui connaissent les prix et qui décident vite.",
+      "Une mise en marché se joue dans les vingt premiers jours. C'est la période où votre bien est vu par les acheteurs déjà en recherche active   ceux qui connaissent les prix et qui décident vite.",
       "Si le prix d'annonce est trop haut, ces acheteurs-là passent leur chemin. Le bien vieillit, les visites s'espacent, et il faudra baisser deux ou trois fois pour finir sous le prix qu'on aurait obtenu en partant juste.",
       "Notre méthode : une estimation appuyée sur des transactions signées, un reportage photo professionnel, un plan coté, et une mise en ligne simultanée sur l'ensemble de nos canaux le même jour.",
       "Sur les 62 mandats exclusifs signés en 2025, le délai médian de vente a été de 74 jours, avec une décote moyenne de 2,4 % seulement entre prix d'annonce et prix signé.",
@@ -579,14 +611,15 @@ export const articles: Article[] = [
     title: "Investissement locatif à Taghazout Bay : les chiffres réels",
     category: "Investissement",
     date: "21 avril 2026",
+    iso: "2026-04-21",
     readTime: "7 min",
     excerpt:
       "Taux d'occupation, charges de copropriété, fiscalité : ce que rapporte vraiment un bien en station.",
-    image: locationTaghazout,
+    image: testimonialsImage,
     body: [
       "Taghazout Bay attire par sa promesse : océan, golf, resorts, et une saison qui s'étale désormais d'octobre à mai. Reste à savoir ce que cela donne une fois les charges déduites.",
       "Sur les biens que nous gérons dans la station, le taux d'occupation moyen s'établit à 61 % sur l'année, avec un pic à 84 % entre décembre et mars. Le loyer moyen à la nuitée pour un deux-pièces meublé se situe autour de 1 250 MAD.",
-      "Les charges de copropriété sont élevées — comptez 25 à 40 MAD/m²/mois selon la résidence — car elles couvrent piscines, jardins et sécurité. À intégrer impérativement dans le calcul de rendement.",
+      "Les charges de copropriété sont élevées comptez 25 à 40 MAD/m²/mois selon la résidence car elles couvrent piscines, jardins et sécurité. À intégrer impérativement dans le calcul de rendement.",
       "Rendement net observé après charges, gestion et fiscalité : entre 4,2 % et 5,8 %. Honnête, mais moins spectaculaire que ce que promettent certains commercialisateurs.",
     ],
   },
@@ -595,6 +628,7 @@ export const articles: Article[] = [
     title: "Où s'installer à Agadir quand on arrive en famille",
     category: "Vie locale",
     date: "3 avril 2026",
+    iso: "2026-04-03",
     readTime: "6 min",
     excerpt:
       "Écoles, trajets, budget, ambiance : notre comparatif honnête des cinq quartiers les plus demandés.",
@@ -660,17 +694,22 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
+/**
+ * Only what the agency can actually back: the creation date, the breadth of the
+ * offer and the size of the team. Volume figures wait for the real numbers.
+ */
 export const stats = [
-  { value: 18, suffix: " ans", label: "d'expérience sur le Grand Agadir" },
-  { value: 640, suffix: "+", label: "transactions accompagnées" },
-  { value: 180, suffix: "", label: "lots en gestion locative" },
-  { value: 74, suffix: " j", label: "délai médian de vente en exclusivité" },
+  { value: 2024, suffix: "", label: "création de l'agence, le 30 octobre" },
+  { value: 7, suffix: "", label: "métiers réunis sous le même toit" },
+  { value: 4, suffix: "", label: "conseillers, un référent par dossier" },
+  { value: 5, suffix: "", label: "quartiers du Grand Agadir couverts" },
 ];
 
 export const services = [
   {
     slug: "achat",
     title: "Achat",
+    image: property1,
     summary:
       "Une sélection resserrée, des visites préparées et une vérification juridique avant toute offre.",
     points: [
@@ -683,6 +722,7 @@ export const services = [
   {
     slug: "vente",
     title: "Vente",
+    image: teamOffice,
     summary:
       "Estimation appuyée sur des transactions signées, reportage professionnel et diffusion coordonnée.",
     points: [
@@ -695,6 +735,7 @@ export const services = [
   {
     slug: "location",
     title: "Location",
+    image: property2,
     summary:
       "Recherche de locataires solvables, rédaction des baux et état des lieux contradictoire.",
     points: [
@@ -707,6 +748,7 @@ export const services = [
   {
     slug: "estimation",
     title: "Estimation & expertise",
+    image: editorial1,
     summary:
       "Une valeur vénale argumentée, acceptée par les banques et les notaires de la place.",
     points: [
@@ -719,6 +761,7 @@ export const services = [
   {
     slug: "investissement",
     title: "Investissement",
+    image: locationAgadir,
     summary:
       "Sélection de biens à rendement, calculs nets de charges et stratégie de sortie.",
     points: [
@@ -731,6 +774,7 @@ export const services = [
   {
     slug: "gestion",
     title: "Gestion locative",
+    image: locationMarina,
     summary:
       "Votre bien géré comme si vous étiez sur place, où que vous soyez dans le monde.",
     points: [
@@ -743,8 +787,9 @@ export const services = [
   {
     slug: "accompagnement",
     title: "Accompagnement personnalisé",
+    image: locationFounty,
     summary:
-      "Un interlocuteur unique, joignable, du premier appel à la remise des clés — et après.",
+      "Un interlocuteur unique, joignable, du premier appel à la remise des clés   et après.",
     points: [
       "Un conseiller référent par dossier",
       "Coordination notaire, banque et artisans",
@@ -757,18 +802,22 @@ export const services = [
 export const values = [
   {
     title: "Franchise",
+    image: teamOffice,
     text: "Nous disons le prix que vaut un bien, même quand ce n'est pas celui qu'on espère entendre. C'est ce qui fait revenir nos clients.",
   },
   {
     title: "Connaissance du terrain",
-    text: "Rue par rue, immeuble par immeuble. Dix-huit ans passés sur le Grand Agadir ne se remplacent pas par une base de données.",
+    image: locationFounty,
+    text: "Rue par rue, immeuble par immeuble. Le Grand Agadir se marche avant de se vendre : aucune base de données ne remplace le terrain.",
   },
   {
     title: "Rigueur juridique",
+    image: property3,
     text: "Titre foncier, servitudes, conformité : chaque dossier est vérifié avant d'engager qui que ce soit.",
   },
   {
     title: "Disponibilité",
+    image: locationTaghazout,
     text: "Un conseiller référent, joignable, qui répond aussi le samedi matin quand une visite doit se caler.",
   },
 ];
@@ -798,12 +847,6 @@ export function getArticle(slug: string) {
 export function propertiesByAgent(slug: string) {
   return properties.filter((p) => p.agentSlug === slug);
 }
-
-export const socials = [
-  { label: "Instagram", href: "https://instagram.com/stemabanis", icon: "Instagram" },
-  { label: "Threads", href: "https://threads.net/@stemabanis", icon: "Threads" },
-  { label: "Facebook", href: "https://facebook.com/stemabanis", icon: "Facebook" },
-];
 
 export function propertiesByLocation(slug: string) {
   return properties.filter((p) => p.locationSlug === slug);

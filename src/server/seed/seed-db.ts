@@ -56,6 +56,7 @@ import {
 } from "@/lib/site-data";
 import { getSupabase } from "@/server/db/client";
 import { env } from "@/server/env";
+import { hashPassword } from "@/server/auth/password";
 import type { Database, PropertyStatus, TransactionKind } from "@/server/db/types";
 
 type Insert<T extends keyof Database["public"]["Tables"]> =
@@ -336,6 +337,9 @@ async function seedStaff(): Promise<Map<string, string>> {
       role: site.role,
       staff_role: staffRole,
       email,
+      // bcrypt hash of SEED_STAFF_PASSWORD, verified by the back-office login
+      // (src/lib/admin/auth/session.ts) — not the Supabase Auth password.
+      password_hash: await hashPassword(password),
       slug: site.slug,
       phone: site.phone,
       initials: site.initials,

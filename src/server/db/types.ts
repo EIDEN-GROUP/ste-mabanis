@@ -44,6 +44,7 @@ export interface Database {
           role: string;
           staff_role: StaffRole;
           email: string;
+          password_hash: string | null;
           avatar_url: string | null;
           created_at: string;
           slug: string | null;

@@ -20,6 +20,10 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional().default(""),
   SMTP_FROM: z.string().optional().default("STE MABANIS <contact@mabanis.com>"),
 
+  JWT_SECRET: z
+    .string()
+    .min(32, "JWT_SECRET must be at least 32 characters — generate one with `openssl rand -base64 48`"),
+
   PUBLIC_URL: z
     .string()
     .url("PUBLIC_URL must be a full URL")

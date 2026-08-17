@@ -1,20 +1,28 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Phone, Mail, Instagram, Facebook, LayoutDashboard } from "lucide-react";
+import { Phone, Mail, Facebook, AtSign, Instagram, LayoutDashboard } from "lucide-react";
 import logo from "@/assets/mabanis-logo.png";
-import { agency, images } from "@/lib/site-data";
+import { setScrollLocked } from "@/lib/scroll-lock";
+import { agency, images, socials } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
-/** Slim inline nav — the full site map lives in the overlay menu. */
+/** Lucide has no Threads glyph; the @ mark stands in for the handle. */
+const SOCIAL_ICONS = {
+  Instagram,
+  Threads: AtSign,
+  Facebook,
+} as const;
+
+/** Slim inline nav   the full site map lives in the overlay menu. */
 const nav = [
+  { to: "/agence", label: "L'agence" },
   { to: "/proprietes", label: "Propriétés" },
   { to: "/quartiers", label: "Quartiers" },
-  { to: "/services", label: "Services" },
   { to: "/vendre", label: "Vendre" },
-  { to: "/agence", label: "L'agence" },
 ] as const;
 
-type MenuLink = { to: string; label: string; search?: Record<string, string> };
+/** `hash` targets a band of the agency page, which now carries services and team. */
+type MenuLink = { to: string; label: string; search?: Record<string, string>; hash?: string };
 
 const menuGroups: { title: string; links: MenuLink[] }[] = [
   {
@@ -22,14 +30,14 @@ const menuGroups: { title: string; links: MenuLink[] }[] = [
     links: [
       { to: "/proprietes", label: "Biens à vendre", search: { transaction: "vente" } },
       { to: "/quartiers", label: "Quartiers d'Agadir" },
-      { to: "/services", label: "Accompagnement achat" },
+      { to: "/agence", label: "Accompagnement achat", hash: "services" },
     ],
   },
   {
     title: "Vous souhaitez vendre ?",
     links: [
       { to: "/vendre", label: "Vendre" },
-      { to: "/vendre", label: "Estimer" },
+      // { to: "/vendre", label: "Estimer" },
       { to: "/temoignages", label: "Ils nous ont fait confiance" },
     ],
   },
@@ -37,14 +45,13 @@ const menuGroups: { title: string; links: MenuLink[] }[] = [
     title: "Location à Agadir",
     links: [
       { to: "/proprietes", label: "Biens à louer", search: { transaction: "location" } },
-      { to: "/services", label: "Gestion locative" },
+      { to: "/agence", label: "Gestion locative", hash: "services" },
     ],
   },
   {
     title: "À propos",
     links: [
       { to: "/agence", label: "Notre agence" },
-      { to: "/equipe", label: "Équipe" },
       { to: "/actualites", label: "Actualités" },
       { to: "/contact", label: "Contact" },
     ],
@@ -85,7 +92,6 @@ export function SiteHeader() {
   const [slide, setSlide] = useState(0);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const reduced = useReducedMotion();
-  const overHero = pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -100,14 +106,15 @@ export function SiteHeader() {
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Le gel du corps et l'arrêt de l'inertie vivent au même endroit : sur iOS,
+    // `overflow: hidden` seul laisse la page filer sous le panneau.
+    setScrollLocked(true);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      setScrollLocked(false);
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
@@ -119,7 +126,9 @@ export function SiteHeader() {
     return () => clearInterval(id);
   }, [open, reduced]);
 
-  const solid = scrolled || !overHero;
+  // Every public page opens on a dark full-bleed hero, so the bar rides over it
+  // transparent and only takes its white ground once the visitor scrolls away.
+  const solid = scrolled;
   const ms = (n: number) => (reduced ? 0 : n);
 
   // Open: the logo sits on the photo half at lg+, but on the pale panel below it.
@@ -150,20 +159,19 @@ export function SiteHeader() {
               : "border-b border-white/10 py-5",
         )}
       >
-        <div className="mx-auto flex max-w-[100rem] items-center gap-6 px-5 sm:px-8 lg:px-12">
-          <Link to="/" className="shrink-0" aria-label="STE MABANIS — accueil">
+        <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-6 px-5 sm:px-8 lg:px-12">
+          <Link to="/" className="ml-2 shrink-0" aria-label="STE MABANIS accueil">
             <img
               src={logo}
               alt="STE MABANIS"
-              width={300}
+              width={500}
               height={200}
               className={cn(
-                "h-11 w-full transition-all duration-500 motion-reduce:transition-none sm:h-12",
+                "h-11 w-full transition-all duration-500 motion-reduce:transition-none sm:h-14",
                 logoTone,
               )}
             />
           </Link>
-
           <nav
             className={cn(
               "ml-auto hidden items-center gap-7 transition-[opacity,transform] duration-400 motion-reduce:transition-none lg:flex",
@@ -192,7 +200,7 @@ export function SiteHeader() {
                 open ? "pointer-events-none opacity-0" : "opacity-100",
               )}
             >
-              <a
+              {/* <a
                 href={`tel:${agency.mobile.replace(/\s/g, "")}`}
                 className={cn(
                   "hidden items-center gap-2 text-xs tracking-wide xl:inline-flex",
@@ -201,8 +209,8 @@ export function SiteHeader() {
               >
                 <Phone className="size-3.5 text-gold" />
                 {agency.mobile}
-              </a>
-              <Link
+              </a> */}
+              {/* <Link
                 to="/admin"
                 aria-label="Ouvrir le tableau de bord"
                 className={cn(
@@ -214,10 +222,10 @@ export function SiteHeader() {
               >
                 <LayoutDashboard className="size-3.5 text-gold" />
                 Dashboard
-              </Link>
+              </Link> */}
               <Link
                 to="/contact"
-                className="hidden bg-gold px-5 py-2.5 text-[0.7rem] tracking-[0.16em] text-navy uppercase transition-colors hover:bg-navy hover:text-white sm:inline-block"
+                className="hidden rounded-md bg-gold px-5 py-2.5 text-[0.7rem] tracking-[0.16em] text-navy uppercase transition-colors hover:bg-navy hover:text-white sm:inline-block"
               >
                 Nous contacter
               </Link>
@@ -229,7 +237,8 @@ export function SiteHeader() {
               aria-expanded={open}
               aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
               className={cn(
-                "flex size-11 shrink-0 items-center justify-center border transition-colors duration-500 motion-reduce:transition-none",
+                // The border colours below never showed without a width to draw.
+                "flex size-11 shrink-0 items-center justify-center transition-colors duration-500 motion-reduce:transition-none sm:size-10",
                 open
                   ? "border-gold text-navy"
                   : solid
@@ -237,7 +246,7 @@ export function SiteHeader() {
                     : "border-white/40 text-white hover:border-white",
               )}
             >
-              <span className="flex w-4 flex-col items-stretch gap-[4px]">
+              <span className="flex w-8 flex-col items-stretch gap-[4px]">
                 <span
                   className={cn(
                     "h-px w-full bg-current transition-transform duration-500 motion-reduce:transition-none",
@@ -273,7 +282,7 @@ export function SiteHeader() {
         aria-label="Menu principal"
         aria-hidden={!open}
       >
-        {/* Left half — photo, wipes in from the left edge */}
+        {/* Left half   photo, wipes in from the left edge */}
         <div
           className="absolute inset-y-0 left-0 hidden w-1/2 overflow-hidden bg-navy transition-[clip-path] lg:block"
           style={{
@@ -299,7 +308,7 @@ export function SiteHeader() {
           <div className="absolute inset-0 bg-gradient-to-br from-navy/55 via-navy/15 to-transparent" />
         </div>
 
-        {/* Right half — three slices sweeping in after the photo */}
+        {/* Right half   three slices sweeping in after the photo */}
         <div className="absolute inset-y-0 right-0 flex w-full lg:w-1/2">
           {Array.from({ length: SLICES }, (_, i) => (
             <span
@@ -314,7 +323,17 @@ export function SiteHeader() {
         </div>
 
         {/* Menu content */}
-        <div className="absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto px-6 pt-28 pb-10 sm:px-10 lg:w-1/2 lg:justify-center lg:px-16 lg:pt-16 lg:pb-8 xl:px-24">
+        {/* `data-lenis-prevent` : le défilement inertiel intercepte les gestes
+            au niveau de la fenêtre et, page gelée, les annule. Cet attribut lui
+            dit de ne pas toucher à ce qui se passe dans le panneau   sans lui,
+            le menu est immobile sur téléphone. `h-[100dvh]` (et non `inset-y-0`,
+            qui vaut 100vh) suit la barre d'adresse de Safari : sans lui, sur
+            iPhone, le panneau est plus haut que l'écran visible et le contenu
+            du bas reste hors d'atteinte. */}
+        <div
+          data-lenis-prevent
+          className="absolute top-0 right-0 flex h-[100dvh] w-full flex-col overflow-y-auto overscroll-contain px-6 pt-28 pb-10 sm:px-10 lg:w-1/2 lg:justify-center lg:px-16 lg:pt-16 lg:pb-8 xl:px-24"
+        >
           <div className="grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:gap-y-8">
             {menuGroups.map((group, gi) => (
               <div
@@ -332,6 +351,7 @@ export function SiteHeader() {
                       <Link
                         to={link.to}
                         search={link.search as never}
+                        {...(link.hash ? { hash: link.hash } : {})}
                         onClick={() => setOpen(false)}
                         className="display inline-block text-2xl text-navy transition-[color,transform] duration-400 hover:translate-x-1.5 hover:text-gold sm:text-[1.75rem]"
                       >
@@ -365,21 +385,30 @@ export function SiteHeader() {
               <Mail className="size-3.5 text-gold" />
               {agency.email}
             </a>
-            <Link
+            {/* <Link
               to="/admin"
               onClick={() => setOpen(false)}
               className="inline-flex items-center gap-2 border border-line px-3 py-2 text-[0.68rem] tracking-[0.14em] text-navy/80 uppercase transition-colors hover:border-gold hover:text-navy"
             >
               <LayoutDashboard className="size-3.5 text-gold" />
               Dashboard
-            </Link>
+            </Link> */}
             <div className="ml-auto flex items-center gap-3">
-              <span className="flex size-9 items-center justify-center rounded-full border border-line text-navy/70 transition-colors hover:border-gold hover:text-gold">
-                <Instagram className="size-4" />
-              </span>
-              <span className="flex size-9 items-center justify-center rounded-full border border-line text-navy/70 transition-colors hover:border-gold hover:text-gold">
-                <Facebook className="size-4" />
-              </span>
+              {socials.map((social) => {
+                const Icon = SOCIAL_ICONS[social.label];
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label={social.label}
+                    className="flex size-9 items-center justify-center rounded-md border border-line text-navy/70 transition-colors hover:border-gold hover:text-gold"
+                  >
+                    <Icon className="size-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
         </div>

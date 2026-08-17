@@ -7,11 +7,11 @@ import { Section } from "@/components/layout-bits";
 import { images, testimonials } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
-const TESTIMONIALS_ROTATE_MS = 7000;
-const TESTIMONIALS_VIEWPORT = { once: true, amount: 0.2 } as const;
+const ROTATE_MS = 7000;
+const VIEWPORT = { once: true, amount: 0.2 } as const;
 
-/** Uncovered left to right — the same gesture as the blog photographs. */
-const TESTIMONIALS_WIPE = {
+/** Uncovered left to right   the same gesture as the blog photographs. */
+const WIPE = {
   hidden: { clipPath: "inset(0% 100% 0% 0%)" },
   show: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.25, ease: EASE } },
 };
@@ -31,7 +31,7 @@ export function TestimonialsSection() {
 
   useEffect(() => {
     if (reduced || paused) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % items.length), TESTIMONIALS_ROTATE_MS);
+    const id = setInterval(() => setIndex((i) => (i + 1) % items.length), ROTATE_MS);
     return () => clearInterval(id);
   }, [reduced, paused, items.length]);
 
@@ -61,7 +61,7 @@ export function TestimonialsSection() {
         onFocusCapture={() => setPaused(true)}
         onBlurCapture={() => setPaused(false)}
       >
-        {/* One fixed photograph for the whole section — it illustrates the band,
+        {/* One fixed photograph for the whole section   it illustrates the band,
             not any single review, so it stays put while the quotes rotate. The
             scroll trigger sits on the wrapper, never on the clipped box: a fully
             clipped element has no visible area, so IntersectionObserver reports a
@@ -69,12 +69,12 @@ export function TestimonialsSection() {
         <motion.div
           initial="hidden"
           whileInView="show"
-          viewport={TESTIMONIALS_VIEWPORT}
+          viewport={VIEWPORT}
           variants={{ hidden: {}, show: {} }}
         >
           <motion.div
             className="relative aspect-[4/3] overflow-hidden rounded-md sm:aspect-[3/2]"
-            variants={TESTIMONIALS_WIPE}
+            variants={WIPE}
           >
             <img
               src={images.testimonialsImage}
@@ -153,12 +153,3 @@ export function TestimonialsSection() {
     </Section>
   );
 }
-
-const ROTATE_MS = 7000;
-const VIEWPORT = { once: true, amount: 0.2 } as const;
-
-/** Uncovered left to right — the same gesture as the blog photographs. */
-const WIPE = {
-  hidden: { clipPath: "inset(0% 100% 0% 0%)" },
-  show: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.25, ease: EASE } },
-};
