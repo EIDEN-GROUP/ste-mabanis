@@ -64,7 +64,7 @@ export const navGroups: NavGroup[] = [
     items: [
       // { to: "/admin/automatisations", label: "Automatisations", icon: Workflow, phase: 4, ready: true, roles: ["directrice"] },
       // { to: "/admin/matching", label: "Matching", icon: Scale, phase: 4, ready: true, roles: ["directrice", "commercial"] },
-      // { to: "/admin/marketing", label: "Marketing", icon: Megaphone, phase: 4, ready: true, roles: ["directrice"] },
+      { to: "/admin/marketing", label: "Marketing", icon: Megaphone, phase: 4, ready: true, roles: ["directrice"] },
       { to: "/admin/portail-client", label: "Portail client", icon: UserRound, phase: 4, ready: true, roles: ["directrice"] },
     ],
   },
